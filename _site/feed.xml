@@ -12,69 +12,131 @@
 					<dc:creator>{&quot;name&quot;=&gt;&quot;Yongil Lee of Diffense&quot;}</dc:creator>
 				
 				
-					<description>&lt;h4 id=&quot;들어가기에-앞서&quot;&gt;들어가기에 앞서&lt;/h4&gt;
+					<description>&lt;p&gt;James Forshaw가 발견한 윈도우즈에서의 하드 링크 오용 방법의 원리를 알아보고, 이를 악용한 실제 윈도우즈 권한상승(EoP) 취약점 사례를 살펴보고자 합니다.&lt;/p&gt;
 
-&lt;p&gt;다음 자료를 참고하였습니다.&lt;/p&gt;
+&lt;p&gt;또한, 디펜스에서 출시 예정인 X-DIFFENSE에서 하드 링크 오용을 통한 권한상승 취약점을 어떻게 효과적으로 탐지하고 차단하는지에 대해 소개합니다.&lt;/p&gt;
+
+&lt;h3 id=&quot;하드-링크&quot;&gt;하드 링크?&lt;/h3&gt;
+
+&lt;p&gt;하드 링크는 하나의 파일에 여러 개의 이름을 만들 수 있는 기능입니다.&lt;/p&gt;
+
+&lt;p&gt;Hello.txt에 대해 하드링크(Bye.txt)를 생성한다면, 동일한 파일을 표현하는 서로 다른 2개의 이름(Hello.txt와 Bye.txt)을 가지게 되는 것이구나라고 생각하는 것이 이해하기 편합니다.&lt;/p&gt;
+
+&lt;p&gt;Hello.txt가 “Hello”라는 내용을 가지고 있으면, Bye.txt 를 읽어보면 같은 내용을 가지고 있습니다. 같은 파일을 나타내는 서로 다른 이름에 불과하니 당연한 것이죠.&lt;/p&gt;
+
+&lt;p&gt;하드링크의 퍼미션을 바꾼다면 하드링크가 나타내는 파일의 퍼미션이 바뀌게 됩니다. 사실 하드링크는 디렉토리 엔트리라서 퍼미션이라는 것이 없습니다. 하드링크가 가리키는 파일에 퍼미션이 있습니다. Bye.txt에서 탐색기를 열어 권한을 수정한 뒤 Hello.txt의 권한을 확인해보면 동일하게 바뀌어 있음을 확인할 수 있습니다. 2개의 하드링크가 가리키는 동일 파일에 대해 퍼미션을 수정하고 확인한 것에 불과합니다.&lt;/p&gt;
+
+&lt;p&gt;파일 삭제는 어떨까요? Hello.txt를 삭제하면 Hello.txt는 이름(디렉토리엔트리)에 불과하므로 이름(Hello.txt)만 삭제됩니다. Bye.txt을 통해 여전히 파일에 접근할 수 있습니다. 파일을 참조하는 하드링크가 모두 삭제되면 최종적으로 파일이 삭제됩니다.&lt;/p&gt;
+
+&lt;p&gt;그러면 모든 파일에 대해 하드링크를 만들 수 있을까요?&lt;/p&gt;
+
+&lt;p&gt;하드 링크 생성에는 다음과 같은 제약이 있습니다.&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;James forshaw&lt;/li&gt;
-  &lt;li&gt;MSDN&lt;/li&gt;
+  &lt;li&gt;디렉토리간에는 하드링크를 만들 수 없습니다. (C:\dira linked to C:\dirb)&lt;/li&gt;
+  &lt;li&gt;다른 볼륨간에 하드링크를 만들 수 없습니다. (C:\dira\ethel.txt linked to D:\dirb\lucy.txt)&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h4 id=&quot;하드링크&quot;&gt;하드링크?&lt;/h4&gt;
+&lt;h3 id=&quot;하드링크-생성-방법&quot;&gt;하드링크 생성 방법&lt;/h3&gt;
 
-&lt;p&gt;하드링크는 파일간 연결시켜주는 방법입니다.
-심볼릭링크와 차이점이 있습니다.&lt;/p&gt;
+&lt;p&gt;mklink 명령어를 이용하면 하드링크를 만들 수 있습니다.&lt;/p&gt;
 
-&lt;p&gt;하드링크는 다음과 같은 제약을 가집니다.&lt;/p&gt;
+&lt;p&gt;다음 예는 기존파일(hello.txt)에 하드링크(bye.txt)를 생성하는 명령입니다.&lt;/p&gt;
 
-&lt;ul&gt;
-  &lt;li&gt;디렉토리간에는 하드링크를 만들 수 없습니다.&lt;/li&gt;
-  &lt;li&gt;다른 볼륨간에 하드링크를 만들 수 없습니다.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h4 id=&quot;하드링크-생성-방법&quot;&gt;하드링크 생성 방법&lt;/h4&gt;
-
-&lt;p&gt;커맨드라인에서 mklink 명령어를 이용하면 하드링크를 만들 수 있습니다.&lt;/p&gt;
-
-&lt;p&gt;설명을 위해 먼저 hello.txt를 만들겠습니다.&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;type hello &amp;gt; hello.txt
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mklink /H bye.txt hello.txt
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mklink /H hi.txt hello.txt
+&lt;p&gt;mklink 명령어는 &lt;code class=&quot;highlighter-rouge&quot;&gt;CreateHardLink&lt;/code&gt; API를 사용하여 하드링크 생성을 윈도우즈OS에 요청합니다.&lt;/p&gt;
+
+&lt;p&gt;CreateHardLink API의 Syntax는 다음과 같습니다.&lt;/p&gt;
+
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;BOOL&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CreateHardLinkA&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;LPCSTR&lt;/span&gt;                &lt;span class=&quot;n&quot;&gt;lpFileName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;LPCSTR&lt;/span&gt;                &lt;span class=&quot;n&quot;&gt;lpExistingFileName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;LPSECURITY_ATTRIBUTES&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lpSecurityAttributes&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;mklink 명령어는 &lt;code class=&quot;highlighter-rouge&quot;&gt;CreateHardLink&lt;/code&gt; API를 이용해서 하드링크를 만듭니다.&lt;/p&gt;
+&lt;p&gt;간단합니다. 첫번째 인자에 생성될 파일명(하드링크)을 넣어주고, 두번째 인자에 기존파일명을 입력해주면 하드링크를 생성할 수 있습니다.&lt;/p&gt;
 
-&lt;p&gt;다른 프로그램도 하드링크 생성이 필요하면 CreateHardLink를 사용하면 됩니다.&lt;/p&gt;
+&lt;h3 id=&quot;하드링크-오용hardlink-abusing&quot;&gt;하드링크 오용(Hardlink abusing)&lt;/h3&gt;
 
-&lt;h4 id=&quot;하드링크-오용hardlink-abusing&quot;&gt;하드링크 오용(Hardlink abusing)&lt;/h4&gt;
+&lt;p&gt;James Forshaw는 하드링크와 관련한 흥미로운 사실&lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;#fn:1&quot; class=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;을 발견하게 됩니다.&lt;/p&gt;
 
-&lt;p&gt;James Forshaw는 흥미로운 사실을 발견하게 됩니다.&lt;/p&gt;
+&lt;p&gt;먼저 하드링크 생성에 사용되는 &lt;code class=&quot;highlighter-rouge&quot;&gt;CreateHardLink&lt;/code&gt; API 의 구현 내부를 살펴보죠.&lt;/p&gt;
 
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;CreateHardLink&lt;/code&gt; API는 내부적으로 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt;과 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtSetInformation&lt;/code&gt; 을 호출하여 하드링크 생성을 윈도우즈OS에 요청합니다.&lt;/p&gt;
-
-&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;CreateHardLinkW&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;NtOpenfile&lt;/span&gt;
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;BOOL&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;CreateHardLinkW&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LPCWSTR&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lpFileName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LPCWSTR&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lpExistingFileName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// 생략
+&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// 기존파일을 Open한다.(FILE_WRITE_ATTRIBUTES 권한을 요구)
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;status&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NtOpenFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ExistingFileHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SYNCHRONIZE&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FILE_WRITE_ATTRIBUTES&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;status&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FALSE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;   &lt;span class=&quot;c1&quot;&gt;// Open이 실패하면 하드링크 생성 실패를 리턴
+&lt;/span&gt; 
+    &lt;span class=&quot;c1&quot;&gt;// 생략
+&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// 하드링크 생성요청
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;status&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NtSetInformationFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ExistingFileHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LinkInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;target&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Length&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;16&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FileLinkInformation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;status&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FALSE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;      
+    
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TRUE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;여기서 FILE_WRITE_ATTRIBUTE 권한을 요구하는데, 만약 현재사용자(프로세스)가 대상파일에 속성쓰기 권한이 없다면, CreateHardLink API 호출은 실패하게 됩니다.&lt;/p&gt;
+&lt;p&gt;코드에서 보면 알 수 있듯이, 내부적으로 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt;과 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtSetInformationFile&lt;/code&gt;을 호출하여 하드링크를 생성하게 됩니다.&lt;/p&gt;
 
-&lt;p&gt;James Forshaw가 지적한 부분은, NtOpenFile 을 호출할 때 FILE_WRITE_ATTRIBUTE를 요구하지 않아도 NtSetInformation을 통해 하드링크가 생성된다는 사실입니다.&lt;/p&gt;
+&lt;p&gt;여기서 눈여겨 볼 점은, 기존파일을 Open하는 데 &lt;code class=&quot;highlighter-rouge&quot;&gt;FILE_WRITE_ATTRIBUTES&lt;/code&gt;이 인자로 사용되었다는 것인데요. 만약 사용자가 기존파일에 대해 &lt;code class=&quot;highlighter-rouge&quot;&gt;FILE_WRITE_ATTRIBUTES&lt;/code&gt; 권한을 가지고 있지 않다면 하드링크를 만들 수 없음을 의미합니다.&lt;/p&gt;
 
-&lt;p&gt;CreateHardlink 를 부르지 않고, 다음과 같이 직접 (usermode) 네이티브 API를 호출하는 방법을 이용하는 것이죠.&lt;/p&gt;
+&lt;p&gt;다음은 사용자가 System32\kernel32.dll에 대해 방금 언급한 권한이 없기 때문에 하드링크를 생성할 수 없음을 예로 보여줍니다.&lt;/p&gt;
 
-&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;NtOpenFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;NtSetInformation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;C:\Test&amp;gt;mklink /H hardlink.txt c:\windows\system32\kernel32.dll
+Access is denied.
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;mklink 는 실패하는데, James forshaw가 만든 createhardlink 툴은 하드링크 생성에 실패하는 것을 보여줍니다.&lt;/p&gt;
+&lt;p&gt;James Forshaw는 이 지점에서 FILE_WRITE_ATTRIBUTES 없이 파일을 Open하면 어떻게 될까? 라는 의문을 가지고 실험을 해보기 시작합니다. 실험 결과, 다음과 같은 사실을 발견하게 됩니다.&lt;/p&gt;
 
-&lt;h3 id=&quot;취약점&quot;&gt;취약점&lt;/h3&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;대상 파일에 대한 Write 권한이 없어도 하드링크를 만들 수 있다&lt;/p&gt;
+&lt;/blockquote&gt;
 
-&lt;p&gt;일반 유저 권한에서 거의 모든 파일(같은 볼륨 내)에 대해서 JF가 언급한 방법을 사용하면 하드링크를 생성할 수 있습니다.&lt;/p&gt;
+&lt;p&gt;mklink(CreateHardLink)를 이용하면 하드링크를 만들 수 없는 경우(예:kernel32.dll)가 있었는데, James Forshaw가 발견한 사실을 이용하면 그 경우에도 하드링크를 만들 수 있게 된 것이죠. 이를 증명하기 위해 다음과 같은 코드를 작성하여 공개&lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;#fn:2&quot; class=&quot;footnote&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;하였습니다.&lt;/p&gt;
+
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;CreateNativeHardlink&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LPCWSTR&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;linkname&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LPCWSTR&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;targetname&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// 중략
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;NtOpenFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ExistingFileHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MAXIMUM_ALLOWED&lt;/span&gt;&lt;span class=&quot;cm&quot;&gt;/*이것이 바뀌었습니다*/&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,,,,);&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// 중략
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;NtSetInformationFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ExistingFileHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;io_status&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;link_info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;link_info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FileLinkInformation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;여기서 CreateHardLink와의 중요한 차이점은 CreateHardLink는 대상파일을 오픈할 때 요청한 권한이 FILE_WRITE_ATTRIBUTES 였지만, James Forshaw가 작성한 CreateNativeHardlink에서는 MAXIMUM_ALLOWED로 바뀌었다는 점입니다.&lt;/p&gt;
+
+&lt;p&gt;MAXIMUM_ALLOWED의 의미는 현재 사용자가 대상파일에 대해 허용되는 모든 권한을 가지고 파일을 오픈하겠다는 것인데, 어떻게든 파일을 열어달라는 의미로 보면 됩니다. 즉 &lt;em&gt;어떻게든 대상파일을 열기만 하면 하드링크 생성이 가능&lt;/em&gt;함을 코드를 통해 말해주고 있습니다.&lt;/p&gt;
+
+&lt;p&gt;James Forshaw가 작성한 CreateHardLink.exe 툴을 이용하여 지금까지 설명한 내용을 테스트해 볼 수 있습니다.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;CreateHardLink.exe hardlink.exe c:\windows\system32\kernel32.dll
+dir hardlink.exe
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;mklink를 이용하면 생성할 수 없었던 하드링크를, James Forshaw가 만든 툴을 이용하면 하드링크를 만들 수 있음을 확인할 수 있습니다.&lt;/p&gt;
+
+&lt;h3 id=&quot;하드링크-오용hardlink-abusing-1&quot;&gt;하드링크 오용(Hardlink Abusing)&lt;/h3&gt;
+
+&lt;p&gt;일반 유저 권한에서 거의 모든 파일(같은 볼륨 내)에 대해서 하드링크를 생성할 수 있음을 설명했습니다.&lt;/p&gt;
+
+&lt;p&gt;이것이 어떤 문제가 될 수 있을까요?&lt;/p&gt;
+
+&lt;p&gt;WRITE 권한이 없는 대상파일(예: c:\windows\notepad.exe)에 하드링크를 걸었다고 생각해봅시다. 하드링크를 통해서 대상파일(notepad.exe)을 WRITE할 수 있을까요? 만약 그렇게 된다면 바로 권한상승 취약점으로 이어질 수 있지만, 앞서 언급했듯이 하드링크는 디렉토리엔트리로서 그 자체로 퍼미션을 가지고 있지 않고 하드링크가 가리키는 파일이 퍼미션을 가지고 있기 때문에 하드링크를 통해서 WRITE 시도를 하게 되면, 그것이 가리키는 파일에 대한 접근검사가 이루어져서 WRITE 시도가 실패하게 되죠.&lt;/p&gt;
+
+&lt;p&gt;정리하면 Write권한이 없는 대상파일에 대해 하드링크를 생성할 수는 있으나 하드링크를 통한 Write는 허용이 되지 않는다고 얘기할 수 있겠습니다.&lt;/p&gt;
+
+&lt;p&gt;다른 케이스를 생각해 보겠습니다. C:\Test 라는 디렉토리가 있다고 합시다. 이 디렉토리에는 일반사용자와 시스템관리자 모두 파일 생성/쓰기/삭제 권한이 주어져 있는 상태입니다. 또한, 시스템서비스가 C:\Test\A.TXT 파일을 열어 “Hello”라는 로그를 주기적으로 남긴다고 가정해보겠습니다.&lt;/p&gt;
+
+&lt;p&gt;만약 시스템서비스가 C:\Test\A.TXT를 열기 전에, 일반사용자(해커)가 A.TXT를 삭제함과 동시에 C:\Windows\System32\kernel32.dll를 가리키는 하드링크(C:\Test\A.TXT)를 생성하면 어떻게 될까요? 시스템서비스는 하드링크를 열어 “Hello” 로그를 WRITE하려 할 것이고, 시스템서비스는 kernel32.dll에 대한 Write권한이 있으므로 kernel32.dll은 결국 “Hello”로그로 더렵혀지겠죠. 파일쓰기권한이 없던 사용자가 하드링크를 이용하면(취약점과 함께) 시스템의 중요 파일을 Write할 수 있게 되는 것이죠.&lt;/p&gt;
+
+&lt;p&gt;하드링크를 이용한 취약점 공격 방법은 아니고 오래전부터 유닉스 계열의 운영체제에서는 활용되어 온 방식입니다. 하지만 윈도우즈 운영체제에서 취약점 공격에 하드링크를 활용하기 시작한 건 James Forshaw의 발견 이후라고 보는 것이 맞습니다. 왜냐하면 하드링크를 이용한다는 것은 결국 해커가 쓰기권한이 없는 파일에 대해 하드링크를 걸어줘야 하는게 필수적인데, James Forshaw 발견 전에는 윈도우즈 운영체제에서 그런 사실을 모두 몰랐기 때문이죠.&lt;/p&gt;
 
 &lt;p&gt;하지만 그게 다입니다. 대상파일에 쓰기가 허용되지 않는다면, 하드링크를 통해서 쓰는 것 역시 허용되지 않습니다. 그럼 취약점이 없는 것 아닙니까? 라고 생각할 수 있을 것입니다.&lt;/p&gt;
 
@@ -90,9 +152,11 @@
 
 &lt;h3 id=&quot;cve-&quot;&gt;CVE-&lt;/h3&gt;
 
-&lt;p&gt;sandboxescaper라는 리서쳐가 제로데이를 공개하면서 많은 이슈를 모았었습니다. 보통은 벤더사에 리포트를 하고, 패치 작업이 이루어진 다음에 관련 내용을 공개하는 것이 일반적인데 sandboxescaper는 fully 동작가능한 수준의 제로데이 코드를 깃허브에 공개하면서 많은 이슈가 되었던 것이죠. 해당 취약점은 비관리자(nonAdmin) 권한에서 관리자(Admin)권한으로 EoP는 취약점입니다.&lt;/p&gt;
+&lt;p&gt;실제 권한상승 익스플로잇을 통해 하드링크가 어떻게 활용되는지를 살펴보겠습니다.&lt;/p&gt;
 
-&lt;p&gt;공개되고 나서, 몇몇 APT 그룹에서 오퍼레이션에 활용했다는 사실이 밝혀지기도 했습니다.&lt;/p&gt;
+&lt;p&gt;살펴볼 취약점은 sandboxescaper라는 리서쳐가 작년말에 공개한 스케쥴러 서비스 권한상승(EoP) 취약점입니다.&lt;/p&gt;
+
+&lt;p&gt;일반적으로 취약점을 발견하면 벤더사에 리포트를 하고, 패치 작업이 이루어진 다음에 관련 내용을 공개하는 수순을 가지는데 sandboxescaper는 fully 동작가능한 수준의 제로데이 코드를 깃허브에 공개하면서 많은 이슈가 되었습니다. 공개된 익스플로잇 코드는 몇몇 APT 그룹에서 오퍼레이션에 활용했을 정도로 활용가치(?)가 꽤 높습니다.&lt;/p&gt;
 
 &lt;p&gt;하드링크를 활용하는 좋은(?) 예 중 하나입니다.&lt;/p&gt;
 
@@ -148,90 +212,21 @@
   &lt;li&gt;하드링크의 오용을 방지하는 방안&lt;/li&gt;
 &lt;/ul&gt;
 
+&lt;div class=&quot;footnotes&quot;&gt;
+  &lt;ol&gt;
+    &lt;li id=&quot;fn:1&quot;&gt;
+      &lt;p&gt;https://googleprojectzero.blogspot.com/2015/12/between-rock-and-hard-link.html &lt;a href=&quot;#fnref:1&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:2&quot;&gt;
+      &lt;p&gt;https://github.com/googleprojectzero/symboliclink-testing-tools/blob/master/CommonUtils/Hardlink.cpp#L20 &lt;a href=&quot;#fnref:2&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/div&gt;
 </description>
 				
 				<pubDate>Fri, 22 Feb 2019 00:00:00 +0900</pubDate>
 				<link>http://localhost:4000/2019/02/22/hard-link/</link>
 				<guid isPermaLink="true">http://localhost:4000/2019/02/22/hard-link/</guid>
-			</item>
-		
-			<item>
-				<title>Theme introduction</title>
-				
-					
-						<dc:creator>{&quot;name&quot;=&gt;&quot;Diffense&quot;, &quot;email&quot;=&gt;&quot;contact@diffense.co.kr&quot;, &quot;info&quot;=&gt;nil}</dc:creator>
-					
-				
-				
-					<description>&lt;p&gt;This post is a showcase of what Holo Alfa looks like, and a reference guide for how you can use it to make your blog shine.&lt;/p&gt;
-
-</description>
-				
-				<pubDate>Wed, 22 Jul 2015 00:00:00 +0900</pubDate>
-				<link>http://localhost:4000/2015/07/22/theme-introduction/</link>
-				<guid isPermaLink="true">http://localhost:4000/2015/07/22/theme-introduction/</guid>
-			</item>
-		
-			<item>
-				<title>Guest Posts</title>
-				
-					<dc:creator>{&quot;name&quot;=&gt;&quot;George Michael&quot;, &quot;info&quot;=&gt;&quot;(@&lt;a href=\&quot;https://twitter.com/georgemichael\&quot;&gt;GeorgeMichael&lt;/a&gt;)&quot;}</dc:creator>
-				
-				
-					<description>&lt;p&gt;If you want to create a guest post that will appear as if written by another author, simply add an &lt;code class=&quot;highlighter-rouge&quot;&gt;author&lt;/code&gt; attribute to the front matter of your blog post. This will be picked up in the template and displayed in the meta-section both on the front page as well as on the individual post pages.&lt;/p&gt;
-
-&lt;p&gt;This post’s front matter looks like this:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span class=&quot;nn&quot;&gt;---&lt;/span&gt;
-&lt;span class=&quot;na&quot;&gt;title&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Guest Posts&lt;/span&gt;
-
-&lt;span class=&quot;na&quot;&gt;author&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;George Michael&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;(@&amp;lt;a href=&quot;https://twitter.com/georgemichael&quot;&amp;gt;GeorgeMichael&amp;lt;/a&amp;gt;)&lt;/span&gt;
-
-&lt;span class=&quot;na&quot;&gt;summary&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;If you want to create a guest post that will appear as if written by another author, simply add an `author` attribute to the front matter of your blog post.&lt;/span&gt;
-&lt;span class=&quot;nn&quot;&gt;---&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-</description>
-				
-				<pubDate>Fri, 15 Mar 2013 00:00:00 +0900</pubDate>
-				<link>http://localhost:4000/2013/03/15/guest-posts/</link>
-				<guid isPermaLink="true">http://localhost:4000/2013/03/15/guest-posts/</guid>
-			</item>
-		
-			<item>
-				<title>Code Snippets</title>
-				
-					
-						<dc:creator>{&quot;name&quot;=&gt;&quot;Diffense&quot;, &quot;email&quot;=&gt;&quot;contact@diffense.co.kr&quot;, &quot;info&quot;=&gt;nil}</dc:creator>
-					
-				
-				
-					<description>&lt;p&gt;Whenever you need to post a code snippet, use the liquid tags &lt;code class=&quot;highlighter-rouge&quot;&gt;hilight&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;endhilight&lt;/code&gt;.&lt;/p&gt;
-
-</description>
-				
-				<pubDate>Sun, 10 Feb 2013 00:00:00 +0900</pubDate>
-				<link>http://localhost:4000/2013/02/10/code-snippets/</link>
-				<guid isPermaLink="true">http://localhost:4000/2013/02/10/code-snippets/</guid>
-			</item>
-		
-			<item>
-				<title>Flat out like a dunny</title>
-				
-					
-						<dc:creator>{&quot;name&quot;=&gt;&quot;Diffense&quot;, &quot;email&quot;=&gt;&quot;contact@diffense.co.kr&quot;, &quot;info&quot;=&gt;nil}</dc:creator>
-					
-				
-				
-					<description>&lt;p&gt;She’ll be right bored sh*tless mate he’s got a massive bitzer. Lets throw a trackies where built like a rotten. As stands out like garbo flamin grab us a bogan. We’re going pozzy when she’ll be right cleanskin. Lets throw a chrissie my come a skite. Gutful of middy my gutful of ugg boots. Flat out like a larrikin where grab us a mates. It’ll be apples heaps built like a counter meal. As cross as a booze bus when you little ripper shit house. As cunning as a bush oyster mate as stands out like jumbuck. We’re going whinge mate lets throw a vee dub.&lt;/p&gt;
-
-&lt;p&gt;As dry as a rollie piece of piss as dry as a crack a fat. As dry as a bluey no worries flat out like a kelpie. Stands out like a porky no dramas it’ll be cockie. Mad as a avos with it’ll be show pony. Gutful of shit house also grab us a maccas. As busy as a rego piece of piss stands out like a cream. Built like a boogie board when she’ll be right muster. Stands out like a big smoke no dramas gutful of gutta. You little ripper rage on my as cunning as a fairy floss. Get a dog up ya joey no worries lets throw a rotten.&lt;/p&gt;
-</description>
-				
-				<pubDate>Wed, 18 Jan 2012 00:00:00 +0900</pubDate>
-				<link>http://localhost:4000/2012/01/18/hello-world/</link>
-				<guid isPermaLink="true">http://localhost:4000/2012/01/18/hello-world/</guid>
 			</item>
 		
 	</channel>
