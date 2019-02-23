@@ -102,21 +102,24 @@ Access is denied.
   &lt;p&gt;대상 파일에 대한 Write 권한이 없어도 하드링크를 만들 수 있다&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;mklink(CreateHardLink)를 이용하면 하드링크를 만들 수 없는 경우(예:kernel32.dll)가 있었는데, James Forshaw가 발견한 사실을 이용하면 그 경우에도 하드링크를 만들 수 있게 된 것이죠. 이를 증명하기 위해 다음과 같은 코드를 작성하여 공개&lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;#fn:2&quot; class=&quot;footnote&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;하였습니다.&lt;/p&gt;
+&lt;p&gt;mklink(CreateHardLink)를 이용하면 하드링크를 만들 수 없는 경우(예:kernel32.dll)가 있었는데, James Forshaw가 발견한 사실을 이용하면 그 경우에도 하드링크를 만들 수 있게 된 것이죠. 이를 증명하기 위해 다음과 같은 POC를 작성하여 공개&lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;#fn:2&quot; class=&quot;footnote&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;하였습니다.&lt;/p&gt;
 
-&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;CreateNativeHardlink&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LPCWSTR&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;linkname&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LPCWSTR&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;targetname&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// 주요부분만 추려냈습니다.
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;CreateNativeHardlink&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LPCWSTR&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;linkname&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LPCWSTR&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;targetname&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;// 중략
+    &lt;span class=&quot;c1&quot;&gt;// ...
+&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// 타겟파일을 오픈합니다.(DesiredAccess=MAXIMUM_ALLOWED)
 &lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;NtOpenFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ExistingFileHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MAXIMUM_ALLOWED&lt;/span&gt;&lt;span class=&quot;cm&quot;&gt;/*이것이 바뀌었습니다*/&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,,,,);&lt;/span&gt;
 
-    &lt;span class=&quot;c1&quot;&gt;// 중략
+    &lt;span class=&quot;c1&quot;&gt;// ...
+&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// 하드링크 생성을 요청합니다.
 &lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;NtSetInformationFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ExistingFileHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;io_status&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;link_info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;link_info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FileLinkInformation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;여기서 CreateHardLink와의 중요한 차이점은 CreateHardLink는 대상파일을 오픈할 때 요청한 권한이 FILE_WRITE_ATTRIBUTES 였지만, James Forshaw가 작성한 CreateNativeHardlink에서는 MAXIMUM_ALLOWED로 바뀌었다는 점입니다.&lt;/p&gt;
-
-&lt;p&gt;MAXIMUM_ALLOWED는 어떻게든 파일을 열어달라는 의미로 보면 됩니다. 즉 &lt;em&gt;어떻게든 대상파일을 열기만 하면 하드링크 생성이 가능&lt;/em&gt;함을 코드를 통해 말해주고 있습니다.&lt;/p&gt;
+&lt;p&gt;CreateHardLink API와의 차이점은 CreateHardLink는 타겟파일을 오픈할 때 요청한 권한이 FILE_WRITE_ATTRIBUTES인 반면, James Forshaw의 CreateNativeHardlink는 MAXIMUM_ALLOWED를 사용한다는 점입니다. MAXIMUM_ALLOWED는 어떻게든 파일을 열어달라는 의미로 보면 됩니다. 즉 &lt;em&gt;어떻게든 대상파일을 열기만 하면 하드링크 생성이 가능&lt;/em&gt;함을 코드를 통해 말해주고 있습니다.&lt;/p&gt;
 
 &lt;p&gt;James Forshaw가 작성한 CreateHardLink.exe 툴을 이용하여 지금까지 설명한 내용을 테스트해 볼 수 있습니다.&lt;/p&gt;
 
