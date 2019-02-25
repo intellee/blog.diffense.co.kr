@@ -114,7 +114,7 @@ bye
 
 &lt;h3 id=&quot;하드링크의-재미난-사실&quot;&gt;하드링크의 재미난 사실&lt;/h3&gt;
 
-&lt;p&gt;윈도우즈 보안 연구로 굉장히 유명한 James Forshaw(구글 프로젝트 제로 소속)는 하드링크에 대한 흥미로운 사실&lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;#fn:2&quot; class=&quot;footnote&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;을 발표하였습니다.&lt;/p&gt;
+&lt;p&gt;윈도우즈 보안 연구로 굉장히 유명한 James Forshaw(구글 프로젝트 제로)는 하드링크에 대한 흥미로운 사실&lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;#fn:2&quot; class=&quot;footnote&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;을 발표하였습니다.&lt;/p&gt;
 
 &lt;p&gt;먼저 &lt;code class=&quot;highlighter-rouge&quot;&gt;CreateHardLink&lt;/code&gt;의 구현 내부를 살펴보겠습니다.&lt;/p&gt;
 
@@ -137,15 +137,15 @@ bye
 
 &lt;p&gt;위 코드를 보면, 하드링크를 생성하기 위해 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt;과 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtSetInformationFile&lt;/code&gt;을 사용하고 있음을 알 수 있습니다. &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt;로 대상 파일을 Open하고나서, &lt;code class=&quot;highlighter-rouge&quot;&gt;NtSetInformationFile&lt;/code&gt;을 호출하는 2단계로 이루어져 있는 것이죠.&lt;/p&gt;
 
-&lt;p&gt;여기서 주목할 부분은 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt;에 사용된 인자(&lt;code class=&quot;highlighter-rouge&quot;&gt;FILE_WRITE_ATTRIBUTES&lt;/code&gt;)입니다. 만약 대상 파일에 대해 &lt;code class=&quot;highlighter-rouge&quot;&gt;FILE_WRITE_ATTRIBUTES&lt;/code&gt; 로 파일을 오픈할 수 없다면, &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt; 호출은 실패하게 되고 결국 &lt;code class=&quot;highlighter-rouge&quot;&gt;CreateHardLink&lt;/code&gt; 호출은 실패하게 됩니다. 대상 파일을 속성쓰기 액세스로 Open하지 못하면 하드링크 생성을 못한다? 일견 타당해보이기도 하는데요.&lt;/p&gt;
+&lt;p&gt;여기서 주목할 부분은 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt;에 사용된 인자 &lt;code class=&quot;highlighter-rouge&quot;&gt;FILE_WRITE_ATTRIBUTES&lt;/code&gt;입니다. 이것의 의미는 &lt;em&gt;“파일 속성을 변경할 수 있게 파일을 열고 싶어”&lt;/em&gt;라는 의미입니다. 호출자에게 그러한 권한이 주어지지 않았다면 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt; 호출은 실패하게 되고 결국 하드링크 생성을 할 수 없습니다. 대상 파일에 속성쓰기 권한이 없으면 하드링크 생성을 못한다? 일견 타당해보이기도 하는데요.&lt;/p&gt;
 
-&lt;p&gt;다음 예는 방금 언급한 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt; 호출이 실패하여 하드링크 생성에 실패하는 것을 보여주고 있습니다. 일반사용자는 &lt;code class=&quot;highlighter-rouge&quot;&gt;kernel32.dll&lt;/code&gt; 파일을 &lt;code class=&quot;highlighter-rouge&quot;&gt;FILE_WRITE_ATTRIBUTES&lt;/code&gt; 액세스로 Open할 수 없기 때문에 하드링크 생성에 실패한 것이죠.&lt;/p&gt;
+&lt;p&gt;다음 예는 방금 언급한 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt; 호출이 실패하여 하드링크 생성에 실패하는 것을 보여주고 있습니다. 일반사용자는 &lt;code class=&quot;highlighter-rouge&quot;&gt;kernel32.dll&lt;/code&gt;의 속성을 쓸 수 있는 권한이 없기 때문에 하드링크 생성에 실패한 것이죠.&lt;/p&gt;
 
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;C:\Test&amp;gt;mklink /H hardlink.txt c:\windows\system32\kernel32.dll
 Access is denied.
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;James Forshaw는 이 지점에서 &lt;code class=&quot;highlighter-rouge&quot;&gt;FILE_WRITE_ATTRIBUTES&lt;/code&gt; 인자를 빼고 대상 파일을 Open(&lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt;)해도 하드링크를 생성할 수 있을까?라는 의문을 가지고 실험한 결과 다음과 같은 사실을 발견하게 됩니다.&lt;/p&gt;
+&lt;p&gt;James Forshaw는 이 지점에서 읽기 권한만 가진 대상 파일을 Open(&lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt;)해도 하드링크를 생성할 수 있을까?라는 의문을 가지고 테스트를 해봅니다. 그 결과 다음과 같은 사실을 발견하게 됩니다.&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;대상 파일에 대한 Write 권한이 없어도 하드링크를 만들 수 있다&lt;/p&gt;
@@ -168,7 +168,7 @@ Access is denied.
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;CreateHardLink&lt;/code&gt;는 대상 파일을 Open할 때 요청한 권한이 &lt;code class=&quot;highlighter-rouge&quot;&gt;FILE_WRITE_ATTRIBUTES&lt;/code&gt;인 반면, James Forshaw가 작성한 함수 &lt;code class=&quot;highlighter-rouge&quot;&gt;CreateNativeHardlink&lt;/code&gt;는 &lt;code class=&quot;highlighter-rouge&quot;&gt;MAXIMUM_ALLOWED&lt;/code&gt;를 사용한다는 것이 가장 큰 차이점입니다.&lt;/p&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;CreateHardLink&lt;/code&gt;는 인자로 &lt;code class=&quot;highlighter-rouge&quot;&gt;FILE_WRITE_ATTRIBUTES&lt;/code&gt;인 반면, James Forshaw가 작성한 함수 &lt;code class=&quot;highlighter-rouge&quot;&gt;CreateNativeHardlink&lt;/code&gt;는 &lt;code class=&quot;highlighter-rouge&quot;&gt;MAXIMUM_ALLOWED&lt;/code&gt;를 사용한다는 것이 가장 큰 차이점입니다.&lt;/p&gt;
 
 &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;MAXIMUM_ALLOWED&lt;/code&gt;는 어떻게든 파일을 열어달라는 의미로 보면 됩니다. 즉 &lt;em&gt;어떻게든 대상 파일을 열기만 하면 하드링크 생성이 가능하다&lt;/em&gt;는 점을 코드를 통해 얘기해주고 있는 것이죠.&lt;/p&gt;
 

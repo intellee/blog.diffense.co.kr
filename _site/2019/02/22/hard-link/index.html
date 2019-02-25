@@ -198,7 +198,7 @@ bye
 
 <h3 id="하드링크의-재미난-사실">하드링크의 재미난 사실</h3>
 
-<p>윈도우즈 보안 연구로 굉장히 유명한 James Forshaw(구글 프로젝트 제로 소속)는 하드링크에 대한 흥미로운 사실<sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup>을 발표하였습니다.</p>
+<p>윈도우즈 보안 연구로 굉장히 유명한 James Forshaw(구글 프로젝트 제로)는 하드링크에 대한 흥미로운 사실<sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup>을 발표하였습니다.</p>
 
 <p>먼저 <code class="highlighter-rouge">CreateHardLink</code>의 구현 내부를 살펴보겠습니다.</p>
 
@@ -221,15 +221,15 @@ bye
 
 <p>위 코드를 보면, 하드링크를 생성하기 위해 <code class="highlighter-rouge">NtOpenFile</code>과 <code class="highlighter-rouge">NtSetInformationFile</code>을 사용하고 있음을 알 수 있습니다. <code class="highlighter-rouge">NtOpenFile</code>로 대상 파일을 Open하고나서, <code class="highlighter-rouge">NtSetInformationFile</code>을 호출하는 2단계로 이루어져 있는 것이죠.</p>
 
-<p>여기서 주목할 부분은 <code class="highlighter-rouge">NtOpenFile</code>에 사용된 인자(<code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code>)입니다. 만약 대상 파일에 대해 <code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code> 로 파일을 오픈할 수 없다면, <code class="highlighter-rouge">NtOpenFile</code> 호출은 실패하게 되고 결국 <code class="highlighter-rouge">CreateHardLink</code> 호출은 실패하게 됩니다. 대상 파일을 속성쓰기 액세스로 Open하지 못하면 하드링크 생성을 못한다? 일견 타당해보이기도 하는데요.</p>
+<p>여기서 주목할 부분은 <code class="highlighter-rouge">NtOpenFile</code>에 사용된 인자 <code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code>입니다. 이것의 의미는 <em>“파일 속성을 변경할 수 있게 파일을 열고 싶어”</em>라는 의미입니다. 호출자에게 그러한 권한이 주어지지 않았다면 <code class="highlighter-rouge">NtOpenFile</code> 호출은 실패하게 되고 결국 하드링크 생성을 할 수 없습니다. 대상 파일에 속성쓰기 권한이 없으면 하드링크 생성을 못한다? 일견 타당해보이기도 하는데요.</p>
 
-<p>다음 예는 방금 언급한 <code class="highlighter-rouge">NtOpenFile</code> 호출이 실패하여 하드링크 생성에 실패하는 것을 보여주고 있습니다. 일반사용자는 <code class="highlighter-rouge">kernel32.dll</code> 파일을 <code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code> 액세스로 Open할 수 없기 때문에 하드링크 생성에 실패한 것이죠.</p>
+<p>다음 예는 방금 언급한 <code class="highlighter-rouge">NtOpenFile</code> 호출이 실패하여 하드링크 생성에 실패하는 것을 보여주고 있습니다. 일반사용자는 <code class="highlighter-rouge">kernel32.dll</code>의 속성을 쓸 수 있는 권한이 없기 때문에 하드링크 생성에 실패한 것이죠.</p>
 
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>C:\Test&gt;mklink /H hardlink.txt c:\windows\system32\kernel32.dll
 Access is denied.
 </code></pre></div></div>
 
-<p>James Forshaw는 이 지점에서 <code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code> 인자를 빼고 대상 파일을 Open(<code class="highlighter-rouge">NtOpenFile</code>)해도 하드링크를 생성할 수 있을까?라는 의문을 가지고 실험한 결과 다음과 같은 사실을 발견하게 됩니다.</p>
+<p>James Forshaw는 이 지점에서 읽기 권한만 가진 대상 파일을 Open(<code class="highlighter-rouge">NtOpenFile</code>)해도 하드링크를 생성할 수 있을까?라는 의문을 가지고 테스트를 해봅니다. 그 결과 다음과 같은 사실을 발견하게 됩니다.</p>
 
 <blockquote>
   <p>대상 파일에 대한 Write 권한이 없어도 하드링크를 만들 수 있다</p>
@@ -252,7 +252,7 @@ Access is denied.
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p><code class="highlighter-rouge">CreateHardLink</code>는 대상 파일을 Open할 때 요청한 권한이 <code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code>인 반면, James Forshaw가 작성한 함수 <code class="highlighter-rouge">CreateNativeHardlink</code>는 <code class="highlighter-rouge">MAXIMUM_ALLOWED</code>를 사용한다는 것이 가장 큰 차이점입니다.</p>
+<p><code class="highlighter-rouge">CreateHardLink</code>는 인자로 <code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code>인 반면, James Forshaw가 작성한 함수 <code class="highlighter-rouge">CreateNativeHardlink</code>는 <code class="highlighter-rouge">MAXIMUM_ALLOWED</code>를 사용한다는 것이 가장 큰 차이점입니다.</p>
 
 <p><code class="highlighter-rouge">MAXIMUM_ALLOWED</code>는 어떻게든 파일을 열어달라는 의미로 보면 됩니다. 즉 <em>어떻게든 대상 파일을 열기만 하면 하드링크 생성이 가능하다</em>는 점을 코드를 통해 얘기해주고 있는 것이죠.</p>
 
