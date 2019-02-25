@@ -391,7 +391,7 @@ nav a.current {
 
 /* Structure overwrites */
 
-@media all and (min-width: 370px) {
+@media all and (min-width: 570px) {
   .website-title {
     font-size: 32px;
   }

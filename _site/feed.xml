@@ -137,7 +137,7 @@ Access is denied.
   &lt;p&gt;대상 파일에 대한 Write 권한이 없어도 하드링크를 만들 수 있다&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;CreateHardLink&lt;/code&gt;를 이용하면 파일열기에 실패하여 하드링크를 만들 수 없는 경우(kernel32.dll처럼)가 있었는데, James Forshaw가 발견한 사실을 이용하면 그 경우에도 하드링크를 만들 수 있게 된 것이죠. 이를 증명하기 위해 다음과 같은 POC를 작성하여 공개&lt;sup id=&quot;fnref:3&quot;&gt;&lt;a href=&quot;#fn:3&quot; class=&quot;footnote&quot;&gt;3&lt;/a&gt;&lt;/sup&gt;하였습니다.&lt;/p&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;CreateHardLink&lt;/code&gt;를 이용하면 파일열기에 실패하여 하드링크를 만들 수 없는 경우(kernel32.dll처럼)가 있었는데, James Forshaw가 발견한 사실을 이용하면 그 경우에도 하드링크를 만들 수 있게 된 것이죠. 이를 증명하기 위해 다음과 같은 POC&lt;sup id=&quot;fnref:3&quot;&gt;&lt;a href=&quot;#fn:3&quot; class=&quot;footnote&quot;&gt;3&lt;/a&gt;&lt;/sup&gt;를 작성하여 공개하였습니다.&lt;/p&gt;
 
 &lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// 주요부분만 추려냈습니다.
 &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;CreateNativeHardlink&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LPCWSTR&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;linkname&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LPCWSTR&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;targetname&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
