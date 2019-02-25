@@ -94,7 +94,7 @@ header::after {
 
 
 <article>
-  <span class="meta">Feb 22, 2019 • 12&nbsp;min read</span>
+  <span class="meta">Feb 22, 2019 • 11&nbsp;min read</span>
 	<h1>Hello HardLink? Bye HardLink!</h1>
 		<p>하드링크란 무엇이며, 익스플로잇에서 활용되는 하드링크와 일반적인 하드링크와의 차이점이 무엇인지 알아보겠습니다.</p>
 
@@ -198,8 +198,7 @@ bye
 
 <h3 id="하드링크의-재미난-사실">하드링크의 재미난 사실</h3>
 
-<p><code class="highlighter-rouge">CreateHardLink</code> API가 실패하는 원인은 방금 언급한 4가지 경우 외에도 한가지 더 있습니다. 이러한 사실은 윈도우즈 보안 연구로 아주 유명한 
-James Forshaw(구글 프로젝트 제로 소속)의 발표<sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup>로 알려지게 되었습니다. 해당 발표 내용에 대한 설명을 조금 해보겠습니다.</p>
+<p>윈도우즈 보안 연구로 굉장히 유명한 James Forshaw(구글 프로젝트 제로 소속)는 하드링크에 대한 흥미로운 사실<sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup>을 발표하였습니다.</p>
 
 <p>먼저 <code class="highlighter-rouge">CreateHardLink</code>의 구현 내부를 살펴보겠습니다.</p>
 
@@ -220,30 +219,30 @@ James Forshaw(구글 프로젝트 제로 소속)의 발표<sup id="fnref:2"><a h
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>위 코드를 보면, 하드링크를 생성하기 위해 <code class="highlighter-rouge">NtOpenFile</code>과 <code class="highlighter-rouge">NtSetInformationFile</code>을 사용하고 있음을 알 수 있습니다. <code class="highlighter-rouge">NtOpenFile</code>로 대상 파일을 오픈하고나서, <code class="highlighter-rouge">NtSetInformationFile</code>을 호출하는 2단계로 이루어져 있는 것이죠.</p>
+<p>위 코드를 보면, 하드링크를 생성하기 위해 <code class="highlighter-rouge">NtOpenFile</code>과 <code class="highlighter-rouge">NtSetInformationFile</code>을 사용하고 있음을 알 수 있습니다. <code class="highlighter-rouge">NtOpenFile</code>로 대상 파일을 Open하고나서, <code class="highlighter-rouge">NtSetInformationFile</code>을 호출하는 2단계로 이루어져 있는 것이죠.</p>
 
-<p>여기서 눈여겨 볼 점은 <code class="highlighter-rouge">NtOpenFile</code> 호출이 실패할 경우 <code class="highlighter-rouge">CreateHardLink</code>가 실패를 리턴한다는 것입니다. <code class="highlighter-rouge">CreateHardLink</code>가 실패할 수 있는 경우 한가지가 여기에 있었군요. <code class="highlighter-rouge">NtOpenFile</code>은 어떤 경우에 실패하게 될까요? <code class="highlighter-rouge">NtOpenFile</code>에 사용된 인자(<code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code>) 에 주목해주세요. 만약 대상 파일에 대해 <code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code> 열기 권한이 없으면, <code class="highlighter-rouge">NtOpenFile</code> 호출은 실패하게 되고 결국 <code class="highlighter-rouge">CreateHardLink</code> 호출은 실패하게 됩니다.</p>
+<p>여기서 주목할 부분은 <code class="highlighter-rouge">NtOpenFile</code>에 사용된 인자(<code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code>)입니다. 만약 대상 파일에 대해 <code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code> 로 파일을 오픈할 수 없다면, <code class="highlighter-rouge">NtOpenFile</code> 호출은 실패하게 되고 결국 <code class="highlighter-rouge">CreateHardLink</code> 호출은 실패하게 됩니다. 대상 파일을 속성쓰기 액세스로 Open하지 못하면 하드링크 생성을 못한다? 일견 타당해보이기도 하는데요.</p>
 
-<p>아래 예는 kernel32.dll에 하드링크를 만들기 위해 mklink를 사용하려는데, 방금 언급한 NtOpenFile의 호출이 실패하여 결국 하드링크 생성에 실패하는 것을 보여주고 있습니다.</p>
+<p>다음 예는 방금 언급한 <code class="highlighter-rouge">NtOpenFile</code> 호출이 실패하여 하드링크 생성에 실패하는 것을 보여주고 있습니다. 일반사용자는 <code class="highlighter-rouge">kernel32.dll</code> 파일을 <code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code> 액세스로 Open할 수 없기 때문에 하드링크 생성에 실패한 것이죠.</p>
 
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>C:\Test&gt;mklink /H hardlink.txt c:\windows\system32\kernel32.dll
 Access is denied.
 </code></pre></div></div>
 
-<p>James Forshaw는 이 지점에서 FILE_WRITE_ATTRIBUTES 없이 대상 파일을 Open(<code class="highlighter-rouge">NtOpenFile</code>)하면 어떻게 될까? 라는 의문을 가지고 실험을 해본 결과, 다음과 같은 사실을 발견하게 됩니다.</p>
+<p>James Forshaw는 이 지점에서 <code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code> 인자를 빼고 대상 파일을 Open(<code class="highlighter-rouge">NtOpenFile</code>)해도 하드링크를 생성할 수 있을까?라는 의문을 가지고 실험한 결과 다음과 같은 사실을 발견하게 됩니다.</p>
 
 <blockquote>
   <p>대상 파일에 대한 Write 권한이 없어도 하드링크를 만들 수 있다</p>
 </blockquote>
 
-<p><code class="highlighter-rouge">CreateHardLink</code>를 이용하면 파일열기에 실패하여 하드링크를 만들 수 없는 경우(kernel32.dll처럼)가 있었는데, James Forshaw가 발견한 사실을 이용하면 그 경우에도 하드링크를 만들 수 있게 된 것이죠. 이를 증명하기 위해 다음과 같은 POC<sup id="fnref:3"><a href="#fn:3" class="footnote">3</a></sup>를 작성하여 공개하였습니다.</p>
+<p><code class="highlighter-rouge">CreateHardLink</code>를 이용하면 권한 문제로 <code class="highlighter-rouge">NtOpenFile</code> 호출에 실패하여 하드링크를 만들 수 없는 경우(예: <code class="highlighter-rouge">kernel32.dll</code>)가 있었는데, James Forshaw가 발견한 사실을 이용하면 그 경우에도 하드링크를 만들 수 있게 된 것이죠. 이를 증명하기 위해 다음과 같은 POC<sup id="fnref:3"><a href="#fn:3" class="footnote">3</a></sup>를 작성하여 공개하였습니다.</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 주요부분만 추려냈습니다.
 </span><span class="n">bool</span> <span class="nf">CreateNativeHardlink</span><span class="p">(</span><span class="n">LPCWSTR</span> <span class="n">linkname</span><span class="p">,</span> <span class="n">LPCWSTR</span> <span class="n">targetname</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="c1">// ...
 </span>
-    <span class="c1">// 대상 파일을 오픈합니다.(DesiredAccess=MAXIMUM_ALLOWED)
+    <span class="c1">// 대상 파일을 Open합니다.(DesiredAccess=MAXIMUM_ALLOWED)
 </span>    <span class="n">NtOpenFile</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ExistingFileHandle</span><span class="p">,</span> <span class="n">MAXIMUM_ALLOWED</span><span class="cm">/*이것이 바뀌었습니다*/</span><span class="p">,,,,);</span>
 
     <span class="c1">// ...
@@ -253,7 +252,7 @@ Access is denied.
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p><code class="highlighter-rouge">CreateHardLink</code>는 대상 파일을 오픈할 때 요청한 권한이 <code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code>인 반면, James Forshaw가 작성한 함수 <code class="highlighter-rouge">CreateNativeHardlink</code>는 <code class="highlighter-rouge">MAXIMUM_ALLOWED</code>를 사용한다는 것이 가장 큰 차이점입니다.</p>
+<p><code class="highlighter-rouge">CreateHardLink</code>는 대상 파일을 Open할 때 요청한 권한이 <code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code>인 반면, James Forshaw가 작성한 함수 <code class="highlighter-rouge">CreateNativeHardlink</code>는 <code class="highlighter-rouge">MAXIMUM_ALLOWED</code>를 사용한다는 것이 가장 큰 차이점입니다.</p>
 
 <p><code class="highlighter-rouge">MAXIMUM_ALLOWED</code>는 어떻게든 파일을 열어달라는 의미로 보면 됩니다. 즉 <em>어떻게든 대상 파일을 열기만 하면 하드링크 생성이 가능하다</em>는 점을 코드를 통해 얘기해주고 있는 것이죠.</p>
 
@@ -421,7 +420,7 @@ dir hardlink.exe
       <p>James Forshaw, Project Zero Blog, https://googleprojectzero.blogspot.com/2015/12/between-rock-and-hard-link.html <a href="#fnref:2" class="reversefootnote">&#8617;</a></p>
     </li>
     <li id="fn:3">
-      <p>James Forshaw, https://github.com/googleprojectzero/symboliclink-testing-tools <a href="#fnref:3" class="reversefootnote">&#8617;</a></p>
+      <p>James Forshaw, SymbolicLink Testing Tools, https://github.com/googleprojectzero/symboliclink-testing-tools <a href="#fnref:3" class="reversefootnote">&#8617;</a></p>
     </li>
     <li id="fn:4">
       <p>PowerPool malware exploits ALPC LPE zero-day vulnerability, https://www.welivesecurity.com/2018/09/05/powerpool-malware-exploits-zero-day-vulnerability/ <a href="#fnref:4" class="reversefootnote">&#8617;</a></p>
