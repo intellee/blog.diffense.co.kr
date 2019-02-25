@@ -217,6 +217,8 @@ dir hardlink.exe
 
 &lt;p&gt;익스플로잇 과정을 살펴보면서 하드링크의 활용을 이해해보겠습니다.&lt;/p&gt;
 
+&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/sandboxescaper_2.png&quot; alt=&quot;sandboxescaper exploit&quot; /&gt;&lt;/p&gt;
+
 &lt;ol&gt;
   &lt;li&gt;
     &lt;p&gt;tasks 폴더에 &lt;strong&gt;하드링크&lt;/strong&gt;(c:\windows\tasks\UpdateTask.job -&amp;gt; c:\windows\system32\kernel32.dll)을 하나 생성합니다. &lt;em&gt;일반사용자가 tasks 폴더에 파일을 생성할 수 있고, 대상 파일(kernel32.dll)에 하드링크도 걸 수 있으니 1번 작업이 가능해집니다.&lt;/em&gt;&lt;/p&gt;
