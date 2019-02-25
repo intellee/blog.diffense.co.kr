@@ -189,7 +189,11 @@ dir hardlink.exe
 
 &lt;p&gt;쓰기 권한이 없는 대상 파일(예:kernel32.dll)에 하드링크를 걸었다고 생각해봅시다. 하드링크를 통해서 대상 파일을 쓸 수 있을까요? 그렇게 된다면 권한상승 취약점으로 이어질 수 있겠지만 윈도우즈가 그렇게 쉬운 상대는 아닙니다. 윈도우즈는 하드링크가 가리키는 파일에 대한 접근 검사(Access Check)를 통해서 쓰기 시도를 막습니다. 쓰기 권한이 없는 대상 파일에 하드링크를 걸 수는 있으나, 하드링크를 통해서 대상 파일을  쓸 수는 없는 것이죠.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;&quot; alt=&quot;hardlink write&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/hardlink_write.png&quot; alt=&quot;hardlink write&quot; /&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;쓰기 권한이 없는 대상 파일에 하드링크를 걸 수는 있으나, 하드링크를 통해서 대상 파일을  쓸 수는 없는 것이죠.&lt;/p&gt;
+&lt;/blockquote&gt;
 
 &lt;p&gt;다른 케이스를 생각해봐야겠네요.&lt;/p&gt;
 
