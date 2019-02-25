@@ -205,7 +205,7 @@ header::after {
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>위 코드를 보면, 하드링크를 생성하기 위해 <code class="highlighter-rouge">NtOpenFile</code>과 <code class="highlighter-rouge">NtSetInformationFile</code>을 사용하고 있음을 알 수 있습니다. <code class="highlighter-rouge">NtOpenFile</code>로 대상 파일을 오픈하고나서, <code class="highlighter-rouge">NtSetInformationFile</code>을 호출하여 윈도우즈OS에 하드링크 생성을 요청하는 2단계로 이루어져 있는 것이죠.</p>
+<p>위 코드를 보면, 하드링크를 생성하기 위해 <code class="highlighter-rouge">NtOpenFile</code>과 <code class="highlighter-rouge">NtSetInformationFile</code>을 사용하고 있음을 알 수 있습니다. <code class="highlighter-rouge">NtOpenFile</code>로 대상 파일을 오픈하고나서, <code class="highlighter-rouge">NtSetInformationFile</code>을 호출하는 2단계로 이루어져 있는 것이죠.</p>
 
 <p>여기서 눈여겨 볼 점은 대상 파일을 Open하는 데 <code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code>을 인자로 사용한 것인데요. 만약 사용자가 대상 파일에 대해 <code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code> 열기 권한이 없으면, <code class="highlighter-rouge">NtOpenFile</code> 호출은 실패하게 되고 결국 <code class="highlighter-rouge">CreateHardLink</code> 호출은 실패하게 됩니다.</p>
 
