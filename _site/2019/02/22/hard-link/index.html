@@ -167,7 +167,7 @@ header::after {
 <span class="p">);</span>
 </code></pre></div></div>
 
-<p>첫번째 인자에 생성될 파일명(하드링크)을 넣어주고, 두번째 인자에 기존(타겟) 파일명을 입력해주면 하드링크를 생성할 수 있습니다.</p>
+<p>첫번째 인자에 생성될 파일명(하드링크)을 넣어주고, 두번째 인자에 기존(대상) 파일명을 입력해주면 하드링크를 생성할 수 있습니다.</p>
 
 <p><code class="highlighter-rouge">CreateHardLink</code>가 실패를 리턴하는 경우는 다음과 같습니다.</p>
 <ul>
@@ -187,7 +187,7 @@ header::after {
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">BOOL</span> <span class="nf">CreateHardLinkW</span><span class="p">(</span><span class="n">LPCWSTR</span> <span class="n">lpFileName</span><span class="p">,</span> <span class="n">LPCWSTR</span> <span class="n">lpExistingFileName</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// 생략
 </span>
-    <span class="c1">// 타겟파일을 Open한다.(FILE_WRITE_ATTRIBUTES 권한을 요구)
+    <span class="c1">// 대상파일을 Open한다.(FILE_WRITE_ATTRIBUTES 권한을 요구)
 </span>    <span class="n">status</span> <span class="o">=</span> <span class="n">NtOpenFile</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ExistingFileHandle</span><span class="p">,</span> <span class="n">SYNCHRONIZE</span> <span class="o">|</span> <span class="n">FILE_WRITE_ATTRIBUTES</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ObjectAttributes</span><span class="p">,</span> <span class="p">...);</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">status</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span> <span class="n">FALSE</span><span class="p">;</span>   <span class="c1">// Open이 실패하면 하드링크 생성 실패를 리턴
 </span> 
@@ -201,9 +201,9 @@ header::after {
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>위 코드를 보면, 하드링크를 생성하기 위해 <code class="highlighter-rouge">NtOpenFile</code>과 <code class="highlighter-rouge">NtSetInformationFile</code>을 사용하고 있음을 알 수 있습니다. <code class="highlighter-rouge">NtOpenFile</code>로 타겟파일을 오픈하고나서, <code class="highlighter-rouge">NtSetInformationFile</code>을 호출하여 윈도우즈OS에 하드링크 생성을 요청하는 2단계로 이루어져 있는 것이죠.</p>
+<p>위 코드를 보면, 하드링크를 생성하기 위해 <code class="highlighter-rouge">NtOpenFile</code>과 <code class="highlighter-rouge">NtSetInformationFile</code>을 사용하고 있음을 알 수 있습니다. <code class="highlighter-rouge">NtOpenFile</code>로 대상파일을 오픈하고나서, <code class="highlighter-rouge">NtSetInformationFile</code>을 호출하여 윈도우즈OS에 하드링크 생성을 요청하는 2단계로 이루어져 있는 것이죠.</p>
 
-<p>여기서 눈여겨 볼 점은 타겟파일을 Open하는 데 <code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code>을 인자로 사용한 것인데요. 만약 사용자가 타겟파일에 대해 <code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code> 열기 권한이 없으면, <code class="highlighter-rouge">NtOpenFile</code> 호출은 실패하게 되고 결국 <code class="highlighter-rouge">CreateHardLink</code> 호출은 실패하게 됩니다.</p>
+<p>여기서 눈여겨 볼 점은 대상파일을 Open하는 데 <code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code>을 인자로 사용한 것인데요. 만약 사용자가 대상파일에 대해 <code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code> 열기 권한이 없으면, <code class="highlighter-rouge">NtOpenFile</code> 호출은 실패하게 되고 결국 <code class="highlighter-rouge">CreateHardLink</code> 호출은 실패하게 됩니다.</p>
 
 <p>아래 예는 kernel32.dll에 하드링크를 만들기 위해 mklink를 사용하려는데, 방금 언급한 NtOpenFile의 호출이 실패하여 결국 하드링크 생성에 실패하는 것을 보여주고 있습니다.</p>
 
@@ -211,7 +211,7 @@ header::after {
 Access is denied.
 </code></pre></div></div>
 
-<p>James Forshaw는 이 지점에서 FILE_WRITE_ATTRIBUTES 없이 타겟파일을 Open(<code class="highlighter-rouge">NtOpenFile</code>)하면 어떻게 될까? 라는 의문을 가지고 실험을 해보기 시작합니다. 실험 결과, 다음과 같은 사실을 발견하게 됩니다.</p>
+<p>James Forshaw는 이 지점에서 FILE_WRITE_ATTRIBUTES 없이 대상파일을 Open(<code class="highlighter-rouge">NtOpenFile</code>)하면 어떻게 될까? 라는 의문을 가지고 실험을 해보기 시작합니다. 실험 결과, 다음과 같은 사실을 발견하게 됩니다.</p>
 
 <blockquote>
   <p>대상 파일에 대한 Write 권한이 없어도 하드링크를 만들 수 있다</p>
@@ -224,7 +224,7 @@ Access is denied.
 <span class="p">{</span>
     <span class="c1">// ...
 </span>
-    <span class="c1">// 타겟파일을 오픈합니다.(DesiredAccess=MAXIMUM_ALLOWED)
+    <span class="c1">// 대상파일을 오픈합니다.(DesiredAccess=MAXIMUM_ALLOWED)
 </span>    <span class="n">NtOpenFile</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ExistingFileHandle</span><span class="p">,</span> <span class="n">MAXIMUM_ALLOWED</span><span class="cm">/*이것이 바뀌었습니다*/</span><span class="p">,,,,);</span>
 
     <span class="c1">// ...
@@ -234,7 +234,7 @@ Access is denied.
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p><code class="highlighter-rouge">CreateHardLink</code>는 타겟파일을 오픈할 때 요청한 권한이 <code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code>인 반면, James Forshaw가 작성한 함수 <code class="highlighter-rouge">CreateNativeHardlink</code>는 <code class="highlighter-rouge">MAXIMUM_ALLOWED</code>를 사용한다 것이 가장 큰 차이점입니다.</p>
+<p><code class="highlighter-rouge">CreateHardLink</code>는 대상파일을 오픈할 때 요청한 권한이 <code class="highlighter-rouge">FILE_WRITE_ATTRIBUTES</code>인 반면, James Forshaw가 작성한 함수 <code class="highlighter-rouge">CreateNativeHardlink</code>는 <code class="highlighter-rouge">MAXIMUM_ALLOWED</code>를 사용한다 것이 가장 큰 차이점입니다.</p>
 
 <p><code class="highlighter-rouge">MAXIMUM_ALLOWED</code>는 어떻게든 파일을 열어달라는 의미로 보면 됩니다. 즉 <em>어떻게든 대상파일을 열기만 하면 하드링크 생성이 가능하다</em>는 점을 코드를 통해 얘기해주고 있습니다.</p>
 
@@ -252,7 +252,7 @@ dir hardlink.exe
 
 <p>하드링크가 어떤 문제가 될 수 있을까요?</p>
 
-<p>WRITE 권한이 없는 대상파일(예: c:\windows\notepad.exe)에 하드링크를 걸었다고 생각해봅시다. 하드링크를 통해서 대상파일(notepad.exe)을 WRITE할 수 있을까요? 만약 그렇게 된다면 바로 권한상승 취약점으로 이어질 수 있지만, 앞서 언급했듯이 하드링크는 디렉토리엔트리로서 그 자체로 퍼미션을 가지고 있지 않고 하드링크가 가리키는 파일이 퍼미션을 가지고 있기 때문에 하드링크를 통해서 WRITE 시도를 하게 되면, 그것이 가리키는 파일에 대한 접근검사가 이루어져서 WRITE 시도가 실패하게 되죠. Write권한이 없는 타겟파일에 하드링크를 걸 수는 있으나, 하드링크를 통한 타겟파일의 Write는 허용되지 않는 것입니다.</p>
+<p>WRITE 권한이 없는 대상파일(예: c:\windows\notepad.exe)에 하드링크를 걸었다고 생각해봅시다. 하드링크를 통해서 대상파일(notepad.exe)을 WRITE할 수 있을까요? 만약 그렇게 된다면 바로 권한상승 취약점으로 이어질 수 있지만, 앞서 언급했듯이 하드링크는 디렉토리엔트리로서 그 자체로 퍼미션을 가지고 있지 않고 하드링크가 가리키는 파일이 퍼미션을 가지고 있기 때문에 하드링크를 통해서 WRITE 시도를 하게 되면, 그것이 가리키는 파일에 대한 접근검사가 이루어져서 WRITE 시도가 실패하게 되죠. Write권한이 없는 대상파일에 하드링크를 걸 수는 있으나, 하드링크를 통한 대상파일의 Write는 허용되지 않는 것입니다.</p>
 
 <p>다른 케이스를 생각해 보겠습니다. c:\test 폴더가 있습니다. 이 폴더에는 일반사용자와 시스템관리자 모두 파일 생성/쓰기/삭제 권한이 주어져 있는 상태입니다. 시스템서비스는 일반사용자도 c:\test\log.txt을 쓸 수 있도록 해당 파일의 퍼미션을 바꾸는 작업을 수행한다고 생각해보죠.</p>
 
@@ -292,11 +292,11 @@ dir hardlink.exe
 
 <p>위 예에서는 kernel32.dll을 예로 들었지만, 앞서 설명드렸듯이 Open할 수 있는 파일이면 모두 하드링크 대상으로 삼을 수 있습니다.</p>
 
-<p>sandboxescaper는 PrintConfig.dll을 하드링크 타겟으로 삼았습니다. 해당 Dll은 스풀러(Spooler)서비스가 사용하는 모듈입니다. sandboxescaper는 취약점을 이용해 PrintConfig.dll를 쓰기 가능하도록 만든 후 그것을 자신의 페이로드로 교체합니다. 그런다음 스풀러(Spooler) 서비스를 호출하여 PrintConfig.dll(페이로드)을 물고 올라가도록 합니다. 최종적으로 자신의 페이로드가 스풀러 프로세스 컨텍스트(시스템권한)에서 실행되도록 하는 것이죠.</p>
+<p>sandboxescaper는 PrintConfig.dll을 하드링크 대상으로 삼았습니다. 해당 Dll은 스풀러(Spooler)서비스가 사용하는 모듈입니다. sandboxescaper는 취약점을 이용해 PrintConfig.dll를 쓰기 가능하도록 만든 후 그것을 자신의 페이로드로 교체합니다. 그런다음 스풀러(Spooler) 서비스를 호출하여 PrintConfig.dll(페이로드)을 물고 올라가도록 합니다. 최종적으로 자신의 페이로드가 스풀러 프로세스 컨텍스트(시스템권한)에서 실행되도록 하는 것이죠.</p>
 
 <p>그가 공개한 익스플로잇 코드<sup id="fnref:5"><a href="#fn:5" class="footnote">5</a></sup>를 살펴보겠습니다.</p>
 
-<p>(1) 하드링크 타겟(PrintConfig.dll)의 정확한 경로를 구합니다.</p>
+<p>(1) 하드링크 대상(PrintConfig.dll)의 정확한 경로를 구합니다.</p>
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">HANDLE</span> <span class="n">hFind</span><span class="p">;</span>
 <span class="n">hFind</span> <span class="o">=</span> <span class="n">FindFirstFile</span><span class="p">(</span><span class="s">L"C:</span><span class="se">\\</span><span class="s">Windows</span><span class="se">\\</span><span class="s">System32</span><span class="se">\\</span><span class="s">DriverStore</span><span class="se">\\</span><span class="s">FileRepository</span><span class="se">\\</span><span class="s">prnms003.inf_amd64*"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">FindFileData</span><span class="p">);</span>
 <span class="kt">wchar_t</span> <span class="n">BeginPath</span><span class="p">[</span><span class="n">MAX_PATH</span><span class="p">]</span> <span class="o">=</span> <span class="s">L"c:</span><span class="se">\\</span><span class="s">windows</span><span class="se">\\</span><span class="s">system32</span><span class="se">\\</span><span class="s">DriverStore</span><span class="se">\\</span><span class="s">FileRepository</span><span class="se">\\</span><span class="s">"</span><span class="p">;</span>

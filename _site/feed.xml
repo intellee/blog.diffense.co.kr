@@ -83,7 +83,7 @@
 &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;첫번째 인자에 생성될 파일명(하드링크)을 넣어주고, 두번째 인자에 기존(타겟) 파일명을 입력해주면 하드링크를 생성할 수 있습니다.&lt;/p&gt;
+&lt;p&gt;첫번째 인자에 생성될 파일명(하드링크)을 넣어주고, 두번째 인자에 기존(대상) 파일명을 입력해주면 하드링크를 생성할 수 있습니다.&lt;/p&gt;
 
 &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;CreateHardLink&lt;/code&gt;가 실패를 리턴하는 경우는 다음과 같습니다.&lt;/p&gt;
 &lt;ul&gt;
@@ -103,7 +103,7 @@
 &lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;BOOL&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;CreateHardLinkW&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LPCWSTR&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lpFileName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LPCWSTR&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lpExistingFileName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;c1&quot;&gt;// 생략
 &lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;// 타겟파일을 Open한다.(FILE_WRITE_ATTRIBUTES 권한을 요구)
+    &lt;span class=&quot;c1&quot;&gt;// 대상파일을 Open한다.(FILE_WRITE_ATTRIBUTES 권한을 요구)
 &lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;status&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NtOpenFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ExistingFileHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SYNCHRONIZE&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FILE_WRITE_ATTRIBUTES&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...);&lt;/span&gt;
     &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;status&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FALSE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;   &lt;span class=&quot;c1&quot;&gt;// Open이 실패하면 하드링크 생성 실패를 리턴
 &lt;/span&gt; 
@@ -117,9 +117,9 @@
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;위 코드를 보면, 하드링크를 생성하기 위해 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt;과 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtSetInformationFile&lt;/code&gt;을 사용하고 있음을 알 수 있습니다. &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt;로 타겟파일을 오픈하고나서, &lt;code class=&quot;highlighter-rouge&quot;&gt;NtSetInformationFile&lt;/code&gt;을 호출하여 윈도우즈OS에 하드링크 생성을 요청하는 2단계로 이루어져 있는 것이죠.&lt;/p&gt;
+&lt;p&gt;위 코드를 보면, 하드링크를 생성하기 위해 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt;과 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtSetInformationFile&lt;/code&gt;을 사용하고 있음을 알 수 있습니다. &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt;로 대상파일을 오픈하고나서, &lt;code class=&quot;highlighter-rouge&quot;&gt;NtSetInformationFile&lt;/code&gt;을 호출하여 윈도우즈OS에 하드링크 생성을 요청하는 2단계로 이루어져 있는 것이죠.&lt;/p&gt;
 
-&lt;p&gt;여기서 눈여겨 볼 점은 타겟파일을 Open하는 데 &lt;code class=&quot;highlighter-rouge&quot;&gt;FILE_WRITE_ATTRIBUTES&lt;/code&gt;을 인자로 사용한 것인데요. 만약 사용자가 타겟파일에 대해 &lt;code class=&quot;highlighter-rouge&quot;&gt;FILE_WRITE_ATTRIBUTES&lt;/code&gt; 열기 권한이 없으면, &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt; 호출은 실패하게 되고 결국 &lt;code class=&quot;highlighter-rouge&quot;&gt;CreateHardLink&lt;/code&gt; 호출은 실패하게 됩니다.&lt;/p&gt;
+&lt;p&gt;여기서 눈여겨 볼 점은 대상파일을 Open하는 데 &lt;code class=&quot;highlighter-rouge&quot;&gt;FILE_WRITE_ATTRIBUTES&lt;/code&gt;을 인자로 사용한 것인데요. 만약 사용자가 대상파일에 대해 &lt;code class=&quot;highlighter-rouge&quot;&gt;FILE_WRITE_ATTRIBUTES&lt;/code&gt; 열기 권한이 없으면, &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt; 호출은 실패하게 되고 결국 &lt;code class=&quot;highlighter-rouge&quot;&gt;CreateHardLink&lt;/code&gt; 호출은 실패하게 됩니다.&lt;/p&gt;
 
 &lt;p&gt;아래 예는 kernel32.dll에 하드링크를 만들기 위해 mklink를 사용하려는데, 방금 언급한 NtOpenFile의 호출이 실패하여 결국 하드링크 생성에 실패하는 것을 보여주고 있습니다.&lt;/p&gt;
 
@@ -127,7 +127,7 @@
 Access is denied.
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;James Forshaw는 이 지점에서 FILE_WRITE_ATTRIBUTES 없이 타겟파일을 Open(&lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt;)하면 어떻게 될까? 라는 의문을 가지고 실험을 해보기 시작합니다. 실험 결과, 다음과 같은 사실을 발견하게 됩니다.&lt;/p&gt;
+&lt;p&gt;James Forshaw는 이 지점에서 FILE_WRITE_ATTRIBUTES 없이 대상파일을 Open(&lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt;)하면 어떻게 될까? 라는 의문을 가지고 실험을 해보기 시작합니다. 실험 결과, 다음과 같은 사실을 발견하게 됩니다.&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;대상 파일에 대한 Write 권한이 없어도 하드링크를 만들 수 있다&lt;/p&gt;
@@ -140,7 +140,7 @@ Access is denied.
 &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;c1&quot;&gt;// ...
 &lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;// 타겟파일을 오픈합니다.(DesiredAccess=MAXIMUM_ALLOWED)
+    &lt;span class=&quot;c1&quot;&gt;// 대상파일을 오픈합니다.(DesiredAccess=MAXIMUM_ALLOWED)
 &lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;NtOpenFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ExistingFileHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MAXIMUM_ALLOWED&lt;/span&gt;&lt;span class=&quot;cm&quot;&gt;/*이것이 바뀌었습니다*/&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,,,,);&lt;/span&gt;
 
     &lt;span class=&quot;c1&quot;&gt;// ...
@@ -150,7 +150,7 @@ Access is denied.
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;CreateHardLink&lt;/code&gt;는 타겟파일을 오픈할 때 요청한 권한이 &lt;code class=&quot;highlighter-rouge&quot;&gt;FILE_WRITE_ATTRIBUTES&lt;/code&gt;인 반면, James Forshaw가 작성한 함수 &lt;code class=&quot;highlighter-rouge&quot;&gt;CreateNativeHardlink&lt;/code&gt;는 &lt;code class=&quot;highlighter-rouge&quot;&gt;MAXIMUM_ALLOWED&lt;/code&gt;를 사용한다 것이 가장 큰 차이점입니다.&lt;/p&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;CreateHardLink&lt;/code&gt;는 대상파일을 오픈할 때 요청한 권한이 &lt;code class=&quot;highlighter-rouge&quot;&gt;FILE_WRITE_ATTRIBUTES&lt;/code&gt;인 반면, James Forshaw가 작성한 함수 &lt;code class=&quot;highlighter-rouge&quot;&gt;CreateNativeHardlink&lt;/code&gt;는 &lt;code class=&quot;highlighter-rouge&quot;&gt;MAXIMUM_ALLOWED&lt;/code&gt;를 사용한다 것이 가장 큰 차이점입니다.&lt;/p&gt;
 
 &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;MAXIMUM_ALLOWED&lt;/code&gt;는 어떻게든 파일을 열어달라는 의미로 보면 됩니다. 즉 &lt;em&gt;어떻게든 대상파일을 열기만 하면 하드링크 생성이 가능하다&lt;/em&gt;는 점을 코드를 통해 얘기해주고 있습니다.&lt;/p&gt;
 
@@ -168,7 +168,7 @@ dir hardlink.exe
 
 &lt;p&gt;하드링크가 어떤 문제가 될 수 있을까요?&lt;/p&gt;
 
-&lt;p&gt;WRITE 권한이 없는 대상파일(예: c:\windows\notepad.exe)에 하드링크를 걸었다고 생각해봅시다. 하드링크를 통해서 대상파일(notepad.exe)을 WRITE할 수 있을까요? 만약 그렇게 된다면 바로 권한상승 취약점으로 이어질 수 있지만, 앞서 언급했듯이 하드링크는 디렉토리엔트리로서 그 자체로 퍼미션을 가지고 있지 않고 하드링크가 가리키는 파일이 퍼미션을 가지고 있기 때문에 하드링크를 통해서 WRITE 시도를 하게 되면, 그것이 가리키는 파일에 대한 접근검사가 이루어져서 WRITE 시도가 실패하게 되죠. Write권한이 없는 타겟파일에 하드링크를 걸 수는 있으나, 하드링크를 통한 타겟파일의 Write는 허용되지 않는 것입니다.&lt;/p&gt;
+&lt;p&gt;WRITE 권한이 없는 대상파일(예: c:\windows\notepad.exe)에 하드링크를 걸었다고 생각해봅시다. 하드링크를 통해서 대상파일(notepad.exe)을 WRITE할 수 있을까요? 만약 그렇게 된다면 바로 권한상승 취약점으로 이어질 수 있지만, 앞서 언급했듯이 하드링크는 디렉토리엔트리로서 그 자체로 퍼미션을 가지고 있지 않고 하드링크가 가리키는 파일이 퍼미션을 가지고 있기 때문에 하드링크를 통해서 WRITE 시도를 하게 되면, 그것이 가리키는 파일에 대한 접근검사가 이루어져서 WRITE 시도가 실패하게 되죠. Write권한이 없는 대상파일에 하드링크를 걸 수는 있으나, 하드링크를 통한 대상파일의 Write는 허용되지 않는 것입니다.&lt;/p&gt;
 
 &lt;p&gt;다른 케이스를 생각해 보겠습니다. c:\test 폴더가 있습니다. 이 폴더에는 일반사용자와 시스템관리자 모두 파일 생성/쓰기/삭제 권한이 주어져 있는 상태입니다. 시스템서비스는 일반사용자도 c:\test\log.txt을 쓸 수 있도록 해당 파일의 퍼미션을 바꾸는 작업을 수행한다고 생각해보죠.&lt;/p&gt;
 
@@ -208,11 +208,11 @@ dir hardlink.exe
 
 &lt;p&gt;위 예에서는 kernel32.dll을 예로 들었지만, 앞서 설명드렸듯이 Open할 수 있는 파일이면 모두 하드링크 대상으로 삼을 수 있습니다.&lt;/p&gt;
 
-&lt;p&gt;sandboxescaper는 PrintConfig.dll을 하드링크 타겟으로 삼았습니다. 해당 Dll은 스풀러(Spooler)서비스가 사용하는 모듈입니다. sandboxescaper는 취약점을 이용해 PrintConfig.dll를 쓰기 가능하도록 만든 후 그것을 자신의 페이로드로 교체합니다. 그런다음 스풀러(Spooler) 서비스를 호출하여 PrintConfig.dll(페이로드)을 물고 올라가도록 합니다. 최종적으로 자신의 페이로드가 스풀러 프로세스 컨텍스트(시스템권한)에서 실행되도록 하는 것이죠.&lt;/p&gt;
+&lt;p&gt;sandboxescaper는 PrintConfig.dll을 하드링크 대상으로 삼았습니다. 해당 Dll은 스풀러(Spooler)서비스가 사용하는 모듈입니다. sandboxescaper는 취약점을 이용해 PrintConfig.dll를 쓰기 가능하도록 만든 후 그것을 자신의 페이로드로 교체합니다. 그런다음 스풀러(Spooler) 서비스를 호출하여 PrintConfig.dll(페이로드)을 물고 올라가도록 합니다. 최종적으로 자신의 페이로드가 스풀러 프로세스 컨텍스트(시스템권한)에서 실행되도록 하는 것이죠.&lt;/p&gt;
 
 &lt;p&gt;그가 공개한 익스플로잇 코드&lt;sup id=&quot;fnref:5&quot;&gt;&lt;a href=&quot;#fn:5&quot; class=&quot;footnote&quot;&gt;5&lt;/a&gt;&lt;/sup&gt;를 살펴보겠습니다.&lt;/p&gt;
 
-&lt;p&gt;(1) 하드링크 타겟(PrintConfig.dll)의 정확한 경로를 구합니다.&lt;/p&gt;
+&lt;p&gt;(1) 하드링크 대상(PrintConfig.dll)의 정확한 경로를 구합니다.&lt;/p&gt;
 &lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;HANDLE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hFind&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;hFind&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FindFirstFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;L&quot;C:&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;Windows&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;System32&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;DriverStore&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;FileRepository&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;prnms003.inf_amd64*&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FindFileData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 &lt;span class=&quot;kt&quot;&gt;wchar_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BeginPath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MAX_PATH&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;L&quot;c:&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;windows&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;system32&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;DriverStore&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;FileRepository&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
