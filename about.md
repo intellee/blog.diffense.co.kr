@@ -3,7 +3,7 @@ layout: page
 title: About
 ---
 
-Diffense is a security startup located in Seoul, Korea. 
+Diffense is a security startup based in Seoul, Korea. 
 
 ---
 
