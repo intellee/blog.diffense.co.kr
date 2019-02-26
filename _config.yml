@@ -5,10 +5,10 @@ name: Diffense
 description:
 
   # Description of your site. This will show up in google.
-  meta: 
+  meta: Diffense
 
   # Description of your site. This will show up on the front page.
-  subtitle: 
+  subtitle: Diffense
 
 author:
   name: Diffense # Change this!
