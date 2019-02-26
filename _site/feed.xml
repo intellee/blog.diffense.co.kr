@@ -137,7 +137,7 @@ bye
 
 &lt;p&gt;위 코드를 보면, 하드링크를 생성하기 위해 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt;과 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtSetInformationFile&lt;/code&gt;을 사용하고 있음을 알 수 있습니다. &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt;로 대상 파일을 Open하고나서, &lt;code class=&quot;highlighter-rouge&quot;&gt;NtSetInformationFile&lt;/code&gt;을 호출하는 2단계로 이루어져 있는 것이죠.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/CreateHardLink_1.png&quot; alt=&quot;CreateHardLink&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/hardlink/CreateHardLink_1.png&quot; alt=&quot;CreateHardLink&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;여기서 주목할 부분은 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt;에 사용된 인자 &lt;code class=&quot;highlighter-rouge&quot;&gt;FILE_WRITE_ATTRIBUTES&lt;/code&gt;입니다. 이것의 의미는 &lt;em&gt;“파일 속성을 변경할 수 있게 파일을 열고 싶어”&lt;/em&gt;라는 의미입니다. 호출자에게 그러한 권한이 주어지지 않았다면 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt; 호출은 실패하게 되고 결국 하드링크 생성을 할 수 없습니다. 대상 파일에 속성쓰기 권한이 없으면 하드링크 생성을 못한다? 일견 타당해보이기도 하는데요.&lt;/p&gt;
 
@@ -172,7 +172,7 @@ Access is denied.
 
 &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;CreateHardLink&lt;/code&gt;는 인자로 &lt;code class=&quot;highlighter-rouge&quot;&gt;FILE_WRITE_ATTRIBUTES&lt;/code&gt;인 반면, James Forshaw가 작성한 함수 &lt;code class=&quot;highlighter-rouge&quot;&gt;CreateNativeHardlink&lt;/code&gt;는 &lt;code class=&quot;highlighter-rouge&quot;&gt;MAXIMUM_ALLOWED&lt;/code&gt;를 사용한다는 것이 가장 큰 차이점입니다.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/CreateNativeHardLink_1.png&quot; alt=&quot;CreateNativeHardLink&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/hardlink/CreateNativeHardLink_1.png&quot; alt=&quot;CreateNativeHardLink&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;MAXIMUM_ALLOWED&lt;/code&gt;는 어떻게든 파일을 열어달라는 의미로 보면 됩니다. 즉 &lt;em&gt;어떻게든 대상 파일을 열기만 하면 하드링크 생성이 가능하다&lt;/em&gt;는 점을 코드를 통해 얘기해주고 있는 것이죠.&lt;/p&gt;
 
@@ -209,7 +209,7 @@ C:\test&amp;gt;
 
 &lt;p&gt;쓰기 권한이 없는 대상 파일(예:kernel32.dll)에 하드링크를 걸었다고 생각해봅시다. 하드링크를 통해서 대상 파일을 쓸 수 있을까요? 그렇게 된다면 권한상승 취약점으로 이어질 수 있겠지만 윈도우즈가 그렇게 쉬운 상대는 아닙니다. 윈도우즈는 하드링크가 가리키는 파일에 대한 접근 검사(Access Check)를 통해서 쓰기 시도를 막습니다. 쓰기 권한이 없는 대상 파일에 하드링크를 걸 수는 있으나, 하드링크를 통해서 대상 파일을  쓸 수는 없는 것이죠.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/hardlink_write.png&quot; alt=&quot;hardlink write&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/hardlink/hardlink_write.png&quot; alt=&quot;hardlink write&quot; /&gt;&lt;/p&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;쓰기 권한이 없는 대상 파일에 하드링크를 걸 수는 있으나, 하드링크를 통해서 대상 파일을  쓸 수는 없는 것이죠.&lt;/p&gt;
@@ -219,7 +219,7 @@ C:\test&amp;gt;
 
 &lt;p&gt;test 폴더가 있습니다. 일반사용자와 시스템관리자 모두 해당 폴더 밑에 파일을 생성하고 삭제할 수 있는 권한이 주어져 있는 상태입니다. 시스템서비스는 일반사용자도 test\log.txt을 쓸 수 있도록 해당 파일의 퍼미션을 바꾸는 작업을 주기적으로 수행한다고 생각해보죠.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/case_1.png&quot; alt=&quot;case_1&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/hardlink/case_1.png&quot; alt=&quot;case_1&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;만약 시스템서비스가 test\log.txt 퍼미션을 바꾸려 하기 전에, 일반사용자가 test\log.txt를 삭제하고 하드링크(test\log.txt -&amp;gt; system32\kernel32.dll)를 생성하면 어떻게 될까요? 시스템서비스는 하드링크를 열어 퍼미션을 바꿀 것이고, 결국 하드링크가 가리키던 kernel32.dll 퍼미션이 일반사용자도 파일쓰기 권한을 가지도록 바뀌게 될 것입니다. 파일쓰기 권한이 없던 일반사용자가 시스템의 중요 파일을 쓸 수 있는 상황이 만들어지는 것이죠.&lt;/p&gt;
 
@@ -239,13 +239,13 @@ C:\test&amp;gt;
 
 &lt;p&gt;열어둔 API 중에서 &lt;strong&gt;SchRpcSetSecurity&lt;/strong&gt;에서 취약점이 발생했는데요. 이 API의 역할은 &lt;em&gt;c:\windows\tasks&lt;/em&gt; 폴더에 있는 파일의 DACL을 조작하는 것입니다. 예를 들어 &lt;em&gt;“일반사용자가 c:\windows\tasks\hello.job 파일을 READ/WRITE하도록 DACL을 변경해주세요”&lt;/em&gt;와 같은 메시지를 서비스에 요청할 수 있습니다.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/sandboxescaper_1.png&quot; alt=&quot;Task Scheduler Service&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/hardlink/sandboxescaper_1.png&quot; alt=&quot;Task Scheduler Service&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;tasks 폴더에 위치한 파일의 DACL을 변경할 수 있는 문제와 더불어 “일반 사용자도 tasks 폴더에 파일을 생성(쓰기)할 수 있다”는 사실이 합쳐져 권한상승 익스플로잇이 탄생할 수 있었습니다. 이 과정에서 하드링크가 활용되는데요.&lt;/p&gt;
 
 &lt;p&gt;익스플로잇 과정을 살펴보면서 하드링크의 활용을 이해해보겠습니다.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/sandboxescaper_2.png&quot; alt=&quot;sandboxescaper exploit&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/hardlink/sandboxescaper_2.png&quot; alt=&quot;sandboxescaper exploit&quot; /&gt;&lt;/p&gt;
 
 &lt;ol&gt;
   &lt;li&gt;
@@ -327,6 +327,8 @@ C:\test&amp;gt;
 &lt;p&gt;(d) 태스크 스케쥴러 권한을 낮추는 방법&lt;sup id=&quot;fnref:8&quot;&gt;&lt;a href=&quot;#fn:8&quot; class=&quot;footnote&quot;&gt;7&lt;/a&gt;&lt;/sup&gt;(Impersonation)&lt;/p&gt;
 
 &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;SchRpcSetSecurity&lt;/code&gt;의 내부 동작 중에서 취약점과 가장 관련이 있었던 부분은 바로 DACL을 변경하는 부분입니다. 여기서 제안한 방법은 태스크 스케쥴러가 DACL을 변경하기 전에 현재 스레드 토큰 대신 사용자(클라이언트)의 토큰(&lt;em&gt;Impersonation token&lt;/em&gt;)을 사용하여 자원에 접근하도록 하는 것입니다. 이러한 작업을 &lt;em&gt;Impersonation&lt;/em&gt;이라고 하는데요. DACL을 변경하는 작업 전에 태스크 스케쥴러 스레드의 권한을 사용자(클라이언트) 권한으로 잠시 변경하는 것이라 생각하면 됩니다. 이렇게 되면 &lt;em&gt;하드링크대상(예: PrintConfig.dll)의 DACL을 변경할 수 있는 권한이 사용자(클라이언트)에게 없으므로 취약점은 동작하지 않게 됩니다&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/hardlink/impersonation_token.png&quot; alt=&quot;impersonation&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;이 방법이 취약점의 원인(Root Cause)을 정확히 이해하고 내린 적절한 해결책이라 생각합니다. 이 방법을 제안한 0patch라는 제품은 태스크 스케쥴러의 &lt;code class=&quot;highlighter-rouge&quot;&gt;SchRpcSetSecurity&lt;/code&gt; 함수 코드 부분을 바이너리 패치하는 방식으로 &lt;em&gt;Impersonation&lt;/em&gt;을 구현했습니다. 아마 마이크로소프트가 릴리즈한 패치도 &lt;em&gt;Impersonation&lt;/em&gt;을 이용하지 않았을까 추측해봅니다.&lt;/p&gt;
 
