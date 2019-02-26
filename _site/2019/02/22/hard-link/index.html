@@ -362,9 +362,9 @@ C:\test&gt;
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Create a hardlink with UpdateTask.job to our target, this is the file the task scheduler will write the DACL of
 </span><span class="n">CreateNativeHardlink</span><span class="p">(</span><span class="s">L"c:</span><span class="se">\\</span><span class="s">windows</span><span class="se">\\</span><span class="s">tasks</span><span class="se">\\</span><span class="s">UpdateTask.job"</span><span class="p">,</span> <span class="n">BeginPath</span><span class="p">);</span>
 </code></pre></div></div>
-<p>James Forshaw가 만든 CreateNativeHardlink를 이용해 하드링크(UpdateTask.job -&gt; PrintConfig.dll)을 만들고 있음을 알 수 있습니다. CreateHardLink(표준 API)를 사용하면 PrintConfig.dll에 하드링크를 걸 수 없기 때문이죠!</p>
+<p>James Forshaw가 만든 CreateNativeHardlink를 이용해 하드링크를 만들고 있음을 알 수 있습니다. CreateHardLink(표준 API)를 사용하면 하드링크를 걸 수 없기 때문이죠!</p>
 <blockquote>
-  <p>James Forshaw가 만든 CreateNativeHardlink를 그대로 재사용하고 있음을 알 수 있습니다. CreateHardLink(표준API)를 사용하면 PrintConfig.dll에 하드링크를 걸 수 없기 때문이죠!</p>
+  <p>James Forshaw가 만든 CreateNativeHardlink를 그대로 재사용하고 있음을 알 수 있습니다. CreateHardLink(표준API)를 사용하면 하드링크를 걸 수 없기 때문이죠!</p>
 </blockquote>
 
 <h3 id="대응-방안">대응 방안</h3>

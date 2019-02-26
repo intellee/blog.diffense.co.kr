@@ -278,9 +278,9 @@ C:\test&amp;gt;
 &lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;//Create a hardlink with UpdateTask.job to our target, this is the file the task scheduler will write the DACL of
 &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CreateNativeHardlink&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;L&quot;c:&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;windows&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;tasks&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;UpdateTask.job&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BeginPath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;James Forshaw가 만든 CreateNativeHardlink를 이용해 하드링크(UpdateTask.job -&amp;gt; PrintConfig.dll)을 만들고 있음을 알 수 있습니다. CreateHardLink(표준 API)를 사용하면 PrintConfig.dll에 하드링크를 걸 수 없기 때문이죠!&lt;/p&gt;
+&lt;p&gt;James Forshaw가 만든 CreateNativeHardlink를 이용해 하드링크를 만들고 있음을 알 수 있습니다. CreateHardLink(표준 API)를 사용하면 하드링크를 걸 수 없기 때문이죠!&lt;/p&gt;
 &lt;blockquote&gt;
-  &lt;p&gt;James Forshaw가 만든 CreateNativeHardlink를 그대로 재사용하고 있음을 알 수 있습니다. CreateHardLink(표준API)를 사용하면 PrintConfig.dll에 하드링크를 걸 수 없기 때문이죠!&lt;/p&gt;
+  &lt;p&gt;James Forshaw가 만든 CreateNativeHardlink를 그대로 재사용하고 있음을 알 수 있습니다. CreateHardLink(표준API)를 사용하면 하드링크를 걸 수 없기 때문이죠!&lt;/p&gt;
 &lt;/blockquote&gt;
 
 &lt;h3 id=&quot;대응-방안&quot;&gt;대응 방안&lt;/h3&gt;
