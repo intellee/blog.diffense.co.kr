@@ -20,7 +20,7 @@ author:
   # want it.
   info:
 
-url: http://blog.diffense.co.kr
+url: https://blog.diffense.co.kr
 baseurl: "/"
 
 # language attribute in <html> element.
@@ -42,7 +42,7 @@ social-icons-open-newtab: true
 footer-text: Diffense Corp. <br><a href="http://steinvc.github.io/holo-alfa/">Holo Alfa</a> Jekyll theme by <a href="http://steinvc.github.io/holo-alfa/">Stijn</a>.
 
 # Preferably 64px in height. Leave empty = disable.
-logo-image: # /img/logo.png
+logo-image: /img/logo.png
 
 # Toolbar color for Chrome on Android.
 theme-color-attr: "#00f0ff"
