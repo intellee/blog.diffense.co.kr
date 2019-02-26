@@ -94,7 +94,7 @@ header::after {
 
 
 <article>
-  <span class="meta">Feb 22, 2019 • 11&nbsp;min read</span>
+  <span class="meta">Feb 22, 2019 • 12&nbsp;min read</span>
 	<h1>Hello HardLink? Bye HardLink!</h1>
 		<p>하드링크란 무엇이며, 익스플로잇에서 활용되는 하드링크와 일반적인 하드링크와의 차이점이 무엇인지 알아보겠습니다.</p>
 
@@ -260,13 +260,30 @@ Access is denied.
 
 <p><code class="highlighter-rouge">MAXIMUM_ALLOWED</code>는 어떻게든 파일을 열어달라는 의미로 보면 됩니다. 즉 <em>어떻게든 대상 파일을 열기만 하면 하드링크 생성이 가능하다</em>는 점을 코드를 통해 얘기해주고 있는 것이죠.</p>
 
-<p>James Forshaw가 작성한 CreateHardLink.exe 툴을 이용하여 지금까지 설명한 내용을 테스트해 볼 수 있습니다.</p>
+<p>James Forshaw가 만든 CreateHardLink.exe을 이용하여 지금까지 설명한 내용을 테스트해 볼 수 있습니다.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>CreateHardLink.exe hardlink.exe c:\windows\system32\kernel32.dll
-dir hardlink.exe
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>C:\test&gt;mklink /H hardlink.dll c:\windows\system32\kernel32.dll
+액세스가 거부되었습니다.
+
+C:\test&gt;CreateHardlink.exe hardlink.dll c:\windows\system32\kernel32.dll
+Done
+
+C:\test&gt;dir
+ C 드라이브의 볼륨에는 이름이 없습니다.
+ 볼륨 일련 번호: 5621-FE76
+
+ C:\test 디렉터리
+
+2019-02-26  오후 12:29    &lt;DIR&gt;          .
+2019-02-26  오후 12:29    &lt;DIR&gt;          ..
+2019-02-04  오전 12:01           117,760 CreateHardlink.exe
+2019-01-09  오전 11:55         1,114,112 hardlink.dll
+               2개 파일           1,231,872 바이트
+               2개 디렉터리  161,787,883,520 바이트 남음
+C:\test&gt;
 </code></pre></div></div>
 
-<p>일반적인 방법(<code class="highlighter-rouge">mklink</code> 혹은 <code class="highlighter-rouge">CreateHardLink</code>)를 이용하면 생성할 수 없었던 하드링크를, James Forshaw가 사실을 이용하면 그러한 경우에도 하드링크를 만들 수 있음을 확인할 수 있습니다.</p>
+<p>위 테스트를 보면 기본 명령어인 <code class="highlighter-rouge">mklink</code>(<code class="highlighter-rouge">CreateHardLink</code>)를 이용하면 하드링크 생성이 불가능했는데, 그러한 경우에도 하드링크를 만들 수 있음을 보여준 것이죠.</p>
 
 <h3 id="하드링크-오용hardlink-abusing">하드링크 오용(Hardlink Abusing)</h3>
 
@@ -285,6 +302,8 @@ dir hardlink.exe
 <p>다른 케이스를 생각해봐야겠네요.</p>
 
 <p>test 폴더가 있습니다. 일반사용자와 시스템관리자 모두 해당 폴더 밑에 파일을 생성하고 삭제할 수 있는 권한이 주어져 있는 상태입니다. 시스템서비스는 일반사용자도 test\log.txt을 쓸 수 있도록 해당 파일의 퍼미션을 바꾸는 작업을 주기적으로 수행한다고 생각해보죠.</p>
+
+<p><img src="https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/case_1.png" alt="case_1" /></p>
 
 <p>만약 시스템서비스가 test\log.txt 퍼미션을 바꾸려 하기 전에, 일반사용자가 test\log.txt를 삭제하고 하드링크(test\log.txt -&gt; system32\kernel32.dll)를 생성하면 어떻게 될까요? 시스템서비스는 하드링크를 열어 퍼미션을 바꿀 것이고, 결국 하드링크가 가리키던 kernel32.dll 퍼미션이 일반사용자도 파일쓰기 권한을 가지도록 바뀌게 될 것입니다. 파일쓰기 권한이 없던 일반사용자가 시스템의 중요 파일을 쓸 수 있는 상황이 만들어지는 것이죠.</p>
 
