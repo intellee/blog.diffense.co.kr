@@ -12,7 +12,9 @@
 					<dc:creator>{&quot;name&quot;=&gt;&quot;Yongil Lee of Diffense&quot;}</dc:creator>
 				
 				
-					<description>&lt;p&gt;하드링크란 무엇이며, 익스플로잇에서 활용되는 하드링크와 일반적인 하드링크와의 차이점이 무엇인지 알아보겠습니다.&lt;/p&gt;
+					<description>&lt;p&gt;안녕하세요! 디펜스입니다.&lt;/p&gt;
+
+&lt;p&gt;이번 글에서는 하드링크란 무엇이며, 익스플로잇에서 활용되는 하드링크와 일반적인 하드링크와의 차이점이 무엇인지 알아보겠습니다.&lt;/p&gt;
 
 &lt;p&gt;또한, 실제 권한상승 익스플로잇(CVE-2018–8440) 사례를 통해 하드링크가 어떤 식으로 활용되고 있는지 알아봅니다.&lt;/p&gt;
 
