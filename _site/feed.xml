@@ -105,10 +105,11 @@ bye
 
 &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;CreateHardLink&lt;/code&gt;가 실패를 리턴하는 경우는 다음과 같습니다.&lt;/p&gt;
 &lt;ul&gt;
-  &lt;li&gt;다른 볼륨에 있는 파일에 하드링크를 거는 경우 (앞서 언급)&lt;/li&gt;
-  &lt;li&gt;디렉토리간에 하드링크를 거는 경우 (앞서 언급)&lt;/li&gt;
+  &lt;li&gt;대상 파일이 존재하지 않는 경우&lt;/li&gt;
   &lt;li&gt;1023개 이상 하드링크를 만들 경우&lt;/li&gt;
   &lt;li&gt;MAX_PATH 길이보다 긴 패스이름이 사용될 경우&lt;/li&gt;
+  &lt;li&gt;다른 볼륨에 있는 파일에 하드링크를 거는 경우 (앞서 언급)&lt;/li&gt;
+  &lt;li&gt;디렉토리간에 하드링크를 거는 경우 (앞서 언급)&lt;/li&gt;
   &lt;li&gt;또 있을까요?&lt;/li&gt;
 &lt;/ul&gt;
 
