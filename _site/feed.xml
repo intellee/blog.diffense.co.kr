@@ -137,6 +137,8 @@ bye
 
 &lt;p&gt;위 코드를 보면, 하드링크를 생성하기 위해 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt;과 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtSetInformationFile&lt;/code&gt;을 사용하고 있음을 알 수 있습니다. &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt;로 대상 파일을 Open하고나서, &lt;code class=&quot;highlighter-rouge&quot;&gt;NtSetInformationFile&lt;/code&gt;을 호출하는 2단계로 이루어져 있는 것이죠.&lt;/p&gt;
 
+&lt;p&gt;&lt;img src=&quot;&quot; alt=&quot;CreateHardLink&quot; /&gt;&lt;/p&gt;
+
 &lt;p&gt;여기서 주목할 부분은 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt;에 사용된 인자 &lt;code class=&quot;highlighter-rouge&quot;&gt;FILE_WRITE_ATTRIBUTES&lt;/code&gt;입니다. 이것의 의미는 &lt;em&gt;“파일 속성을 변경할 수 있게 파일을 열고 싶어”&lt;/em&gt;라는 의미입니다. 호출자에게 그러한 권한이 주어지지 않았다면 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt; 호출은 실패하게 되고 결국 하드링크 생성을 할 수 없습니다. 대상 파일에 속성쓰기 권한이 없으면 하드링크 생성을 못한다? 일견 타당해보이기도 하는데요.&lt;/p&gt;
 
 &lt;p&gt;다음 예는 방금 언급한 &lt;code class=&quot;highlighter-rouge&quot;&gt;NtOpenFile&lt;/code&gt; 호출이 실패하여 하드링크 생성에 실패하는 것을 보여주고 있습니다. 일반사용자는 &lt;code class=&quot;highlighter-rouge&quot;&gt;kernel32.dll&lt;/code&gt;의 속성을 쓸 수 있는 권한이 없기 때문에 하드링크 생성에 실패한 것이죠.&lt;/p&gt;
