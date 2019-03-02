@@ -14,11 +14,11 @@
 				
 					<description>&lt;p&gt;안녕하세요. 디펜스입니다.&lt;/p&gt;
 
-&lt;p&gt;이전 글(&lt;a href=&quot;http://blog.diffense.co.kr/2019/02/22/hard-link/&quot;&gt;Windows HardLink Attack &amp;amp; Defense&lt;/a&gt;)에서 우리는 &lt;em&gt;sandboxescaper&lt;/em&gt;의 익스플로잇을 설명하며 &lt;em&gt;스풀러 서비스(Spoolsv)&lt;/em&gt;를 통해서 최종적으로 페이로드 코드가 실행됨을 설명했습니다. 단순화시켜보면 다음과 같습니다.&lt;/p&gt;
+&lt;p&gt;이전 글(&lt;a href=&quot;http://blog.diffense.co.kr/2019/02/22/hard-link/&quot;&gt;Windows HardLink Attack &amp;amp; Defense&lt;/a&gt;)에서 우리는 &lt;em&gt;sandboxescaper&lt;/em&gt;의 익스플로잇이 &lt;em&gt;스풀러 서비스(Spoolsv)&lt;/em&gt;를 통해서 최종적으로 페이로드를 실행한다는 점을 살펴보았습니다. 단순화시켜보면 다음과 같습니다.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/kkjjll/raw/master/spooler_1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;위 그림에서 취약점 트리거(~2번)까지는 성공했는데 3~5번 과정에서 실패하는 경우가 있을까요? 즉 취약점은 잘 동작(&lt;code class=&quot;highlighter-rouge&quot;&gt;PrintConfig.dll&lt;/code&gt; 쓰기 가능 상태)하였으나, 스풀러 서비스로 페이로드를 올리는 과정(3~5번)이 실패하는 경우 말이죠. 만약 3~5번 과정이 실패하면 페이로드를 시스템 권한에서 실행시킬 수 있는 다른 방법을 모색해봐야 할 것입니다.&lt;/p&gt;
+&lt;p&gt;위 그림에서 취약점 트리거(~2번)까지는 성공했는데 3~5번 과정에서 실패하는 경우가 있을까요? 즉 취약점은 잘 동작하였으나, 스풀러 서비스로 페이로드를 올리는 과정(3~5번)이 실패하는 경우 말이죠. 만약 3~5번 과정이 실패하면 페이로드를 시스템 권한에서 실행시킬 수 있는 다른 방법을 모색해봐야 할 것입니다.&lt;/p&gt;
 
 &lt;p&gt;이번 글의 주제는 위와 같은 상황에서 스풀러 서비스 대신 &lt;em&gt;페이로드를 시스템 권한으로 실행할 수 있는 다른 방법&lt;/em&gt;을 알아보자는 것입니다.&lt;/p&gt;
 
@@ -142,7 +142,7 @@
   &lt;li&gt;PoC를 실행합니다.&lt;/li&gt;
   &lt;li&gt;실행이 끝나면 CIRCoInst.dll의 DACL을 다시 한번 확인합니다.
     &lt;ul&gt;
-      &lt;li&gt;Users 그룹의 Full(모든권한)을 가지도록 변경되었는지 확인합니다.&lt;/li&gt;
+      &lt;li&gt;Users 그룹이 모든 권한(Full)을 가지도록 변경되었는지 확인합니다.&lt;/li&gt;
     &lt;/ul&gt;
   &lt;/li&gt;
   &lt;li&gt;Process Explorer를 실행하여, D-Hub 프로세스(DiagnosticsHub.StandardCollector.Service.exe)가 실행되었는지 확인합니다.&lt;/li&gt;
