@@ -16,7 +16,7 @@
 
 &lt;p&gt;이전 글(&lt;a href=&quot;http://blog.diffense.co.kr/2019/02/22/hard-link/&quot;&gt;Windows HardLink Attack &amp;amp; Defense&lt;/a&gt;)에서 우리는 &lt;em&gt;sandboxescaper&lt;/em&gt;의 익스플로잇을 설명하며 &lt;em&gt;스풀러 서비스(Spoolsv)&lt;/em&gt;를 통해서 최종적으로 페이로드 코드가 실행됨을 설명했습니다. 단순화시켜보면 다음과 같습니다.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/kkjjll/raw/master/spooler_1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/DHub/spooler_1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;위 그림에서 취약점 트리거(~2번)까지는 성공했는데 3~5번 과정에서 실패하는 경우가 있을까요? 즉 취약점은 잘 동작(&lt;code class=&quot;highlighter-rouge&quot;&gt;PrintConfig.dll&lt;/code&gt; 쓰기 가능 상태)하였으나, 스풀러 서비스로 페이로드를 올리는 과정(3~5번)이 실패하는 경우 말이죠. 만약 3~5번 과정이 실패하면 페이로드를 시스템 권한에서 실행시킬 수 있는 다른 방법을 모색해봐야 할 것입니다.&lt;/p&gt;
 
@@ -26,7 +26,7 @@
 
 &lt;p&gt;저희가 연구 목적으로 개발한 &lt;em&gt;윈도우즈 권한상승(EoP) 0-day&lt;/em&gt;는 다음과 같이 동작합니다.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/kkjjll/raw/master/our_eop.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/DHub/our_eop.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;‘음? 앞선 그림이랑 똑같은거 아니예요?’ 생각이 드실 겁니다. 네 맞습니다. 동작 상세 내용을 몰라도 설명하는 것에 문제가 없기 때문이예요. 해당 취약점을 이용하면 임의 파일의 DACL을 변경할 수 있습니다. 그리고 중요한 점은 &lt;em&gt;시스템 권한의 페이로드를 실행하기 위해 sandboxescaper가 사용한 스풀러 서비스 방식(3~5번 과정)을 그대로 차용&lt;/em&gt;했다는 점입니다.&lt;/p&gt;
 
@@ -41,7 +41,7 @@
     &lt;ul&gt;
       &lt;li&gt;위 그림에서 1~2번 단계가 제대로 실행되는지 확인을 해보면 취약점 패치 여부를 알 수 있을 것입니다.&lt;/li&gt;
       &lt;li&gt;PoC를 실행하고서, PrintConfig.dll의 DACL이 변경되었는지를 살펴보았습니다. 
-&lt;img src=&quot;https://github.com/yong1212/kkjjll/raw/master/PrintConfig_after.png&quot; alt=&quot;&quot; /&gt;&lt;/li&gt;
+&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/DHub/PrintConfig_after.png&quot; alt=&quot;&quot; /&gt;&lt;/li&gt;
       &lt;li&gt;빨간색 박스를 보면 Users가 PrintConfig.dll에 대한 모든 권한(Full)을 가지고 있는 것을 확인할 수 있습니다. DACL이 변경된 것을 확인하였고, 따라서 &lt;em&gt;취약점은 패치되지 않은 채 여전히 존재&lt;/em&gt;한다고 볼 수 있습니다.&lt;/li&gt;
     &lt;/ul&gt;
   &lt;/li&gt;
@@ -49,7 +49,7 @@
     &lt;ul&gt;
       &lt;li&gt;확인을 해보니 PrintConfig.dll이 페이로드로 교체되지 않았습니다. 쓰기 권한은 있는데 쓸 수가 없다? 무슨 문제일까요?&lt;/li&gt;
       &lt;li&gt;문제의 원인은 다음 그림을 보면 알 수 있습니다.
-&lt;img src=&quot;https://github.com/yong1212/kkjjll/raw/master/PrintConfig.png&quot; alt=&quot;&quot; /&gt;&lt;/li&gt;
+&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/DHub/PrintConfig.png&quot; alt=&quot;&quot; /&gt;&lt;/li&gt;
       &lt;li&gt;바로 spoolsv.exe에서 PrintConfig.dll을 사용하고 있었던 것이죠.&lt;/li&gt;
     &lt;/ul&gt;
   &lt;/li&gt;
@@ -75,13 +75,13 @@
 
 &lt;p&gt;D-Hub는 &lt;code class=&quot;highlighter-rouge&quot;&gt;AddAgent&lt;/code&gt;라는 API를 사용자(클라이언트)에게 제공합니다.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/kkjjll/raw/master/DHub_1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/DHub/DHub_1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;AddAgent&lt;/code&gt;의 인자로 DLL 파일명을 주면, 그 파일명은 &lt;code class=&quot;highlighter-rouge&quot;&gt;LoadLibrary&lt;/code&gt;(DLL 로드하는 함수)의 인자로 사용됩니다. 사용자는 &lt;code class=&quot;highlighter-rouge&quot;&gt;AddAgent&lt;/code&gt;를 호출하여 D-Hub가 로드할 Dll을 지정할 수 있는 것입니다.&lt;/p&gt;
 
 &lt;p&gt;Lokihardt는 이 부분에서 아래 그림처럼 &lt;code class=&quot;highlighter-rouge&quot;&gt;Directory Traversal&lt;/code&gt; 취약점을 발견하여 Edge 샌드박스 탈출에 성공했습니다.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/kkjjll/raw/master/DHub_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/DHub/DHub_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;해당 취약점은 &lt;code class=&quot;highlighter-rouge&quot;&gt;Directory Traversal&lt;/code&gt;이 발생하지 않도록 패치가 되었습니다.&lt;/p&gt;
 
@@ -100,7 +100,7 @@
 
 &lt;ol&gt;
   &lt;li&gt;D-Hub를 이용하면 System32에 있는 많은 DLL 중에서 사용중이지 않은 DLL을 선택해서 로드할 수 있다는 장점이 있습니다. PrintConfig.dll이 사용 중인 경우에는 스풀러를 이용하지 못하는 반면, D-Hub를 이용하면 수많은 DLL 중 하나를 선택해서 로드시킬 수 있다는 장점이 있는 것이죠.
-&lt;img src=&quot;https://github.com/yong1212/kkjjll/raw/master/DHub_Better.png&quot; alt=&quot;&quot; /&gt;
+&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/DHub/DHub_Better.png&quot; alt=&quot;&quot; /&gt;
     &lt;blockquote&gt;
       &lt;p&gt;D-Hub를 이용하면 사용 중이지 않은 DLL을 선택해서 로드시킬 수 있어요.&lt;/p&gt;
     &lt;/blockquote&gt;
