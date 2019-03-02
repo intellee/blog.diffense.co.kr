@@ -67,7 +67,7 @@
   &lt;p&gt;spoolsv.exe가 DriverStore\PrintConfig.dll을 사용하는 경우가 있었습니다.&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;PrintConfig.dll&lt;/code&gt;이 스풀러에 의해 이미 사용되고 있어, &lt;code class=&quot;highlighter-rouge&quot;&gt;Users&lt;/code&gt;에게 모든 권한(쓰기포함)이 주어졌음에도 해당 파일을 덮어쓸 수 없는 상황이었던 것이죠. (어떤 조건에서 이러한 상황이 발생하는지는 정확히 모르겠습니다. 혹시 알고 계신 분 알려주시면 감사하겠습니다.)&lt;/p&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;PrintConfig.dll&lt;/code&gt;이 스풀러에 의해 이미 사용되고 있어, &lt;code class=&quot;highlighter-rouge&quot;&gt;Users&lt;/code&gt;에게 모든 권한(쓰기포함)이 주어졌음에도 해당 파일을 덮어쓸 수 없는 상황이었던 것이죠.&lt;/p&gt;
 
 &lt;h3 id=&quot;another-option&quot;&gt;Another option?&lt;/h3&gt;
 
@@ -164,7 +164,7 @@
 
 &lt;h3 id=&quot;마치며&quot;&gt;마치며&lt;/h3&gt;
 
-&lt;p&gt;취약점 연구를 하는 목적은 분명합니다. 해킹 공격을 효과적으로 탐지하고 차단할 수 있는 기술 개발은 이러한 취약점 연구가 기반이 된다고 믿습니다. 디펜스의 연구 산출물은 저희 고객에게 우선적으로 제공하여 (발견되지 않은) 최신 위협에 대응할 수 있도록 합니다.&lt;/p&gt;
+&lt;p&gt;취약점 연구를 하는 목적은 분명합니다. 해킹 공격을 효과적으로 탐지하고 차단할 수 있는 기술 개발에 이러한 취약점 연구가 기반이 된다고 믿습니다. 디펜스의 연구 산출물은 저희 고객에게 우선적으로 제공하여 (발견되지 않은) 최신 위협에 대응할 수 있도록 합니다.&lt;/p&gt;
 
 &lt;p&gt;감사합니다. 다음 번 블로그에서 뵙겠습니다!&lt;/p&gt;
 
