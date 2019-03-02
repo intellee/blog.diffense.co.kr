@@ -11,7 +11,7 @@ author:
 
 이전 글([Windows HardLink Attack & Defense](http://blog.diffense.co.kr/2019/02/22/hard-link/))에서 우리는 *sandboxescaper*의 익스플로잇을 설명하며 *스풀러 서비스(Spoolsv)*를 통해서 최종적으로 페이로드 코드가 실행됨을 설명했습니다. 단순화시켜보면 다음과 같습니다.
 
-![](https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/DHub/spooler_1.png)
+![](https://github.com/yong1212/kkjjll/raw/master/spooler_1.png)
 
 위 그림에서 취약점 트리거(~2번)까지는 성공했는데 3~5번 과정에서 실패하는 경우가 있을까요? 즉 취약점은 잘 동작(`PrintConfig.dll` 쓰기 가능 상태)하였으나, 스풀러 서비스로 페이로드를 올리는 과정(3~5번)이 실패하는 경우 말이죠. 만약 3~5번 과정이 실패하면 페이로드를 시스템 권한에서 실행시킬 수 있는 다른 방법을 모색해봐야 할 것입니다. 
 
@@ -21,7 +21,7 @@ author:
 
 저희가 연구 목적으로 개발한 *윈도우즈 권한상승(EoP) 0-day*는 다음과 같이 동작합니다.
 
-![](https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/DHub/our_eop.png)
+![](https://github.com/yong1212/kkjjll/raw/master/our_eop.png)
 
 '음? 앞선 그림이랑 똑같은거 아니예요?' 생각이 드실 겁니다. 네 맞습니다. 동작 상세 내용을 몰라도 설명하는 것에 문제가 없기 때문이예요. 해당 취약점을 이용하면 임의 파일의 DACL을 변경할 수 있습니다. 그리고 중요한 점은 *시스템 권한의 페이로드를 실행하기 위해 sandboxescaper가 사용한 스풀러 서비스 방식(3~5번 과정)을 그대로 차용*했다는 점입니다.
 
@@ -35,13 +35,13 @@ author:
 1. 취약점은 살아있는가?
     * 위 그림에서 1~2번 단계가 제대로 실행되는지 확인을 해보면 취약점 패치 여부를 알 수 있을 것입니다.
     * PoC를 실행하고서, PrintConfig.dll의 DACL이 변경되었는지를 살펴보았습니다. 
-![](https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/DHub/PrintConfig_after.png) 
+![](https://github.com/yong1212/kkjjll/raw/master/PrintConfig_after.png) 
     * 빨간색 박스를 보면 Users가 PrintConfig.dll에 대한 모든 권한(Full)을 가지고 있는 것을 확인할 수 있습니다. DACL이 변경된 것을 확인하였고, 따라서 *취약점은 패치되지 않은 채 여전히 존재*한다고 볼 수 있습니다.
 
 2. PrintConfig.dll은 페이로드로 교체되었나?
     * 확인을 해보니 PrintConfig.dll이 페이로드로 교체되지 않았습니다. 쓰기 권한은 있는데 쓸 수가 없다? 무슨 문제일까요?
     * 문제의 원인은 다음 그림을 보면 알 수 있습니다.
-![](https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/DHub/PrintConfig.png)
+![](https://github.com/yong1212/kkjjll/raw/master/PrintConfig.png)
     * 바로 spoolsv.exe에서 PrintConfig.dll을 사용하고 있었던 것이죠. 
 
 > spoolsv.exe가 DriverStore\PrintConfig.dll을 사용하는 경우가 있었습니다.
@@ -62,13 +62,13 @@ author:
 
 D-Hub는 `AddAgent`라는 API를 사용자(클라이언트)에게 제공합니다. 
 
-![](https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/DHub/DHub_1.png) 
+![](https://github.com/yong1212/kkjjll/raw/master/DHub_1.png) 
 
 `AddAgent`의 인자로 DLL 파일명을 주면, 그 파일명은 `LoadLibrary`(DLL 로드하는 함수)의 인자로 사용됩니다. 사용자는 `AddAgent`를 호출하여 D-Hub가 로드할 Dll을 지정할 수 있는 것입니다. 
 
 Lokihardt는 이 부분에서 아래 그림처럼 `Directory Traversal` 취약점을 발견하여 Edge 샌드박스 탈출에 성공했습니다.
 
-![](https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/DHub/DHub_2.png) 
+![](https://github.com/yong1212/kkjjll/raw/master/DHub_2.png) 
 
 해당 취약점은 `Directory Traversal`이 발생하지 않도록 패치가 되었습니다.
 
@@ -84,7 +84,7 @@ Lokihardt는 이 부분에서 아래 그림처럼 `Directory Traversal` 취약�
 D-Hub를 이용하는 방식은 스풀러에 비해 어떤 장점이 있을까요? 
 
 1. D-Hub를 이용하면 System32에 있는 많은 DLL 중에서 사용중이지 않은 DLL을 선택해서 로드할 수 있다는 장점이 있습니다. PrintConfig.dll이 사용 중인 경우에는 스풀러를 이용하지 못하는 반면, D-Hub를 이용하면 수많은 DLL 중 하나를 선택해서 로드시킬 수 있다는 장점이 있는 것이죠.
-![](https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/DHub/DHub_Better.png) 
+![](https://github.com/yong1212/kkjjll/raw/master/DHub_Better.png) 
 > D-Hub를 이용하면 사용 중이지 않은 DLL을 선택해서 로드시킬 수 있어요.
 2. 스풀러를 이용하려면 PrintConfig.dll의 경로를 확인하는 과정이 필요하다는 단점이 있습니다. PrintConfig.dll 경로가 고정적이지 않기 때문이예요. 참고로 sandboxescaper는 PrintConfig.dll 경로를 구하기 위해 다음과 같은 코드[^4]를 작성했습니다.
 ```c
@@ -106,7 +106,7 @@ D-Hub 방식은 이런 과정이 필요 없습니다.
 스풀러 방식에서 D-Hub으로 바꾼 후 EoP 0-day 테스트를 진행해 보았습니다. 
 (페이로드로 덮어쓸 파일은 `System32\CIRCoInst.dll`을 선택했습니다.)
 
-<iframe width="560" height="315" src="https://youtu.be/cBIXxn85oLM" frameborder="0" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/cBIXxn85oLM" frameborder="0" allowfullscreen></iframe>
 
 동영상 데모의 단계별 설명입니다. 
 
