@@ -14,7 +14,7 @@
 				
 					<description>&lt;p&gt;안녕하세요. 디펜스입니다.&lt;/p&gt;
 
-&lt;p&gt;이전 글(&lt;a href=&quot;http://blog.diffense.co.kr/2019/02/22/hard-link/&quot;&gt;Windows HardLink Attack &amp;amp; Defense&lt;/a&gt;)에서 우리는 &lt;em&gt;sandboxescaper&lt;/em&gt;의 익스플로잇이 &lt;em&gt;스풀러 서비스(Spoolsv)&lt;/em&gt;를 통해서 최종적으로 페이로드를 실행한다는 점을 살펴보았습니다. 복습하는 차원에서 그 과정을 단순화시켜보면 다음과 같습니다.&lt;/p&gt;
+&lt;p&gt;이전 글(&lt;a href=&quot;http://blog.diffense.co.kr/2019/02/22/hard-link/&quot;&gt;Windows HardLink Attack &amp;amp; Defense&lt;/a&gt;)에서 우리는 &lt;em&gt;sandboxescaper&lt;/em&gt;의 익스플로잇이 &lt;em&gt;스풀러 서비스(Spoolsv)&lt;/em&gt;를 통해서 최종적으로 페이로드를 실행한다는 점을 살펴보았습니다. 복습하는 차원에서 그 과정을 단순화하면 다음과 같습니다.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/kkjjll/raw/master/spooler_1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
