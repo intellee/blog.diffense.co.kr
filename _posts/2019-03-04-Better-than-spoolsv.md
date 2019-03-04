@@ -112,7 +112,9 @@ D-Hub 방식은 이런 과정이 필요 없습니다.
 
 D-Hub 방식을 적용한 후 EoP 0-day의 동작 테스트를 진행해보았습니다. 
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/cBIXxn85oLM" frameborder="0" allowfullscreen></iframe>
+
+[![](https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/DHub/video.png)](https://www.youtube.com/embed/cBIXxn85oLM)
+
 
 동영상 데모의 단계별 설명입니다. 
 (페이로드로 덮어쓸 파일은 `System32\CIRCoInst.dll`을 선택했습니다.)

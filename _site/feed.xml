@@ -137,7 +137,7 @@
 
 &lt;p&gt;D-Hub 방식을 적용한 후 EoP 0-day의 동작 테스트를 진행해보았습니다.&lt;/p&gt;
 
-&lt;iframe width=&quot;560&quot; height=&quot;315&quot; src=&quot;https://www.youtube.com/embed/cBIXxn85oLM&quot; frameborder=&quot;0&quot; allowfullscreen=&quot;&quot;&gt;&lt;/iframe&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.youtube.com/embed/cBIXxn85oLM&quot;&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/DHub/video.png&quot; alt=&quot;&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;동영상 데모의 단계별 설명입니다. 
 (페이로드로 덮어쓸 파일은 &lt;code class=&quot;highlighter-rouge&quot;&gt;System32\CIRCoInst.dll&lt;/code&gt;을 선택했습니다.)&lt;/p&gt;
