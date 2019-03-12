@@ -6,8 +6,7 @@ title: About
 Diffense is a security startup based in Seoul, Korea. 
 
 feel free to contact us. 
-* email: **contact.diffense@gmail.com**
-* facebook: **yilee@yonsei.ac.kr**
+* email: **ceo@diffense.co.kr**
 
 ---
 
