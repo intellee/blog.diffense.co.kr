@@ -39,7 +39,7 @@ display-social-icons: false
 # If you want social links to open in a new tab, set this as true
 social-icons-open-newtab: true
 
-footer-text: © Diffense, Inc. All rights reserved.<br><a href="http://steinvc.github.io/holo-alfa/">Holo Alfa</a> Jekyll theme by <a href="http://steinvc.github.io/holo-alfa/">Stijn</a>.
+footer-text: © Diffense, Inc.<br><a href="http://steinvc.github.io/holo-alfa/">Holo Alfa</a> Jekyll theme by <a href="http://steinvc.github.io/holo-alfa/">Stijn</a>.
 
 # Preferably 64px in height. Leave empty = disable.
 logo-image: /img/logo.png
