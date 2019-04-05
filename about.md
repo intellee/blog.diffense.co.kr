@@ -7,7 +7,7 @@ Diffense is a cyber security company based in Seoul, South Korea.
 
 ### Contact us
 
-email: ceo@diffense.co.kr
+email: contact@diffense.co.kr
 
 ---
 
