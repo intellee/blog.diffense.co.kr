@@ -263,12 +263,14 @@ header img {
 }
 nav {
   margin: 20px 0;
+  font-family: "Gothic";
+  font-size: 18px;
+  font-weight: bold;
 }
 article {
   margin-top: 30px;
 }
-article::after,
-header::after {
+article::after {
   margin: 50px 0;
   content: "•";
   line-height: 0;
@@ -276,6 +278,9 @@ header::after {
   display: block;
   text-align: center;
   color: rgba(0, 240, 255, 0.4);
+}
+header::after {
+  margin: 50px 0;
 }
 article:last-of-type::after {
   content: "";
@@ -430,9 +435,11 @@ nav a.current {
   table {
     margin: 40px auto;
   }
-  article::after,
-  header::after {
+  article::after {
     margin: 70px;
+  }
+  header::after {
+    margin: 20px;
   }
   h1 {
     font-size: 2.6em;

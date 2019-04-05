@@ -36,7 +36,7 @@ lang: en
 
 # If you want to show the subtitle anywhere else than the front page, use
 # {% include subtitle.html %} to include it anywhere you want.
-show-subtitle: true
+show-subtitle: false
 display-social-icons: false
 
 footer-text: This is the footer.<br><a href="http://steinvc.github.io/holo-alfa/">Holo Alfa</a> Jekyll theme crafted by <a href="http://steinvc.github.io/holo-alfa/">Stijn</a>.
@@ -45,13 +45,13 @@ footer-text: This is the footer.<br><a href="http://steinvc.github.io/holo-alfa/
 logo-image: img/logo.png
 
 # Toolbar color for Chrome on Android.
-theme-color-attr: "#00f0ff"
+theme-color-attr: "#f69430"
 
 # Color of Microsoft live Tile.
 ms-tile-color: "#00f0ff"
 
 # Color used throughout the theme. Format: R, G, B.
-theme-color: 0, 240, 255 # Original: 0, 240, 255
+theme-color: 246, 148, 48# Original: 0, 240, 255
 
 # Text color used throughout the theme. Format: R, G, B.
 text-color: 0, 0, 0 # Original: 0, 0, 0
@@ -64,7 +64,7 @@ text-color: 0, 0, 0 # Original: 0, 0, 0
 background-color: 255, 255, 255 # Original: 255, 255, 255
 
 display-author-post-page: true
-display-author-front-page: true
+display-author-front-page: false
 
 # http://alanwsmith.com/jekyll-liquid-date-formatting-examples
 date_format: "%b %-d, %Y"
