@@ -14,7 +14,10 @@ author:
 
 ### Coinbase 암호화폐 거래소 해킹 공격
 
-6월 19일, Coinbase라는 암호화폐 거래소에서 보안 담당자로 일하는 Philip Martin이란 사람이 트윗([https://twitter.com/SecurityGuyPhil/status/1141466335592869888](https://twitter.com/SecurityGuyPhil/status/1141466335592869888))을 하나 올립니다. 6월 17일 월요일에 자기 회사 직원들의 PC를 대상으로 파이어폭스 0day가 포함된 해킹 공격이 시도된 것을 탐지하여 차단했다는 내용입니다. 지난 주 꽤 큰 이슈가 되었습니다. 아무래도 거래소는 돈과 관련이 있으니까요.
+6월 19일, Coinbase라는 암호화폐 거래소에서 보안 담당자로 일하는 Philip Martin이란 사람이 트윗([https://twitter.com/SecurityGuyPhil/status/1141466335592869888](https://twitter.com/SecurityGuyPhil/status/1141466335592869888))을 하나 올립니다.
+![](https://user-images.githubusercontent.com/50191798/60066734-068cbb00-9743-11e9-807a-e6c559f2ec39.png)
+6월 17일 월요일에 자기 회사 직원들의 PC를 대상으로 파이어폭스 0day가 포함된 해킹 공격이 시도된 것을 탐지하여 차단했다는 내용입니다. 지난 주 꽤 큰 이슈가 되었습니다. 아무래도 거래소는 돈과 관련이 있으니까요.
+
 
 해킹에 사용된 취약점은 Firefox 원격코드실행 취약점(CVE-2019-11707)과 샌드박스탈출 취약점(CVE-2019-11708) 2종이 사용되었습니다. Coinbase는 공격체인에 사용된 2개의 취약점을 Mozilla에 보고하게 됩니다. 흥미로운 부분은 취약점 중 하나가 Google Project Zero팀의 Saelo가 이미 보고(4월15일)한 것과 동일하였다는 점입니다. 어떻게 해커들은 해당 취약점 정보를 입수할 수 있었을까요? 해커들이 직접 발견했을 수도 있고, 모질라 버그이슈 트래커 접근 권한을 가지고 있었을 수도 있겠죠. 여러가지 썰들이 나오고 있는 상황입니다.
 
