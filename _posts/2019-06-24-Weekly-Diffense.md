@@ -44,7 +44,7 @@ RAT는 Win/Mac 용으로 제작되어 있다고 하네요. Mac용 백도어는 �
 ### RDP BlueKeep(CVE-2019-0708)
 
 ![Micrsoft Security Updates](https://user-images.githubusercontent.com/50191798/60060521-fa493380-972b-11e9-9f92-8ba9273f04e5.png)
-5월 14일, RDP(Remote Desktop Services) 서버 취약점에 대한 [패치](https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2019-0708)가 릴리즈됩니다. 
+5월 14일, RDP(Remote Desktop Services) 서버 취약점에 대한 [패치](https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2019-0708)가 릴리즈되었습니다.
 
 이 사실은 엄청난 파장을 일으켰습니다. 왜냐하면 해당 버그는 <U>인증 과정 필요없이 RDP서버를 원격에서 해킹할 수 있는 취약점이라서, 이 공격에 영향을 받는 컴퓨터가 대략 수 백만대</U>로 추정되었기 때문이죠. Windows8 이전의 운영체제(WinXP, 7, 2008등)가 모두 이 취약점에 영향을 받습니다.
 
