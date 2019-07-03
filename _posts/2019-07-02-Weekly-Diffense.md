@@ -107,6 +107,16 @@ C2 xx xx 90     ; retn xx xx; nop
 * Intel TSX에서 명령어cache와 트랜잭션 메모리간의 불일치 현상 버그
 
 Defcon CTF 문제 설명과 풀이에 대한 자세한 내용은 ret2system blog를 참고해주세요.
+
+#### 참고 자료 
+
+* [In Transactional Memory, No One Can Hear You Scream](https://blog.ret2.io/2019/06/26/attacking-intel-tsx/), ret2system blog
+* [Fun with Intel® Transactional Synchronization Extensions](https://software.intel.com/en-us/blogs/2013/07/25/fun-with-intel-transactional-synchronization-extensions), Intel Developer Zone
+* [Intel® Transactional Synchronization Extensions](https://software.intel.com/sites/default/files/managed/68/10/sf12-arcs004-100.pdf), Intel Developer Forum 2012
+* [Transactional Synchronization Extensions](https://en.wikipedia.org/wiki/Transactional_Synchronization_Extensions), Wikipedia
+* [Transactional Synchronization in Haswell](https://software.intel.com/en-us/blogs/2012/02/07/transactional-synchronization-in-haswell), Intel Developer Zone
+* [Coarse-grained locks and Transactional Synchronization explained](https://software.intel.com/en-us/blogs/2012/02/07/coarse-grained-locks-and-transactional-synchronization-explained), Intel Developer Zone
+
 <br><br>
 
 ### [The Return of the WIZard (CVE-2019-10149)](https://www.openwall.com/lists/oss-security/2019/06/06/1)
