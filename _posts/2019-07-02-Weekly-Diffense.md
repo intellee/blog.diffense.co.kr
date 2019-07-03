@@ -25,7 +25,9 @@ Intel의 TSX(Transactional Synchronization eXtensions)은 멀티스레드의 동
 2개의 멀티스레드(Alice, Bob)가 공유자원(Table)에 동시에 접근할 경우, 원치 않는 결과(-10)가 나올 수 있음을 왼쪽 그림이 보여주고 있습니다. 이를 해결하기 위해 개발자들은 보통 오른쪽 그림처럼 Lock을 사용하죠.  다음 그림을 보겠습니다.
 <img src="https://user-images.githubusercontent.com/50191798/60555911-cf895b80-9d79-11e9-94e4-e8bb3165c034.png" width="80%" height="80%">
 왼쪽 그림은 앞서 본 것처럼 테이블 전체에다 Lock을 걸어 놓은 것입니다. Coarse Grain Locking이라고 하는데요. 테이블 전체에다 Lock을 걸어 놓은 것이라 Alice와 Bob이 테이블의 다른 항목(A,B)에 접근하려는 경우에도 Alice나 Bob 둘 중 한 스레드가 테이블을 독점하는 비효율이 발생하게 됩니다.
-이에 대한 해결책으로 테이블을 더 잘게 항목별로 나눠서 각 항목마다 Lock을 걸어주는 방법이 있습니다. Fine Grain Locking이라 부르고 오른쪽 그림과 같은 상황을 얘기하는 것입니다. Coarse Grain Locking의 장점은 구현하기 쉽다는 것이고, 단점은 비효율적이라는 것입니다. Fine Grain Locking은 그 반대라고 보시면 되겠죠. 
+이에 대한 해결책으로 테이블을 더 잘게 항목별로 나눠서 각 항목마다 Lock을 걸어주는 방법이 있습니다. Fine Grain Locking이라 부르고 오른쪽 그림과 같은 상황을 얘기하는 것입니다. <br>
+
+Coarse Grain Locking의 장점은 사용하기 쉽다는 것이고, 단점은 성능이 떨어진다는 것입니다. Fine Grain Locking은 그 반대라고 보시면 되겠죠. 
 
 Intel TSX는 바로 이 지점에서 솔루션을 제시합니다. 개발자들이 Coarse Grain Locking을 걸어놓으면 하드웨어 레벨에서 Fine Grain Locking 처리를 해주겠다는 것입니다.
 <img src="https://user-images.githubusercontent.com/50191798/60556606-247aa100-9d7d-11e9-85e0-b03fcb2405c6.png" width="80%" height="80%">
