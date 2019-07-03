@@ -48,7 +48,7 @@ Lock을 걸려면 `xacquire`, 해제할 경우엔 `xrelease`라는 명령어를 
 
 **Transactional Memory**
 
-`xacquire`을 통해 크리티컬 섹션에 진입하면, 트랜잭션 실행(Transactional Execution) 상태로 바뀝니다. 이 시점부터 이루어지는 메모리 업데이트(Transactional Update)는 트랜잭션 메모리(Transactional Memory)라는 곳에 기록됩니다. 다른 스레드가 이 시점에선 해당 업데이트된 내용을 확인할 수 없습니다. 트랜잭션이 완료되기 전까지는요. <br>
+`xacquire`을 통해 크리티컬 섹션(TSX에선 트랜잭션 리전이라고도 부름)에 진입하면, 트랜잭션 실행(Transactional Execution) 상태로 바뀝니다. 이 시점부터 이루어지는 메모리 업데이트(Transactional Update)는 트랜잭션 메모리(Transactional Memory)라는 곳에 기록됩니다. 다른 스레드가 이 시점에선 해당 업데이트된 내용을 확인할 수 없습니다. 트랜잭션이 완료되기 전까지는요. <br>
 
 `xrelease`를 통해 트랜잭션 리전을 빠져나올 때 데이터 충돌(data conflict)이 없다고 판단이 되면 트랜잭션을 완료하게 됩니다. 즉 트랜잭션 메모리에서 기록했던 변경사항들을 실제 메인 메모리에 반영(Transactional Commit)합니다.
 
@@ -85,13 +85,13 @@ xor rbx, rbx         ; key_Y 지움
 
 Pwn2Own 우승팀(Safari 카테고리)으로도 유명한 ret2system에서 위 문제를 풀다가 Intel TSX에서 버그를 발견하게 됩니다. 해당 버그를 이용해 문제를 해결하였는데요.
 
-우선 쉘코드와 lock(문제에서 rdi가 가리키는 곳)이 같은 rwx 페이지에 있었기 때문에, CPU의 명령어캐시에 key_X가 존재하지 않을까라는 가정을 하게 됩니다. 이 상황에서 트랜잭션 리전에 진입을 하게 되고, lock은 이미 key_Z(key_X xor key_Y)로 바뀐 상황입니다. 
+우선 쉘코드와 lock(문제에서 rdi가 가리키는 곳)이 같은 rwx 페이지에 있었기 때문에, CPU의 명령어캐시에 key_X가 존재할 것이라는 가정을 합니다. 이 상황에서 트랜잭션 리전에 진입을 하게 되고, lock은 리전에 진입할 때 key_Z(key_X xor key_Y)로 바뀌죠. 
 
 여기서 만약 lock으로 jmp를 하면 어떻게 될까요?
 <br><br>
-원래라면 명령어 cache에 있는 내용(key_X)과 메모리(여기선 트랜잭션 메모리)에 있는 내용(key_Z)이 불일치하는 현상이 발생했기 때문에, 트랜잭션 메모리에 있는 내용으로 명령어 cache를 업데이트 해주고, 그것(key_Z)를 fetch하여 실행해야 할 것입니다.
+원래라면 명령어 cache에 있는 내용(key_X)과 트랜잭션 메모리에 있는 내용(key_Z)의 불일치 현상이 발생했기 때문에, 트랜잭션 메모리에 있는 내용으로 명령어 cache를 업데이트 해주고, 그것(key_Z)을 fetch하여 실행해야 할 것입니다.
 
-하지만, 이러한 <u>명령어cache와 트랜잭션 메모리간의 불일치 현상이 있음에도 불구하고, 명령어cache에서 fetch 해올 때 트랜잭션 메모리과의 불일치 현상을 체크하지 않는 버그</u>가 있습니다. 
+하지만, 이러한 <u>명령어cache와 트랜잭션 메모리간의 불일치 현상이 존재함에도 불구하고, 명령어cache에서 fetch 해올 때 이러한 불일치 현상을 체크하지 않는 버그</u>가 있습니다. 
 
 <img src="https://blog.ret2.io/assets/img/tsx_jmp_key_z.png" width="80%" height="80%">
 <center><a href="">ret2system blog</a></center>
