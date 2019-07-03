@@ -30,7 +30,7 @@ Intel의 TSX(Transactional Synchronization eXtensions)은 멀티스레드의 동
 Intel TSX는 바로 이 지점에서 솔루션을 제시합니다. 개발자들이 Coarse Grain Locking을 걸어놓으면 하드웨어 레벨에서 Fine Grain Locking 처리를 해주겠다는 것입니다.
 <img src="https://user-images.githubusercontent.com/50191798/60556606-247aa100-9d7d-11e9-85e0-b03fcb2405c6.png" width="80%" height="80%">
 
-바로 "Fine Grain Behavior at Coarse Grain Effort"라는 목표를 위해 개발된 기술이 Intel TSX 인 것이죠. 결국 개발자의 편의성과 성능 2가지 토끼를 다 잡겠다는 얘기입니다. 
+바로 "Fine Grain Behavior at Coarse Grain Effort"라는 목표를 위해 개발된 기술이 Intel TSX 라는 것입니다. 결국 개발자의 편의성과 성능 2가지 토끼를 다 잡겠다는 얘기입니다. 
 
 그럼 이 기술을 개발자가 어떻게 쓰나요? 다음 그림처럼 크리티컬섹션(공유자원에 접근하는 코드영역)에 Lock을 걸어주면 됩니다. 
 ```
