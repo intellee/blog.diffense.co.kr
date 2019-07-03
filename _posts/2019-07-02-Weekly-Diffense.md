@@ -99,12 +99,13 @@ Pwn2Own 우승팀(Safari 카테고리)으로도 유명한 ret2system에서 위 �
 
 
 key_X를 읽는 것이 아닌, key_X를 실행할 수 있게 되었습니다. key_X는 랜덤한 값이라 어떤 명령어 코드가 들어있을 지 예측할 수가 없죠. 
-그래서 ret2system은 다음 opcode 조합이 나올 때까지 Bruteforce를 했습니다.
+그래서 ret2system은 key_X가 다음 opcode 조합이 나올 때까지 Bruteforce를 했습니다.
 ```
 C2 xx xx 90     ; retn xx xx; nop
 ```
-앞 c2, 뒤 90만 맞으면 되기 때문에, 대략 65536 번 안에는 해당 바이트 시퀀스 조합이 나올 확률이 높습니다.
-저 명령어(retn xx xx; nop)가 실행되면 rsp 값을 계산해서 xx xx 값을 얻어낼 수가 있을 것입니다. 결국 key_X 값을 구할 수 있게 되는 것이죠.
+앞 C2 뒤 90만 맞으면 되기 때문에, 대략 65536 번 안에는 해당 바이트 시퀀스 조합이 나올 확률이 높습니다.
+만약 저 패턴의 명령어(retn xx xx; nop)가 실행되면 rsp 값을 계산해서 xx xx 값을 얻어낼 수가 있을 것입니다. 
+결국 key_X 값을 구할 수 있게 되는 것이죠.
 
 결론:
 * ret2system에서 Defcon CTF 문제를 풀다가 Intel TSX에서 CPU 버그를 발견
