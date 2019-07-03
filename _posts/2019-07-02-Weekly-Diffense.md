@@ -32,7 +32,9 @@ Intel TSX는 바로 이 지점에서 솔루션을 제시합니다. 개발자들�
 
 바로 "Fine Grain Behavior at Coarse Grain Effort"라는 목표를 위해 개발된 기술이 Intel TSX 라는 것입니다. 결국 개발자의 편의성과 성능 2가지 토끼를 다 잡겠다는 얘기입니다. 
 
-그럼 이 기술을 개발자가 어떻게 쓰나요? 다음 그림처럼 크리티컬섹션(공유자원에 접근하는 코드영역)에 Lock을 걸어주면 됩니다. 
+그럼 이 기술을 개발자가 어떻게 쓰나요? <br>
+
+다음 그림처럼 크리티컬섹션(공유자원에 접근하는 코드영역)에 Lock을 걸어주면 됩니다. 
 ```
 xacquire lock mov [rax], 1          ; lock을 획득합니다.
 ...
@@ -60,12 +62,12 @@ Lock을 걸려면 `xacquire`, 해제할 경우엔 `xrelease`라는 명령어를 
 위 사실을 통해 샌드박스를 다음과 같이 구현했습니다.
 
 ```
-mov [rdi], eax                      ; eax = key_X, ebx = key_Y
-xor eax, rax                        ; key_X 지움
+mov [rdi], eax       ; eax = key_X, ebx = key_Y
+xor eax, rax         ; key_X 지움
 
-xacquire lock xor [rdi], ebx        ;  트랜잭션 리전 진입,  key_Z = key_X xor key_Y
+xacquire lock xor [rdi], ebx  ;  트랜잭션 리전 진입,  key_Z = key_X xor key_Y
 
-xor rbx, rbx                        ; key_Y 지움
+xor rbx, rbx         ; key_Y 지움
 
 [유저 쉘코드 시작]
 
