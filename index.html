@@ -31,7 +31,7 @@ home: true
   	<a href="{{ post.url | prepend: site.baseurl }}"><h2>{{ post.title }}</h2></a>
       <p>
       {% if post.summary %}
-        {{ post.summary }}&nbsp;<a class="read-more" href="{{ post.url | prepend: site.baseurl }}">{{ site.var_read }}  →</a>
+        {{ post.summary }}&nbsp;
       {% else %}
         {{ post.excerpt | remove: '<p>' | remove: '</p>' }}&nbsp;<a class="read-more" href="{{ post.url | prepend: site.baseurl }}">{{ site.var_read }}  →</a>
       {% endif %}
