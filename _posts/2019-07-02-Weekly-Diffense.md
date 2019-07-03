@@ -14,7 +14,7 @@ author:
 ### [Attacking Intel's Transactional Synchronization Extensions](https://blog.ret2.io/2019/06/26/attacking-intel-tsx)
 
 Pwn2Own 2018 우승팀으로도 유명한 ret2system에서 **Intel TSX 버그**를 발견하였습니다.
-재미있는 사실은 Defcon CTF 문제를 풀다가 CPU 버그를 발견하였다는 것인데요. 문제 출제자의 의도와는 다르게 이러한 버그를 발견하여 문제를 풀었다는군요.
+재미있는 사실은 Defcon CTF 문제를 풀다가 CPU 버그를 발견하였다는 것인데요. 문제 출제자의 의도와는 다르게 문제를 풀었다는군요.
 
 우선 Intel TSX에 대해 설명드리고, ret2system에서 발견한 CPU 버그와 이를 이용해 CTF 문제를 어떻게 해결하였는지를 설명하겠습니다.
 
