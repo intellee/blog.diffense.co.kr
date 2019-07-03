@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://github.com/diffense/blog.diffense.co.kr/blob/master/sitemap.xml
