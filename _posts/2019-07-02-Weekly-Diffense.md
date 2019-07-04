@@ -83,9 +83,9 @@ xor rbx, rbx         ; key_Y 지움
 
 **CPU Bug?**
 
-Pwn2Own 우승팀(Safari 카테고리)으로도 유명한 ret2system에서 위 문제를 풀다가 Intel TSX에서 버그를 발견하게 됩니다. 해당 버그를 이용해 문제를 해결하였는데요.
+Pwn2Own 우승팀(Safari 카테고리)으로도 유명한 ret2system에서 위 문제를 풀다가 Intel TSX에서 버그를 발견합니다. 해당 버그를 이용해 문제를 해결하였는데요.
 
-우선 쉘코드와 lock(문제에서 rdi가 가리키는 곳)이 같은 rwx 페이지에 있었기 때문에, CPU의 명령어캐시에 key_X가 존재할 것이라는 가정을 합니다. 이 상황에서 트랜잭션 리전에 진입을 하게 되고, lock은 리전에 진입할 때 key_Z(key_X xor key_Y)로 바뀌죠. 
+우선 쉘코드와 lock(문제에서 rdi가 가리키는 곳)이 같은 rwx 페이지에 있었기 때문에, CPU의 명령어 cache에 key_X가 존재할 것이라는 가정을 합니다. 이 상황에서 트랜잭션 리전에 진입을 하게 되고, lock은 리전에 진입할 때 key_Z(key_X xor key_Y)로 바뀌죠. 
 
 여기서 만약 lock으로 jmp를 하면 어떻게 될까요?
 <br><br>
