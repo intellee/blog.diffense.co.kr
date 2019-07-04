@@ -55,7 +55,7 @@ Lock을 걸려면 `xacquire`, 해제할 경우엔 `xrelease`라는 명령어를 
 
 **Hotel California's Sandbox**
 
-올해 2019년 Defcon CTF에서 출제된 'Hotel California' 문제는 Intel TSX의 `xacquire`와 `xrelease` 명령어를 이용해서 샌드박스를 간단히 구현했습니다.
+올해 2019년 Defcon CTF에서 출제된 'Hotel California' 문제는 Intel TSX의 `xacquire`와 `xrelease` 명령어를 이용해서 샌드박스를 구현했습니다.
 
 스레드가 크리티컬섹션(트랜잭션 리전)에 진입하면,
 * 메모리 write 명령이 실제 메인메모리에 반영되지 않고, 트랜잭션메모리에 쓰여짐
