@@ -3,13 +3,14 @@ layout: page
 title: About
 ---
 
-Diffense is a cyber security company based in Seoul, South Korea. 
+디펜스는 2019년에 설립된 사이버 보안 회사입니다.
 
 ### 사업 분야
 
-* 보안 취약점 연구 및 교육
+* 최신 해킹 보안 기술 정보 제공 서비스 
+* 소프트웨어 취약점 연구 및 교육
 * 보안 솔루션 개발
-* 모의해킹
+* 데스크탑/모바일/서버 앱 취약점 진단
 
 ### 연락처
 
