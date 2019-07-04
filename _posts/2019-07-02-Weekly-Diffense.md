@@ -14,7 +14,7 @@ author:
 ### [Attacking Intel's Transactional Synchronization Extensions](https://blog.ret2.io/2019/06/26/attacking-intel-tsx)
 
 Pwn2Own 2018 우승팀으로도 유명한 ret2system에서 **Intel TSX 버그**를 발견하였습니다.
-재미있는 사실은 Defcon CTF 문제를 풀다가 CPU 버그를 발견하였다는 것인데요. 문제 출제자의 의도와는 다르게 문제를 풀었다는군요.
+재미있는 사실은 Defcon CTF 문제를 풀다가 발견하였다는 것인데요.
 
 우선 Intel TSX에 대해 설명드리고, ret2system에서 발견한 CPU 버그와 이를 이용해 CTF 문제를 어떻게 해결하였는지를 설명하겠습니다.
 
@@ -22,7 +22,7 @@ Pwn2Own 2018 우승팀으로도 유명한 ret2system에서 **Intel TSX 버그**�
 Intel의 TSX(Transactional Synchronization eXtensions)은 멀티스레드의 동기화 문제를 간소화시키는 데 도움을 주는 하드웨어 기술입니다. 
 다음 예는 Intel에서 발표한 내용의 일부를 가져온 것인데요.
 <img src="https://user-images.githubusercontent.com/50191798/60555722-23e00b80-9d79-11e9-8359-41f5db8d02f1.png" width="80%" height="80%">
-2개의 멀티스레드(Alice, Bob)가 공유자원(Table)에 동시에 접근할 경우, 원치 않는 결과(-10)가 나올 수 있음을 왼쪽 그림이 보여주고 있습니다. 이를 해결하기 위해 개발자들은 보통 오른쪽 그림처럼 Lock을 사용하죠.  다음 그림을 보겠습니다.
+2개의 스레드(Alice, Bob)가 공유자원(Table)에 동시에 접근할 경우, 원치 않는 결과(-10)가 나올 수 있음을 왼쪽 그림이 보여주고 있습니다. 이를 해결하기 위해 개발자들은 보통 오른쪽 그림처럼 Lock을 사용하죠.  다음 그림을 보겠습니다.
 <img src="https://user-images.githubusercontent.com/50191798/60555911-cf895b80-9d79-11e9-94e4-e8bb3165c034.png" width="80%" height="80%">
 왼쪽 그림은 앞서 본 것처럼 테이블 전체에다 Lock을 걸어 놓은 것입니다. Coarse Grain Locking이라고 하는데요. 테이블 전체에다 Lock을 걸어 놓은 것이라 Alice와 Bob이 테이블의 다른 항목(A,B)에 접근하려는 경우에도 Alice나 Bob 둘 중 한 스레드가 테이블을 독점하는 비효율이 발생하게 됩니다.
 이에 대한 해결책으로 테이블을 더 잘게 항목별로 나눠서 각 항목마다 Lock을 걸어주는 방법이 있습니다. Fine Grain Locking이라 부르고 오른쪽 그림과 같은 상황을 얘기하는 것입니다. <br>
