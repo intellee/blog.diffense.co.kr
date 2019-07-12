@@ -1,5 +1,5 @@
 ---
-title: Weekly Diffense - June &#35;1
+title: DIFF-2019-001 
 
 summary: Coinbase 거래소 해킹 공격 / RDP Bluekeep / AppXSVC 권한상승 취약점 / Win10 힙 오버플로우
 

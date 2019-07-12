@@ -1,5 +1,5 @@
 ---
-title: Weekly Diffense - July &#35;1
+title: DIFF-2019-002
 
 summary: Intel TSX CPU 버그 / Exim 메일 서버 취약점
 
