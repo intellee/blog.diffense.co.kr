@@ -24,7 +24,7 @@ url: https://blog.diffense.co.kr
 baseurl: "/"
 
 # language attribute in <html> element.
-lang: en
+lang: en_US
 
 # FROM THIS POINT ON EVERYTHING IS OPTIONAL
 
