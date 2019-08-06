@@ -1,6 +1,28 @@
 <head>
 	<meta charset="utf-8">
 	<title>{% if page.title %}{{ page.title }} |{% endif %} {{ site.theme_settings.title }}</title>
+
+    <meta property="og:site_name" content="{{ site.name }}">
+	<meta property="og:title" content="{% if page.title %}{{ page.title }} • {{ site.name }}{% else %}{{ site.name }}{% endif %}">
+	<meta property="og:locale" content="{{ site.lang }}">
+	{% if page.og-image %}
+	  <meta property="og:image" content="{{ site.url }}{{ site.baseurl }}/img/{{ page.og-image }}">
+	{% else %}
+	  {% if page.cover-image %}
+	    <meta property="og:image" content="{{ site.url }}{{ site.baseurl }}/img/{{ page.cover-image }}">
+	  {% else %}
+	    <meta property="og:image" content="{{ site.url }}{{ site.baseurl }}/og-img.png">
+	  {% endif %}
+	{% endif %}
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="{{ site.url }}{{ site.baseurl }}{{ page.url }}">
+	<meta property="og:description" content="
+	{% if page.summary %}
+	{{ page.summary }}
+	{% else %}
+	{{ site.description.meta }}
+	{% endif %}">
+
 	<meta name="description"
 		content="{% if page.excerpt %}{{ page.excerpt | strip_html | strip_newlines | truncate: 160 }}{% else %}{{ site.theme_settings.description }}{% endif %}">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
