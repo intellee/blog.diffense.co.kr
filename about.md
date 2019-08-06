@@ -1,6 +1,6 @@
 ---
 layout: page
-title: About
+title: ABOUT
 ---
 
 디펜스는 2019년에 설립된 연구 중심의 사이버 보안 회사입니다. 
@@ -17,6 +17,3 @@ title: About
 * 주소: 대한민국 서울시 중구 청계천로 100 시그니처타워 904호<br>
 * 이메일: contact@diffense.co.kr
 
----
-
-Holo Alfa is open source, [MIT license](http://opensource.org/licenses/MIT).

@@ -1,18 +1,903 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
-	<channel>
-		<title>Diffense</title>
-		<description>{&quot;meta&quot;=&gt;nil, &quot;subtitle&quot;=&gt;nil}</description>
-		<link>http://localhost:4000</link>
-		<atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml" />
-		
-			<item>
-				<title>Better than spoolsv</title>
-				
-					<dc:creator>{&quot;name&quot;=&gt;&quot;Yongil Lee of Diffense&quot;}</dc:creator>
-				
-				
-					<description>&lt;p&gt;안녕하세요. 디펜스입니다.&lt;/p&gt;
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>DIFFENSE</title>
+    <atom:link href="/feed.xml" rel="self" type="application/rss+xml"/>
+    <link>http://localhost:4000/</link>
+    <description>A website with blog posts and pages</description>
+    <pubDate>Tue, 06 Aug 2019 15:40:23 +0900</pubDate>
+    
+      <item>
+        <title>DIFF-2019-005</title>
+        <link>/2019/07/26/WD.html</link>
+        <guid isPermaLink="true">/2019/07/26/WD.html</guid>
+        <description>&lt;hr /&gt;
+
+&lt;h2 id=&quot;development&quot;&gt;Development&lt;/h2&gt;
+
+&lt;h3 id=&quot;infinityhook&quot;&gt;InfinityHook&lt;/h3&gt;
+
+&lt;p&gt;안녕하세요. 독자 여러분. 지난 &lt;a href=&quot;http://blog.diffense.co.kr/2019/07/22/WD/&quot;&gt;DIFF-2019-004&lt;/a&gt;에서 “패치가드를 우회할 수 있는 커널후킹 라이브러리 InfinityHook”에 대한 내용을 얘기했었습니다. 이번 내용은 &lt;em&gt;InfinityHook&lt;/em&gt;을 빌드 및 실행하는 방법과 이것을 활용하는 방법에 대해 알아보고자 합니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;기본 개발 환경&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;아래와 같은 환경을 구축해서 테스트해보시길 권합니다.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Windows 10 x64&lt;/li&gt;
+  &lt;li&gt;Visual Studio 2019 Community Edition (&lt;a href=&quot;https://visualstudio.microsoft.com/downloads/&quot;&gt;다운로드&lt;/a&gt;)
+    &lt;ul&gt;
+      &lt;li&gt;“Desktop development with C++”를 반드시 선택해야 합니다.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Windows 10 SDK 10.0.18362.0 (&lt;a href=&quot;https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk&quot;&gt;다운로드&lt;/a&gt;)&lt;/li&gt;
+  &lt;li&gt;WDK (&lt;a href=&quot;https://docs.microsoft.com/ko-kr/windows-hardware/drivers/download-the-wdk&quot;&gt;다운로드&lt;/a&gt;)&lt;/li&gt;
+  &lt;li&gt;DbgView (&lt;a href=&quot;https://download.sysinternals.com/files/DebugView.zip&quot;&gt;다운로드&lt;/a&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Visual Studio, SDK, WDK 순으로 설치합니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;빌드&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;설치를 마쳤으면, 커널 드라이버 빌드 준비가 끝났습니다.&lt;/p&gt;
+
+&lt;p&gt;빌드 절차는 다음과 같습니다.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;em&gt;InfinityHook&lt;/em&gt; 소스코드를 &lt;a href=&quot;https://github.com/everdox/InfinityHook/archive/master.zip&quot;&gt;다운로드&lt;/a&gt; 받습니다.&lt;/li&gt;
+  &lt;li&gt;다운로드 받은 압축 파일을 적당한 폴더(예: C:\InfHook)에 풉니다.&lt;/li&gt;
+  &lt;li&gt;프로젝트 파일(C:\InfHook\src\infinityhook.sln)을 더블클릭하여 비주얼스튜디오로 프로젝트를 오픈해주세요.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Ctrl+Shift+B&lt;/code&gt; 를 눌러 빌드합니다.  빌드가 성공하였다면 다음 그림과 같은 빌드 메시지를 볼 수 있을 것입니다.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://user-images.githubusercontent.com/50191798/61880097-36d89c80-af2f-11e9-91b4-9a8362fe278a.png&quot; width=&quot;50%&quot; height=&quot;50%&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;빌드 간단하네요. 빌드된 커널 드라이버 경로는 C:\InfHook\src\x64\Debug\kinfinityhook.sys 입니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;테스트&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;빌드된 커널드라이버는 아래와 같은 후킹 코드 샘플을 포함하고 있습니다.&lt;/p&gt;
+
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// NtCreateFile 후킹 함수
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NTSTATUS&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;DetourNtCreateFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(...)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//
+&lt;/span&gt;    &lt;span class=&quot;c1&quot;&gt;// We're going to filter for our &quot;magic&quot; file name.
+&lt;/span&gt;    &lt;span class=&quot;c1&quot;&gt;//
+&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ObjectName&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ObjectName&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;
+
+        &lt;span class=&quot;c1&quot;&gt;//
+&lt;/span&gt;        &lt;span class=&quot;c1&quot;&gt;// 파일명이 &quot;ifh--&quot;을 포함한다면?
+&lt;/span&gt;        &lt;span class=&quot;c1&quot;&gt;//
+&lt;/span&gt;        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;wcsstr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ObjectName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IfhMagicFileName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;kprintf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;[+] infinityhook: Denying access to file: %wZ.&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ObjectName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+            &lt;span class=&quot;n&quot;&gt;ExFreePool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ObjectName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;//
+&lt;/span&gt;            &lt;span class=&quot;c1&quot;&gt;// 접근 차단
+&lt;/span&gt;            &lt;span class=&quot;c1&quot;&gt;//
+&lt;/span&gt;            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;STATUS_ACCESS_DENIED&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;//
+&lt;/span&gt;    &lt;span class=&quot;c1&quot;&gt;// 원본 NtCreateFile 함수 호출
+&lt;/span&gt;    &lt;span class=&quot;c1&quot;&gt;//
+&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;OriginalNtCreateFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FileHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DesiredAccess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IoStatusBlock&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AllocationSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FileAttributes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ShareAccess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CreateDisposition&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CreateOptions&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;EaBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;EaLength&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;NtCreateFile&lt;/code&gt;을 후킹하여, 특정 파일명(&lt;code class=&quot;highlighter-rouge&quot;&gt;ifh--&lt;/code&gt;)을 포함한 파일은 접근 차단되도록 작성되어 있음을 알 수 있습니다.  커널드라이버(&lt;code class=&quot;highlighter-rouge&quot;&gt;kinfinityhook.sys&lt;/code&gt;)를 로드하여 &lt;code class=&quot;highlighter-rouge&quot;&gt;ifh--&lt;/code&gt; 파일을 정말 차단할 수 있는지 확인해 보겠습니다.&lt;/p&gt;
+
+&lt;p&gt;지금 빌드된 드라이버는 테스트용 인증서로 서명된 드라이버(test-signed driver)라서, 커널드라이버가 로드될 수 있도록 윈도우즈 부트 설정을 바꿔줘야 합니다. 관리자 권한의 cmd.exe 를 열고 다음 2줄을 실행합니다.&lt;/p&gt;
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;bcdedit.exe /set loadoptions DISABLE_INTEGRITY_CHECKS
+bcdedit.exe /set TESTSIGNING ON
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;그리고 재부팅합니다. 재부팅 후,  테스트용 파일(&lt;code class=&quot;highlighter-rouge&quot;&gt;ifh--xxxx.txt&lt;/code&gt;)을 바탕화면에 만들어주세요. 내용은 어떤 내용이든 상관없습니다. 메모장으로 해당 파일이 열리는 것을 확인해주세요.&lt;/p&gt;
+
+&lt;p&gt;이제 드라이버를 로드해보겠습니다. 관리자 권한의 cmd.exe 창을 띄우고 다음 명령을 입력해주세요. (binpath= type= 사이에 공백이 있다는 점 주의하세요.)&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;C:&lt;span class=&quot;se&quot;&gt;\I&lt;/span&gt;nfHook&lt;span class=&quot;se&quot;&gt;\s&lt;/span&gt;rc&lt;span class=&quot;se&quot;&gt;\x&lt;/span&gt;64&lt;span class=&quot;se&quot;&gt;\D&lt;/span&gt;ebug&amp;gt;sc create infhook &lt;span class=&quot;nv&quot;&gt;binpath&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; C:&lt;span class=&quot;se&quot;&gt;\I&lt;/span&gt;nfHook&lt;span class=&quot;se&quot;&gt;\s&lt;/span&gt;rc&lt;span class=&quot;se&quot;&gt;\x&lt;/span&gt;64&lt;span class=&quot;se&quot;&gt;\D&lt;/span&gt;ebug&lt;span class=&quot;se&quot;&gt;\k&lt;/span&gt;infinityhook.sys &lt;span class=&quot;nb&quot;&gt;type&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; kernel
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;SC] CreateService 성공
+
+C:&lt;span class=&quot;se&quot;&gt;\I&lt;/span&gt;nfHook&lt;span class=&quot;se&quot;&gt;\s&lt;/span&gt;rc&lt;span class=&quot;se&quot;&gt;\x&lt;/span&gt;64&lt;span class=&quot;se&quot;&gt;\D&lt;/span&gt;ebug&amp;gt;sc start infhook
+
+SERVICE_NAME: infhook
+        종류               : 1  KERNEL_DRIVER
+        상태               : 4  RUNNING
+                                &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;STOPPABLE, NOT_PAUSABLE, IGNORES_SHUTDOWN&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+        WIN32_EXIT_CODE    : 0  &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;0x0&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+        SERVICE_EXIT_CODE  : 0  &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;0x0&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+        검사점             : 0x0
+        WAIT_HINT          : 0x0
+        PID                : 0
+        플래그             :
+
+C:&lt;span class=&quot;se&quot;&gt;\I&lt;/span&gt;nfHook&lt;span class=&quot;se&quot;&gt;\s&lt;/span&gt;rc&lt;span class=&quot;se&quot;&gt;\x&lt;/span&gt;64&lt;span class=&quot;se&quot;&gt;\D&lt;/span&gt;ebug&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;상태가 &lt;em&gt;RUNNING&lt;/em&gt;으로 출력되면 &lt;em&gt;infinityhook&lt;/em&gt; 드라이버가 제대로 로드가 된 것입니다. 지금부터는 &lt;code class=&quot;highlighter-rouge&quot;&gt;ifh--xxxx.txt&lt;/code&gt;가 차단되어야 하겠죠?&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;ifh--xxxx.txt&lt;/code&gt;을 열어보면 아래 그림처럼 파일이 열리지 않는 것을 확인해볼 수 있습니다. 
+&lt;img src=&quot;https://user-images.githubusercontent.com/50191798/61878962-0132b400-af2d-11e9-86b3-8fcd84b2d528.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;잘되는군요! 테스트를 마쳤으니, 다음과 같이 드라이버를 언로드하겠습니다.&lt;/p&gt;
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;C:&lt;span class=&quot;se&quot;&gt;\I&lt;/span&gt;nfHook&lt;span class=&quot;se&quot;&gt;\s&lt;/span&gt;rc&lt;span class=&quot;se&quot;&gt;\x&lt;/span&gt;64&lt;span class=&quot;se&quot;&gt;\D&lt;/span&gt;ebug&amp;gt;sc stop infhook
+
+SERVICE_NAME: infhook
+        종류               : 1  KERNEL_DRIVER
+        상태              : 1  STOPPED
+        WIN32_EXIT_CODE    : 0  &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;0x0&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+        SERVICE_EXIT_CODE  : 0  &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;0x0&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+        검사점         : 0x0
+        WAIT_HINT          : 0x0
+
+C:&lt;span class=&quot;se&quot;&gt;\I&lt;/span&gt;nfHook&lt;span class=&quot;se&quot;&gt;\s&lt;/span&gt;rc&lt;span class=&quot;se&quot;&gt;\x&lt;/span&gt;64&lt;span class=&quot;se&quot;&gt;\D&lt;/span&gt;ebug&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;이제 &lt;em&gt;infinityhook&lt;/em&gt;을 수정해서 다른 시스템콜을 후킹하는 방법을 알아보겠습니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;네버다이 메모장&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;네버다이 메모장을 구현해보면서 &lt;em&gt;infinityhook&lt;/em&gt;을 이용해 시스템콜을 후킹하는 방법을 살펴보겠습니다.  네버다이 메모장은 이름 그대로 절대 죽지 않는 메모장입니다.(스스로 종료하는 것은 허용합니다.) 이것을 구현하기 위해선 프로세스의 종료를 담당하는 &lt;code class=&quot;highlighter-rouge&quot;&gt;nt!NtTerminateProcess&lt;/code&gt; 시스템콜을 후킹해야 합니다.&lt;/p&gt;
+
+&lt;p&gt;기존 샘플 코드에서 SyscallStub 함수 부분만 다음과 같이 수정해주면 시스템콜 후킹을 추가로 구현해볼 수 있습니다.&lt;/p&gt;
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;__fastcall&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;SyscallStub&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_In_&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SystemCallIndex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_Inout_&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SystemCallFunction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SystemCallIndex&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;cm&quot;&gt;/*후킹하길 원하는 시스템콜 인덱스*/&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SystemCallFunction&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;cm&quot;&gt;/*후킹 함수*/&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;후킹하려는 시스템콜의 서비스테이블 인덱스을 알아봐야 하겠죠?  윈도우즈 시스템 콜 인덱스 리스트는 Google P0의 j00ru가 &lt;a href=&quot;https://j00ru.vexillium.org/syscalls/nt/64/&quot;&gt;여기&lt;/a&gt;에 잘 정리해놓았습니다.
+&lt;img src=&quot;https://user-images.githubusercontent.com/50191798/61920944-5656e000-af96-11e9-959e-42de07319d78.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;NtTerminateProcess&lt;/code&gt;의 인덱스는 0x2c 군요. SyscallStub 함수는 다음과 같은 형태가 될 것입니다.&lt;/p&gt;
+
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;__fastcall&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;SyscallStub&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_In_&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SystemCallIndex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_Inout_&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SystemCallFunction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SystemCallIndex&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x2c&lt;/span&gt;&lt;span class=&quot;cm&quot;&gt;/*NtTerminateProcess 인덱스*/&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;// 원본 NtTerminateProcess 주소를 백업
+&lt;/span&gt;        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;OrigNtTerminateProcess&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;OrigNtTerminateProcess&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NtTerminateProcess_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SystemCallFunction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+        &lt;span class=&quot;c1&quot;&gt;// NtTerminateProcess 함수 콜을 후킹 함수(DetourNtTerminateProcess)로 바꿔준다.
+&lt;/span&gt;        &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SystemCallFunction&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DetourNtTerminateProcess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;그럼, 소스코드(C:\InfHook\src\kinfinityhook\entry.cpp) 전체를 다음과 같이 재작성해주세요. 
+코드설명은 주석으로 대신하겠습니다.&lt;/p&gt;
+
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;#include &quot;stdafx.h&quot;
+#include &quot;entry.h&quot;
+#include &quot;infinityhook.h&quot;
+&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NTSTATUS&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NTAPI&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NtTerminateProcess_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HANDLE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ProcessHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NTSTATUS&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ExitStatus&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NtTerminateProcess_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;OrigNtTerminateProcess&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;NTSTATUS&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DetourNtTerminateProcess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HANDLE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ProcessHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NTSTATUS&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ExitStatus&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;typedef&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PCHAR&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PsGetProcessImageFileName_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PEPROCESS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PsGetProcessImageFileName_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PsGetProcessImageFileName&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// 드라이버 메인
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;extern&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;C&quot;&lt;/span&gt; 
+&lt;span class=&quot;n&quot;&gt;NTSTATUS&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DriverEntry&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_In_&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PDRIVER_OBJECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DriverObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_In_&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PUNICODE_STRING&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RegistryPath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;UNREFERENCED_PARAMETER&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RegistryPath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;kprintf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;[+] infinityhook: Loaded.&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// 드라이버 언로드 핸들러 등록
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;DriverObject&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DriverUnload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DriverUnload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// 후킹 시작(시스템콜이 발생하면, SyscallStub 함수로 제어권이 넘어감)
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;NTSTATUS&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Status&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IfhInitialize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SyscallStub&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NT_SUCCESS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Status&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;kprintf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;[-] infinityhook: Failed to initialize with status: 0x%lx.&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Status&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Status&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// 드라이버 언로드할 때
+&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DriverUnload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_In_&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PDRIVER_OBJECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DriverObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;UNREFERENCED_PARAMETER&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DriverObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// 후킹 종료
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;IfhRelease&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;kprintf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;[!] infinityhook: Unloading... BYE!&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;__fastcall&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SyscallStub&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_In_&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SystemCallIndex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_Inout_&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SystemCallFunction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SystemCallIndex&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x2c&lt;/span&gt;&lt;span class=&quot;cm&quot;&gt;/*NtTerminateProcess 인덱스*/&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;// 원본 NtTerminateProcess 주소를 백업
+&lt;/span&gt;        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;OrigNtTerminateProcess&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;OrigNtTerminateProcess&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NtTerminateProcess_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SystemCallFunction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+        &lt;span class=&quot;c1&quot;&gt;// NtTerminateProcess 함수 콜을 후킹 함수(DetourNtTerminateProcess)로 바꿔준다.
+&lt;/span&gt;        &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SystemCallFunction&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DetourNtTerminateProcess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; 
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// NtTerminateProcess 후킹 함수
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NTSTATUS&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DetourNtTerminateProcess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HANDLE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ProcessHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NTSTATUS&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ExitStatus&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;kprintf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;HookNtTerminateProcess Entry&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// 원본 NtTerminateProcess 호출
+&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;OrigNtTerminateProcess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ProcessHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ExitStatus&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;프로세스가 종료될 때(&lt;code class=&quot;highlighter-rouge&quot;&gt;NtTerminateProcess&lt;/code&gt;가 호출될 때), &lt;code class=&quot;highlighter-rouge&quot;&gt;DetourNtTerminateProcess&lt;/code&gt; 후킹 함수가 제어권을 가로챌 수 있도록 작성된 코드입니다. 지금은 커널로그만 출력하고 어떤 행위도 하지 않도록 되어 있죠.&lt;/p&gt;
+
+&lt;p&gt;후킹이 제대로 되는지 확인해 볼까요? 우선 DbgView를 관리자 권한으로 실행하고 &lt;code class=&quot;highlighter-rouge&quot;&gt;Ctrl+K&lt;/code&gt;를 눌러 커널 로그를 덤프뜰 수 있도록 해줍니다. 다음, 새로 작성한 코드를 빌드해봅시다. 비주얼스튜디오에서 &lt;code class=&quot;highlighter-rouge&quot;&gt;Ctrl+Shift+B&lt;/code&gt;를 눌러주세요. 빌드 완료 후, 관리자 cmd 에서 &lt;code class=&quot;highlighter-rouge&quot;&gt;net start infhook&lt;/code&gt; 을 실행하여 새로 작성한 커널드라이버를 다시 로드해줍니다. 프로세스를 몇 개 종료해보면, 아래와 같이 DbgView에 로그메시지가 제대로 출력되는 것을 볼 수 있습니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://user-images.githubusercontent.com/50191798/61901086-f4788500-af59-11e9-897f-5b4e82e57975.png&quot; width=&quot;80%&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;제대로 후킹이 걸려진 것 같군요. 걸려진 것을 확인했으니 &lt;code class=&quot;highlighter-rouge&quot;&gt;net stop infhook&lt;/code&gt; 명령으로 커널 드라이버를 언로드시켜주세요.&lt;/p&gt;
+
+&lt;p&gt;이제 후킹 함수(&lt;code class=&quot;highlighter-rouge&quot;&gt;DetourNtTerminateProcess&lt;/code&gt;)를 다음과 같이 재작성 해보겠습니다. 소스코드 설명은 주석으로 대신하겠습니다.&lt;/p&gt;
+
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// NtTerminateProcess 후킹 함수
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NTSTATUS&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;DetourNtTerminateProcess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HANDLE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ProcessHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IN&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NTSTATUS&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ExitStatus&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;NTSTATUS&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;rtStatus&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;STATUS_SUCCESS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;PEPROCESS&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pEProcess&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;PCHAR&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pStrProcName&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// 프로세스가 스스로 종료되는 것은 허용한다.
+&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NtCurrentProcess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ProcessHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; 
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;OrigNtTerminateProcess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ProcessHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ExitStatus&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// 프로세스 핸들로부터 EPROCESS 구조체의 주소를 구한다.
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;rtStatus&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ObReferenceObjectByHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ProcessHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FILE_READ_DATA&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;KernelMode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PVOID&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pEProcess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NT_SUCCESS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rtStatus&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pEProcess&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;OrigNtTerminateProcess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ProcessHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ExitStatus&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// EPROCESS 로부터 프로세스명을 구한다.
+&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PsGetProcessImageFileName&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;UNICODE_STRING&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;StringPsGetProcessImageFileName&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RTL_CONSTANT_STRING&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;L&quot;PsGetProcessImageFileName&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;PsGetProcessImageFileName&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PsGetProcessImageFileName_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MmGetSystemRoutineAddress&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;StringPsGetProcessImageFileName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;pStrProcName&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PCHAR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PsGetProcessImageFileName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pEProcess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;block&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pStrProcName&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;strcmp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pStrProcName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;notepad.exe&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// EPROCESS 구조체 참조 해제
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;ObReferenceObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pEProcess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;block&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;c1&quot;&gt;// 메모장(notepad.exe)이 종료되는 것을 막는다.
+&lt;/span&gt;        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;STATUS_SUCCESS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// 원본 NtTerminateProcess 호출
+&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;OrigNtTerminateProcess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ProcessHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ExitStatus&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;코드를 다시 빌드(&lt;code class=&quot;highlighter-rouge&quot;&gt;Ctrl+Shif+B&lt;/code&gt;)하고, &lt;code class=&quot;highlighter-rouge&quot;&gt;net start infhook&lt;/code&gt; 으로 드라이버를 로드해보세요.&lt;/p&gt;
+
+&lt;p&gt;다음처럼 불멸의 메모장을 보실 수 있습니다!&lt;/p&gt;
+
+&lt;iframe width=&quot;560&quot; height=&quot;315&quot; src=&quot;https://www.youtube.com/embed/-igmNVJtWCs&quot; frameborder=&quot;0&quot; allow=&quot;accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture&quot; allowfullscreen=&quot;&quot;&gt;&lt;/iframe&gt;
+
+&lt;p&gt;&lt;strong&gt;참고자료&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/everdox/InfinityHook&quot;&gt;InfinityHook&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/Cody2333/SSDT_HOOK/blob/master/ssdt.c&quot;&gt;SSDT Hook Code&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://j00ru.vexillium.org/syscalls/nt/64/&quot;&gt;Windows X86-64 System Call Table (XP/2003/Vista/2008/7/2012/8/10)&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/sc-create&quot;&gt;Sc command&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.microsoft.com/en-us/windows-hardware/drivers/install/the-testsigning-boot-configuration-option&quot;&gt;Enable Loading of Test Signed Drivers&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://stackoverflow.com/questions/20552300/hook-zwterminateprocess-in-x64-driver-without-ssdt&quot;&gt;RegisterCallbackFunction&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+        <pubDate>Fri, 26 Jul 2019 00:00:00 +0900</pubDate>
+      </item>
+    
+      <item>
+        <title>DIFF-2019-004</title>
+        <link>/2019/07/22/WD.html</link>
+        <guid isPermaLink="true">/2019/07/22/WD.html</guid>
+        <description>&lt;hr /&gt;
+
+&lt;h2 id=&quot;technologies&quot;&gt;Technologies&lt;/h2&gt;
+
+&lt;h3 id=&quot;infinityhook&quot;&gt;InfinityHook&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Kernel_Patch_Protection&quot;&gt;&lt;em&gt;PatchGuard&lt;/em&gt;&lt;/a&gt;를 우회할 수 있는 윈도우즈 커널 후킹 라이브러리가 최근 공개되었습니다.&lt;/p&gt;
+
+&lt;p&gt;커널 후킹 기술은 보안 제품이나 루트킷에서 거의 필수적으로 사용되어 왔습니다. 과거에는 &lt;em&gt;SSDT, IDT&lt;/em&gt; 등의 시스템 테이블 변조를 통해 구현하는 방식이 일반적이었는데, MS가 &lt;em&gt;PatchGuard&lt;/em&gt;를 도입하고 나서부터 기존의 커널 후킹 방식이 불가능해졌습니다.&lt;/p&gt;
+
+&lt;p&gt;이러한 상황에서 공개된 &lt;a href=&quot;https://github.com/everdox/InfinityHook&quot;&gt;&lt;em&gt;InfinityHook&lt;/em&gt;&lt;/a&gt;은 &lt;em&gt;PatchGuard&lt;/em&gt;를 우회할 수 있는 윈도우즈 커널 후킹 라이브러리로서, Win7~Win10을 지원하고 시스템콜,컨텍스트스위치,페이지폴트 핸들러 등을 후킹할 수 있습니다.&lt;/p&gt;
+
+&lt;p&gt;사용하기 쉽게 잘 만들어져 있어 해당 기술을 해커들이 차용할 가능성이 있습니다. 방어자 입장에선 어떻게 탐지할 것인지 고민해야 할 것으로 보입니다..&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;테스트&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;InfinityHook&lt;/em&gt;은 커널 라이브러리이므로, 이것을 테스트해보려면 커널드라이버를 만들어야 합니다. 커널 드라이버의 큰 골격은 다음과 같습니다.&lt;/p&gt;
+
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cm&quot;&gt;/* 드라이버 메인 함수입니다. */&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;NTSTATUS&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;DriverEntry&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_In_&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PDRIVER_OBJECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DriverObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_In_&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PUNICODE_STRING&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RegistryPath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// 드라이버 언로드 핸들러 등록
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;DriverObject&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DriverUnload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DriverUnload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;  
+
+    &lt;span class=&quot;c1&quot;&gt;// NtCreateFile 주소
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;OriginalNtCreateFile&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NtCreateFile_t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MmGetSystemRoutineAddress&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;StringNtCreateFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// InfinityHook을 시작합니다.
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;IfhInitialize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SyscallStub&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;cm&quot;&gt;/* 드라이버 언로드시 */&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;DriverUnload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_In_&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PDRIVER_OBJECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DriverObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// InfinityHook을 종료합니다.
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;IfhRelease&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;       
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// 시스템콜호출 -&amp;gt; 시스템콜디스패처(KiSystemCall64) -&amp;gt; ETW 로깅(PerfInfoLogSysCallEntry)-&amp;gt; GetCpuClock -&amp;gt;
+// InfinityHook 라이브러리(IfhpInternalGetCpuClock) -&amp;gt; SyscallStub
+&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;__fastcall&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;SyscallStub&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_In_&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SystemCallIndex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_Inout_&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SystemCallFunction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// 원하는 시스템콜(예: NtCreateFile)이 호출되면
+&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SystemCallFunction&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;OriginalNtCreateFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SystemCallFunction&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DetourNtCreateFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;   &lt;span class=&quot;c1&quot;&gt;// 후킹함수로 교체
+&lt;/span&gt;    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// 후킹 함수
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NTSTATUS&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;DetourNtCreateFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;_Out_&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PHANDLE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FileHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;_In_&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ACCESS_MASK&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DesiredAccess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;_In_&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;POBJECT_ATTRIBUTES&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;_Out_&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PIO_STATUS_BLOCK&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IoStatusBlock&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;_In_opt_&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PLARGE_INTEGER&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AllocationSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;_In_&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ULONG&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FileAttributes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;_In_&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ULONG&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ShareAccess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;_In_&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ULONG&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CreateDisposition&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;_In_&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ULONG&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CreateOptions&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;_In_reads_bytes_opt_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;EaLength&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PVOID&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;EaBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;_In_&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ULONG&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;EaLength&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;cm&quot;&gt;/*
+        여기서 원하는 작업 수행
+    */&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// 원본 함수 호출
+&lt;/span&gt;    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;OriginalNtCreateFile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FileHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DesiredAccess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ObjectAttributes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IoStatusBlock&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AllocationSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FileAttributes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ShareAccess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CreateDisposition&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CreateOptions&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;EaBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;EaLength&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;em&gt;InfinityHook&lt;/em&gt;을 &lt;a href=&quot;https://github.com/everdox/InfinityHook/archive/master.zip&quot;&gt;공식 홈페이지&lt;/a&gt;에서 다운로드 받습니다.&lt;/p&gt;
+
+&lt;p&gt;WDK 위치: https://docs.microsoft.com/ko-kr/windows-hardware/drivers/download-the-wdk&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;후킹방식&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;InfinityHook&lt;/em&gt;의 후킹 방식을 좀 살펴볼까요? 후킹은 &lt;em&gt;ETW(Event Tracing For Windows)&lt;/em&gt;와 관련이 있습니다. &lt;em&gt;ETW&lt;/em&gt;는 윈도우즈 시스템에서 발생하는 이벤트를 수집해주는 기능으로, 이벤트 추적을 위해 시스템 전역에 이벤트 수집 코드를 정적으로 삽입해 놓았습니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;ETW&lt;/em&gt;는 시스템콜 호출 이벤트 역시 수집할 수 있습니다. 이를 위해 모든 시스템콜의 커널 진입점이 되는 시스템콜 디스패처(&lt;code class=&quot;highlighter-rouge&quot;&gt;KiSystemCall64&lt;/code&gt;)에다 이벤트 수집 함수(&lt;code class=&quot;highlighter-rouge&quot;&gt;PerfInfoLogSysCallEntry&lt;/code&gt;)를 아래 그림처럼 삽입해 놓습니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://github.com/everdox/InfinityHook/raw/master/resources/perf.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;[출처: InfinityHook github]&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;PerfInfoLogSysCallEntry&lt;/code&gt; 내부에선 &lt;code class=&quot;highlighter-rouge&quot;&gt;_WMI_LOGGER_CONTEXT&lt;/code&gt; 구조체의 &lt;code class=&quot;highlighter-rouge&quot;&gt;GetCpuClock&lt;/code&gt; 함수포인터를 호출하는데, &lt;em&gt;InfinityHook&lt;/em&gt;은 바로 이 함수 포인터를 덮어쓰는 방식으로 제어권을 가로챕니다. 결국 모든 시스템콜이 호출될 때마다 &lt;em&gt;InfinityHook&lt;/em&gt;이 제어권을 가로챌 수 있도록 한 것이죠. &lt;em&gt;PatchGuard&lt;/em&gt;는 정적으로 생성된 주요 시스템 테이블이나 코드 영역에 대해서 Coarse-grained하게 변조 행위를 감시할 수 있지만, 동적으로 생성되는 이런 종류의 데이터스트럭쳐들 하나하나를 Fine-grained하게 보호하지는 못하는 것으로 보입니다. 성능 문제 때문이겠지요.&lt;/p&gt;
+
+&lt;p&gt;제어권을 가로챈 후 &lt;em&gt;InfinityHook&lt;/em&gt;이 하는 일은, 커널스레드 스택을 조사해서 원본 시스템콜핸들러 주소가 저장된 스택위치(그림에서 보면 첫번째 빨간색 화살표)를 찾아낸 후 해당 스택의 값을 후킹함수의 주소로 덮어씁니다. 이후 &lt;code class=&quot;highlighter-rouge&quot;&gt;call r10&lt;/code&gt;(세번째 빨간색)이 실행되면, 원본시스템콜핸들러 대신 후킹함수가 최종적으로 호출되도록 구현되어 있습니다.&lt;/p&gt;
+
+&lt;p&gt;InfinityHook의 단점은 시스템콜이 불릴 때마다 후킹을 위해 스택 조사 작업(Stack Walking)을 동반하기 때문에 예전 후킹방식에 비해 시스템 성능을 떨어뜨릴 수 있다는 점입니다.&lt;/p&gt;
+
+&lt;p&gt;감히(?) 단점을 언급하였지만, 커널 후킹 기술을 공개하였다는 사실만으로도 리서쳐들에겐 감사한 일인 것은 분명합니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;참고자료&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/everdox/InfinityHook&quot;&gt;InfinityHook, github&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;vulnerability&quot;&gt;Vulnerability&lt;/h2&gt;
+
+&lt;h3 id=&quot;dell-lpe-취약점cve-2019-3735&quot;&gt;&lt;a href=&quot;https://d4stiny.github.io/Local-Privilege-Escalation-on-most-Dell-computers/&quot;&gt;Dell LPE 취약점(CVE-2019-3735)&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;Bill Demirkapi라는 17살의 보안 연구원이 윈도우즈가 설치된 Dell PC에서의 권한상승 취약점에 대한 내용을 지난 6월말에 캐나다에서 개최된 Recon 컨퍼런스와 본인의 블로그를 통해 공개했습니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;img width=&quot;70%&quot; src=&quot;https://user-images.githubusercontent.com/5102989/61612914-d4676e00-ac9a-11e9-83b0-3fac062b7707.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;[출처: d4stiny.github.io]&lt;/p&gt;
+
+&lt;p&gt;Dell PC에는 SupportAssist라는 프로그램이 미리 설치가 되어 있습니다. SupportAssist는 주기적으로 시스템의 상태를 체크하고 사용자에게 업데이트 알람도 주며 버전에 맞는 드라이버도 자동으로 설치해주는 프로그램입니다.&lt;/p&gt;
+
+&lt;p&gt;Bill은 바로 이 프로그램에서 권한상승 취약점을 발견했습니다. Bill은 지난 5월에 동일한 프로그램에서 RCE 취약점을 발견하여 &lt;a href=&quot;https://d4stiny.github.io/Remote-Code-Execution-on-most-Dell-computers&quot;&gt;공개&lt;/a&gt;하기도 했습니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;취약점&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;SupportAssistAgent.exe&lt;/code&gt;는 시스템 서비스로 실행되며, 자식 프로세스로 &lt;code class=&quot;highlighter-rouge&quot;&gt;SupportAssistAppWire.exe&lt;/code&gt;를 실행시킵니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://user-images.githubusercontent.com/5102989/61609402-fbb93d80-ac90-11e9-92da-954a8eb20b46.png&quot; alt=&quot;SupportAssistAgentProcess&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;[출처: d4stiny.github.io]&lt;/p&gt;
+
+&lt;p&gt;권한상승 취약점의 원인은 자식 프로세스가 생성될 때 상속받은 부모프로세스(시스템프로세스)의 스레드 핸들에 모든 권한(full control)이 주어졌다는 데 있습니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://user-images.githubusercontent.com/5102989/61609456-25726480-ac91-11e9-932e-b539911a4af7.png&quot; alt=&quot;thread_handle_properties&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;[출처: d4stiny.github.io]&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;익스플로잇 절차&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;시스템 프로세스의 스레드에 대한 모든 권한(full control)을 가진 취약점을 악용하여 다음과 같은 절차를 통해 최종적으로 권한상승 할 수 있습니다.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;자식 프로세스(&lt;code class=&quot;highlighter-rouge&quot;&gt;SupportAssistAppWire.exe&lt;/code&gt;)의 실행을 감시합니다.&lt;/li&gt;
+  &lt;li&gt;자식 프로세스가 실행되면, Dll Injection을 통해 자식 프로세스에 코드를 삽입합니다.&lt;/li&gt;
+  &lt;li&gt;삽입된 코드는 상속받은 부모프로세스(&lt;code class=&quot;highlighter-rouge&quot;&gt;SupportAssistAgent.exe&lt;/code&gt;)의 스레드 핸들을 찾습니다.&lt;/li&gt;
+  &lt;li&gt;부모프로세스의 스레드 핸들을 이용해, SetThreadContext를 호출하여 부모프로세스의 스레드 실행 컨텍스트를 다음과 같이 변경합니다.
+    &lt;ul&gt;
+      &lt;li&gt;RIP값을 NtTestAlert로 변경&lt;/li&gt;
+      &lt;li&gt;해당 스레드는 현재 Wait 상태라 RIP값을 바꾼다고 바로 실행되지는 않음&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;부모프로세스의 스레드 핸들을 이용해, LoadLibrary를 엔트리로 하는 APC를 등록합니다.&lt;/li&gt;
+  &lt;li&gt;부모프로세스에 시그널을 보내 스레드의 Wait 상태를 깨웁니다.
+    &lt;ul&gt;
+      &lt;li&gt;자식 프로세스가 시그널을 보낼 수 있었던 것은 부모프로세스가 Interactive 그룹에 속해 있어, 자식 프로세스도 시그널을 보낼 수 있는 권한이 있었기 때문입니다.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;스레드가 깨어나면 NtTestAlert이 실행되고, NtTestAlert는 큐에 등록되어 있던 APC를 꺼내 실행합니다.&lt;/li&gt;
+  &lt;li&gt;APC로 LoadLibrary가 실행되어 페이로드 DLL이 최종적으로 부모프로세스상에서 실행됩니다.
+    &lt;ul&gt;
+      &lt;li&gt;Bill은 부모프로세스의 sqlite3.dll이 사용하는 파일 경로 중에서 사용자가 쓸 수 있는 경로를 찾아냈고, 해당 경로를 페이로드 DLL로 덮어씁니다.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+</description>
+        <pubDate>Mon, 22 Jul 2019 00:00:00 +0900</pubDate>
+      </item>
+    
+      <item>
+        <title>DIFF-2019-003</title>
+        <link>/2019/07/12/WD.html</link>
+        <guid isPermaLink="true">/2019/07/12/WD.html</guid>
+        <description>&lt;hr /&gt;
+
+&lt;h2 id=&quot;issues&quot;&gt;Issues&lt;/h2&gt;
+
+&lt;h3 id=&quot;zoom-취약점&quot;&gt;Zoom 취약점&lt;/h3&gt;
+
+&lt;p&gt;Jonathan Leitschuh이란 연구원이 Zoom 서비스 취약점을 7월 9일자로 공개했습니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;요약&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Zoom의 Mac 클라이언트에서 원격 취약점이 발견됨&lt;/li&gt;
+  &lt;li&gt;여러 취약점 중에서 &lt;u&gt;사용자의 웹캠을 노출&lt;/u&gt;시킬 수 있는 취약점이 가장 크리티컬함&lt;/li&gt;
+  &lt;li&gt;2015년 기준으로 약 4천만명이 Zoom을 사용하고 PC 시장에서 대략 10% 정도가 Mac 유저라고 볼 때, &lt;u&gt;최소 4백만명&lt;/u&gt; 정도의 Mac 사용자가 해당 취약점에 영향을 받는다고 추산&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;취약점&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;취약점 원인은 Mac 클라이언트를 설치할 때 같이 설치되는 &lt;b&gt;&lt;u&gt;로컬 웹서버&lt;/u&gt;&lt;/b&gt;(포트19421)에 있습니다.&lt;/p&gt;
+
+&lt;p&gt;해커는 다음과 같은 스크립트를 통해 Zoom 사용자 PC의 로컬 웹서버에 요청을 보낼 수 있고, 사용자 동의 없이 해커가 만들어놓은 채널에 사용자를 조인시킬 수 있습니다. 사용자의 웹캠이 켜진 상태로 말이죠.&lt;/p&gt;
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;img&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;src=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;http://localhost:19421/launch?action=join&amp;amp;confno=492468757&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;다음 그림처럼 참여자의 웹캠을 켜는 권한이 채널을 만드는 사람(해커)에게 있었기 때문에,&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://miro.medium.com/max/1750/1*3v6fVs6FM39EDWQUBK2s4w.png&quot; width=&quot;50%&quot; height=&quot;50%&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;위 스크립트를 통해 사용자를 채널로 유인하면 자동으로 웹캠이 켜진 상태로 조인되었던 것이죠.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;해결책&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;제로데이 상태로 공개가 되었기 때문에 현재까지도 많은 이슈가 되고 있습니다. Mac 사용자들은 Zoom 클라이언트를 삭제하면 되겠다라고 생각할지도 모르겠습니다. 하지만 더 문제가 된 것은 사용자가 &lt;u&gt;Mac 클라이언트를 삭제해도 로컬 웹서버는 삭제되지 않고 살아있다&lt;/u&gt;는 점인데요. Mac 클라이언트를 삭제해도 여전히 해당 취약점에 노출되어 있는 상태였던 것이죠.&lt;/p&gt;
+
+&lt;p&gt;그래서 로컬 웹서버까지 확실히 제거할 수 있는 방법이 사용자들 사이에서 공유되었습니다.&lt;/p&gt;
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;lsof &lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt;:19421
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;kill&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-9&lt;/span&gt; &amp;lt;pid&amp;gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;rm &lt;span class=&quot;nt&quot;&gt;-rf&lt;/span&gt; ~/.zoomus
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;touch ~/.zoomus
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;19421 포트의 프로세스를 먼저 죽이고, zoom 관련 디렉토리(~/.zoomus)를 제거하는 것입니다.&lt;/p&gt;
+
+&lt;p&gt;취약점 타임라인 및 더 자세한 내용은 Jonathan의 블로그, &lt;a href=&quot;https://medium.com/bugbountywriteup/zoom-zero-day-4-million-webcams-maybe-an-rce-just-get-them-to-visit-your-website-ac75c83f4ef5&quot;&gt;“Zoom Zero Day: 4+ Million Webcams &amp;amp; maybe an RCE? Just get them to visit your website!”&lt;/a&gt;를 참고해주세요.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&quot;issues-1&quot;&gt;Issues&lt;/h2&gt;
+
+&lt;h3 id=&quot;애플의-사일런트-업데이트&quot;&gt;애플의 사일런트 업데이트&lt;/h3&gt;
+
+&lt;p&gt;Zoom 클라이언트를 삭제해도 Zoom의 로컬 웹서버가 삭제되지 않고 살아있는 문제를 해결하기 위해 애플이 직접 나섰습니다. 바로 MacOS의 사일런트 업데이트를 통해 Zoom 클라이언트의 로컬 웹서버를 제거하기로 한 것인데요. OS에서 사일런트 업데이트를 통해 타사의 제품을 제거한 사례는 매우 이례적이라 큰 이슈(&lt;a href=&quot;https://techcrunch.com/2019/07/10/apple-silent-update-zoom-app/&quot;&gt;Apple has pushed a silent Mac update to remove hidden Zoom web server&lt;/a&gt;)가 되었습니다.&lt;/p&gt;
+
+&lt;p&gt;사일런트 업데이트는 MacOS에서 사용하는 MRT(Malware Removal Tool)이라는 악성코드제거도구의 패턴업데이트로 밝혀졌습니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://user-images.githubusercontent.com/50191798/61099922-07418300-a49f-11e9-8298-0a09453c07f1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Zoom 클라이언트 제거 패턴은 MRTConfigData 1.45 버전에서 업데이트되었습니다.&lt;/p&gt;
+
+&lt;p&gt;패턴 내용은 MRT 앱(&lt;code class=&quot;highlighter-rouge&quot;&gt;/System/Library/CoreServices/MRT.app&lt;/code&gt;)의 실행 바이너리를 분석해보면 알 수 있습니다. 
+objective-see 운영자로 유명한 patrick wardle의 &lt;a href=&quot;https://twitter.com/patrickwardle/status/1149176886817255424&quot;&gt;트윗&lt;/a&gt;에서 패턴명(“MACOS.354c063”)을 언급하고 있는데요. hopper 등의 디스어셈블리를 사용해서 해당 패턴명을 참조하는 곳을 보면&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://user-images.githubusercontent.com/50191798/61100363-e1b57900-a4a0-11e9-9530-825104f9f7e2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://user-images.githubusercontent.com/50191798/61100428-16293500-a4a1-11e9-85a9-ebf7f6424de1.png&quot; width=&quot;50%&quot; height=&quot;50%&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;다음 문자열을 패턴으로 사용하고 있음을 알 수 있습니다.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;~/.zoomus/ZoomOpener.app/Contents/MacOS/ZoomOpener
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;패턴 테스트를 위해 ~/.zoomus 아래에 ZoomOpener 파일(로컬웹서버)을 만들고 실행해보겠습니다.&lt;/p&gt;
+
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;mkdir &lt;span class=&quot;nt&quot;&gt;-p&lt;/span&gt; ~/.zoomus/ZoomOpener.app/Contents/MacOS/
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ~/.zoomus/ZoomOpener.app/Contents/MacOS/
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;void main() { getchar(); }&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; ZoomOpener.c
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;clang ZoomOpener.c &lt;span class=&quot;nt&quot;&gt;-o&lt;/span&gt; ZoomOpener
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;./ZoomOpener
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;MRT를 실행합니다.&lt;/p&gt;
+
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;./MRT &lt;span class=&quot;nt&quot;&gt;-a&lt;/span&gt;                  
+2019-07-12 12:43:02.952 MRT[6575:173083] Running as agent
+2019-07-12 12:43:03.037 MRT[6575:173083] failed to check loginItems
+2019-07-12 12:43:03.196 MRT[6575:173083] Found MACOS.354c063 infection.
+/Users/diff/.zoomus/ZoomOpener.app/Contents/MacOS/ZoomOpener: Process killed
+2019-07-12 12:43:03.198 MRT[6575:173083] Found MACOS.354c063 infection.
+/Users/diff/.zoomus: Directory removed
+2019-07-12 12:43:03.198 MRT[6575:173083] Found MACOS.354c063 infection.
+/Users/diff/.zoomus: Directory recreated
+2019-07-12 12:43:03.199 MRT[6575:173083] Agent finished.
+2019-07-12 12:43:03.199 MRT[6575:173083] Finished MRT run
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;MACOS.354c063 감염을 발견했다는 메시지를 볼 수 있고, ZoomOpener(로컬웹서버) 프로세스를 죽이고 관련 디렉토리(~/.zoomus)를 제거했다는 것을 로그를 통해 확인할 수 있네요.&lt;/p&gt;
+
+&lt;p&gt;Filemon 로그도 확인해보겠습니다.&lt;/p&gt;
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo&lt;/span&gt; ./filemon &lt;span class=&quot;nt&quot;&gt;-f&lt;/span&gt; zoomus
+
+Adding File filter 0: zoomus
+ 6575 MRT	Deleted        /Users/diff/.zoomus/ZoomOpener.app/Contents/MacOS/ZoomOpener
+ 6575 MRT	Deleted        /Users/diff/.zoomus/ZoomOpener.app/Contents/MacOS/ZoomOpener.c
+ 6575 MRT	Deleted        /Users/diff/.zoomus/ZoomOpener.app/Contents/MacOS
+ 6575 MRT	Deleted        /Users/diff/.zoomus/ZoomOpener.app/Contents
+ 6575 MRT	Deleted        /Users/diff/.zoomus/ZoomOpener.app
+ 6575 MRT	Deleted        /Users/diff/.zoomus
+ 6575 MRT	Created dir    /Users/diff/.zoomus
+ 6575 MRT	Chowned        /Users/diff/.zoomus
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Zoom 클라이언트 제거를 위해 MacOS 사일런트 업데이트가 이루어진 사실을 확인해보았습니다. MRT가 동작하는 시점이 확인되지는 않았으나, Zoom 클라이언트의 로컬웹서버가 설치되어있다면 사용자 인지없이 백그라운드에서 제거가 될 것입니다.&lt;/p&gt;
+
+&lt;p&gt;참고자료:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.sentinelone.com/blog/apples-malware-removal-mrt-tool-update/&quot;&gt;APPLE MALWARE: UNCOVERING THE MYSTERIOUS REMOVAL (MRT) TOOL UPDATE&lt;/a&gt;, SentinelOne&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://discussions.apple.com/thread/250079600&quot;&gt;What is this MRTConfigData&lt;/a&gt;, Apple&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://twitter.com/patrickwardle/status/1149176886817255424&quot;&gt;patrick wardle’s tweet&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Fri, 12 Jul 2019 00:00:00 +0900</pubDate>
+      </item>
+    
+      <item>
+        <title>DIFF-2019-002</title>
+        <link>/2019/07/02/Weekly-Diffense.html</link>
+        <guid isPermaLink="true">/2019/07/02/Weekly-Diffense.html</guid>
+        <description>&lt;hr /&gt;
+
+&lt;h1 id=&quot;vulnerabilities&quot;&gt;Vulnerabilities&lt;/h1&gt;
+
+&lt;h3 id=&quot;attacking-intels-transactional-synchronization-extensions&quot;&gt;&lt;a href=&quot;https://blog.ret2.io/2019/06/26/attacking-intel-tsx&quot;&gt;Attacking Intel’s Transactional Synchronization Extensions&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;Pwn2Own 2018 우승팀으로도 유명한 ret2system에서 &lt;strong&gt;Intel TSX 버그&lt;/strong&gt;를 발견하였습니다.
+재미있는 사실은 Defcon CTF 문제를 풀다가 발견하였다는 것인데요.&lt;/p&gt;
+
+&lt;p&gt;우선 Intel TSX에 대해 설명드리고, ret2system에서 발견한 CPU 버그와 이를 이용해 CTF 문제를 어떻게 해결하였는지를 설명하겠습니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Intel TSX?&lt;/strong&gt;&lt;br /&gt;
+Intel의 TSX(Transactional Synchronization eXtensions)은 멀티스레드의 동기화 문제를 간소화시키는 데 도움을 주는 하드웨어 기술입니다.&lt;/p&gt;
+
+&lt;p&gt;다음 예는 Intel에서 발표한 내용의 일부를 가져온 것인데요.
+&lt;img src=&quot;https://user-images.githubusercontent.com/50191798/60555722-23e00b80-9d79-11e9-8359-41f5db8d02f1.png&quot; width=&quot;80%&quot; height=&quot;80%&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;2개의 스레드(Alice, Bob)가 공유자원(Table)에 동시에 접근할 경우, 원치 않는 결과(-10)가 나올 수 있음을 왼쪽 그림이 보여주고 있습니다. 이를 해결하기 위해 개발자들은 보통 오른쪽 그림처럼 Lock을 사용하죠.&lt;/p&gt;
+
+&lt;p&gt;다음 그림을 보겠습니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://user-images.githubusercontent.com/50191798/60555911-cf895b80-9d79-11e9-94e4-e8bb3165c034.png&quot; width=&quot;80%&quot; height=&quot;80%&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;왼쪽 그림은 앞서 본 것처럼 테이블 전체에다 Lock을 걸어 놓은 것입니다. Coarse Grain Locking이라고 하는데요. 테이블 전체에다 Lock을 걸어 놓은 것이라 Alice와 Bob이 테이블의 다른 항목(A,B)에 접근하려는 경우에도 Alice나 Bob 둘 중 한 스레드가 테이블을 독점하는 비효율이 발생하게 됩니다.
+이에 대한 해결책으로 테이블을 더 잘게 항목별로 나눠서 각 항목마다 Lock을 걸어주는 방법이 있습니다. Fine Grain Locking이라 부르고 오른쪽 그림과 같은 상황을 얘기하는 것입니다. &lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;Coarse Grain Locking의 장점은 사용하기 쉽다는 것이고, 단점은 성능이 떨어진다는 것입니다. Fine Grain Locking은 그 반대라고 보시면 되겠죠.&lt;/p&gt;
+
+&lt;p&gt;Intel TSX는 바로 이 지점에서 솔루션을 제시합니다. 개발자들이 Coarse Grain Locking을 걸어놓으면 하드웨어 레벨에서 Fine Grain Locking 처리를 해주는 것입니다.
+&lt;img src=&quot;https://user-images.githubusercontent.com/50191798/60556606-247aa100-9d7d-11e9-85e0-b03fcb2405c6.png&quot; width=&quot;80%&quot; height=&quot;80%&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;바로 “Fine Grain Behavior at Coarse Grain Effort”라는 목표를 위해 개발된 기술이 Intel TSX 라는 것입니다. 결국 개발자의 편의성과 성능 2가지 토끼를 다 잡겠다는 얘기입니다.&lt;/p&gt;
+
+&lt;p&gt;그럼 이 기술을 개발자가 어떻게 쓰나요? &lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;다음 그림처럼 크리티컬섹션(공유자원에 접근하는 코드영역)에 Lock을 걸어주면 됩니다.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;xacquire lock mov [rax], 1          ; lock을 획득합니다.
+...
+...         ; 크리티컬 섹션(트랜잭션 리전)
+...
+xrelease lock mov [rax], 0          ; lock을 해제하려면 원래 값(0)으로 복원해줘야 합니다.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Lock을 걸려면 &lt;code class=&quot;highlighter-rouge&quot;&gt;xacquire&lt;/code&gt;, 해제할 경우엔 &lt;code class=&quot;highlighter-rouge&quot;&gt;xrelease&lt;/code&gt;라는 명령어를 사용하면 됩니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Transactional Memory&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;xacquire&lt;/code&gt;을 통해 크리티컬 섹션(TSX에선 트랜잭션 리전이라고도 부름)에 진입하면, 트랜잭션 실행(Transactional Execution) 상태로 바뀝니다. 이 시점부터 이루어지는 메모리 업데이트(Transactional Update)는 트랜잭션 메모리(Transactional Memory)라는 곳에 기록됩니다. 다른 스레드가 이 시점에선 해당 업데이트된 내용을 확인할 수 없습니다. 트랜잭션이 완료되기 전까지는요. &lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;xrelease&lt;/code&gt;를 통해 트랜잭션 리전을 빠져나올 때 데이터 충돌(data conflict)이 없다고 판단이 되면 트랜잭션을 완료하게 됩니다. 즉 트랜잭션 메모리에서 기록했던 변경사항들을 실제 메인 메모리에 반영(Transactional Commit)합니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Hotel California’s Sandbox&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;올해 2019년 Defcon CTF에서 출제된 ‘Hotel California’ 문제는 Intel TSX의 &lt;code class=&quot;highlighter-rouge&quot;&gt;xacquire&lt;/code&gt;와 &lt;code class=&quot;highlighter-rouge&quot;&gt;xrelease&lt;/code&gt; 명령어를 이용해서 샌드박스를 구현했습니다.&lt;/p&gt;
+
+&lt;p&gt;스레드가 크리티컬섹션(트랜잭션 리전)에 진입하면,&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;메모리 write 명령이 실제 메인메모리에 반영되지 않고, 트랜잭션메모리에 쓰여짐&lt;/li&gt;
+  &lt;li&gt;스레드의 시스템 콜 호출이 허용되지 않음&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;위 사실을 통해 샌드박스를 다음과 같이 구현했습니다.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mov [rdi], eax       ; eax = key_X, ebx = key_Y
+xor eax, rax         ; key_X 지움
+
+xacquire lock xor [rdi], ebx  ;  트랜잭션 리전 진입,  key_Z = key_X xor key_Y
+
+xor rbx, rbx         ; key_Y 지움
+
+[유저 쉘코드 시작]
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;이러한 샌드박스 환경에서 참가자가 작성한 쉘코드가 실행되는 챌린지입니다.  쉘코드에서 시스템 콜을 호출하고 싶은데, 샌드박스라 호출할 수가 없습니다.&lt;/p&gt;
+
+&lt;p&gt;만약 key_X를 알수만 있다면 &lt;code class=&quot;highlighter-rouge&quot;&gt;xrelease&lt;/code&gt;를 사용해 lock을 풀고 트랜잭션 상태를 빠져나오게 되어 샌드박스를 탈출할 수 있습니다.&lt;/p&gt;
+
+&lt;p&gt;쉘코드에서 key_X를 알 수 있을까요?&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;CPU Bug?&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Pwn2Own 우승팀(Safari 카테고리)으로도 유명한 ret2system에서 위 문제를 풀다가 Intel TSX에서 버그를 발견합니다. 해당 버그를 이용해 문제를 해결하였는데요.&lt;/p&gt;
+
+&lt;p&gt;우선 쉘코드와 lock(문제에서 rdi가 가리키는 곳)이 같은 rwx 페이지에 있었기 때문에, CPU의 명령어 cache에 key_X가 존재할 것이라는 가정을 합니다. 이 상황에서 트랜잭션 리전에 진입을 하게 되고, lock은 리전에 진입할 때 key_Z(key_X xor key_Y)로 바뀌죠.&lt;/p&gt;
+
+&lt;p&gt;여기서 만약 lock으로 jmp를 하면 어떻게 될까요?
+&lt;br /&gt;&lt;br /&gt;
+원래라면 명령어 cache에 있는 내용(key_X)과 트랜잭션 메모리에 있는 내용(key_Z)의 불일치 현상이 발생했기 때문에, 트랜잭션 메모리에 있는 내용으로 명령어 cache를 업데이트 해주고, 그것(key_Z)을 fetch하여 실행해야 할 것입니다.&lt;/p&gt;
+
+&lt;p&gt;하지만, 이러한 &lt;u&gt;명령어cache와 트랜잭션 메모리간의 불일치 현상이 존재함에도 불구하고, 명령어cache에서 fetch 해올 때 이러한 불일치 현상을 체크하지 않는 버그&lt;/u&gt;가 있습니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://blog.ret2.io/assets/img/tsx_jmp_key_z.png&quot; alt=&quot;ret2system blog&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;그래서 lock으로 jmp를 하게 되면 key_Z를 실행하는 대신, 명령어 cache에 있던 (key_X)를 실행하게 되는 것입니다!&lt;/p&gt;
+
+&lt;p&gt;key_X를 읽는 것이 아닌, key_X를 실행할 수 있게 되었습니다. key_X는 랜덤한 값이라 어떤 명령어 코드가 들어있을 지 예측할 수가 없죠. 
+그래서 ret2system은 key_X가 다음 opcode 조합이 나올 때까지 Bruteforce를 했습니다.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;C2 xx xx 90     ; retn xx xx; nop
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;앞 C2 뒤 90만 맞으면 되기 때문에, 대략 65536 번 안에는 해당 바이트 시퀀스 조합이 나올 확률이 높습니다.
+만약 저 패턴의 명령어(retn xx xx; nop)가 실행되면 rsp 값을 계산해서 xx xx 값을 얻어낼 수가 있을 것입니다. 
+결국 key_X 값을 구할 수 있게 되는 것이죠.&lt;/p&gt;
+
+&lt;p&gt;결론:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;ret2system에서 Defcon CTF 문제를 풀다가 Intel TSX에서 CPU 버그를 발견&lt;/li&gt;
+  &lt;li&gt;Intel TSX에서 명령어cache와 트랜잭션 메모리간의 불일치 현상 버그&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Defcon CTF 문제 설명과 풀이에 대한 자세한 내용은 ret2system blog를 참고해주세요.&lt;/p&gt;
+
+&lt;h4 id=&quot;참고-자료&quot;&gt;참고 자료&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://blog.ret2.io/2019/06/26/attacking-intel-tsx/&quot;&gt;In Transactional Memory, No One Can Hear You Scream&lt;/a&gt;, ret2system blog&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://software.intel.com/en-us/blogs/2013/07/25/fun-with-intel-transactional-synchronization-extensions&quot;&gt;Fun with Intel® Transactional Synchronization Extensions&lt;/a&gt;, Intel Developer Zone&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://software.intel.com/sites/default/files/managed/68/10/sf12-arcs004-100.pdf&quot;&gt;Intel® Transactional Synchronization Extensions&lt;/a&gt;, Intel Developer Forum 2012&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Transactional_Synchronization_Extensions&quot;&gt;Transactional Synchronization Extensions&lt;/a&gt;, Wikipedia&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://software.intel.com/en-us/blogs/2012/02/07/transactional-synchronization-in-haswell&quot;&gt;Transactional Synchronization in Haswell&lt;/a&gt;, Intel Developer Zone&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://software.intel.com/en-us/blogs/2012/02/07/coarse-grained-locks-and-transactional-synchronization-explained&quot;&gt;Coarse-grained locks and Transactional Synchronization explained&lt;/a&gt;, Intel Developer Zone&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;the-return-of-the-wizard-cve-2019-10149&quot;&gt;&lt;a href=&quot;https://www.openwall.com/lists/oss-security/2019/06/06/1&quot;&gt;The Return of the WIZard (CVE-2019-10149)&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;인터넷 메일 서버 Exim의 원격 취약점이 Qualys Security의 한 연구원에 의해 6월 6일에 공개되었습니다. 
+&lt;br /&gt;&lt;br /&gt;
+2019년 6월 기준으로 전체 메일서버의 57%에서 Exim을 사용하고 있습니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://user-images.githubusercontent.com/50191798/60494147-33177880-9ce9-11e9-88ea-4c06f4da771c.png&quot; /&gt;&lt;/p&gt;
+&lt;center&gt;&lt;a href=&quot;http://www.securityspace.com/s_survey/data/man.201905/mxsurvey.html&quot;&gt;Mail (MX) Server Survey&lt;/a&gt;&lt;/center&gt;
+
+&lt;p&gt;당장 수십만대의 서버가 해킹에 당할 가능성이 생긴 것이죠.&lt;/p&gt;
+
+&lt;p&gt;영향을 받는 Exim 버전은 다음과 같습니다.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Exim 메일서버 4.87~4.91 버전&lt;/li&gt;
+  &lt;li&gt;취약점은 이미 19년 2월 10일에 패치되었으나, Security 취약점으로 분류되지 않아 대부분의 OS가 영향을 받음&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;관리 중인 Exim서버가 위 영향 범위에 포함되어 있다면 최신 패치를 적용해야 합니다.&lt;/p&gt;
+
+&lt;h4 id=&quot;취약점-상세&quot;&gt;취약점 상세&lt;/h4&gt;
+
+&lt;p&gt;취약점은 로컬 및 원격에서 공격 가능한 논리 취약점(커맨드 인젝션)입니다.&lt;/p&gt;
+
+&lt;p&gt;로컬 공격은 수신자의 메일 주소를 &lt;code class=&quot;highlighter-rouge&quot;&gt;${run{\&amp;lt;command&amp;gt; \&amp;lt;args&amp;gt;}&lt;/code&gt; 와 같이 설정하면 &lt;em&gt;command&lt;/em&gt; 부분이 실행되는 방식입니다. 보통 root권한으로 Exim이 실행되기 때문에 root 권한상승 공격으로 이어질 수 있습니다.&lt;/p&gt;
+
+&lt;p&gt;원격 공격은 취약한 코드로 도달하기까지 몇 가지 조건들을 통과해야 합니다.&lt;br /&gt;
+공격 과정을 요약하면 다음과 같습니다.&lt;/p&gt;
+
+&lt;p&gt;1) 취약한 Exim 서버에 메일 전송 요청을 보낼 때 “발신자 주소”에 명령어를 포함시키고 “수신자 주소”는 도달할 수 없는 주소로 설정합니다.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;예) 발신자 주소: ${run{&amp;lt;command&amp;gt; &amp;lt;args&amp;gt;}}@example.com&lt;/li&gt;
+  &lt;li&gt;example.com은 공격자가 컨트롤 가능한 메일서버여야 함&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;2) Exim 서버는 수신자 주소로 메일을 전달할 수 없으므로, 발신자에게 메일을 전송할 수 없다는 &lt;em&gt;Bounce&lt;/em&gt; 메시지를 전송합니다.&lt;/p&gt;
+
+&lt;p&gt;3) 공격자는 Exim 으로 부터 온 연결을 최소 7일간 유지해야 합니다.(매 4분마다 Exim 서버로 1byte 전송)&lt;/p&gt;
+
+&lt;p&gt;4) 7일 이후 전송실패 응답을 Exim 서버에 전달하면, 발신자 주소에 포함되어 있던 명령어가 실행됩니다.&lt;/p&gt;
+
+&lt;p&gt;더 자세한 내용은 원문을 포함한 아래 참고 자료를 참고해주세요.&lt;/p&gt;
+
+&lt;h4 id=&quot;참고&quot;&gt;참고&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.openwall.com/lists/oss-security/2019/06/06/1&quot;&gt;The Return of the WIZard: RCE in Exim (CVE-2019-10149), Qualys Security Advisory&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.zdnet.com/article/exim-email-servers-are-now-under-attack/&quot;&gt;Exim email servers are now under attack, ZDNet&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+        <pubDate>Tue, 02 Jul 2019 00:00:00 +0900</pubDate>
+      </item>
+    
+      <item>
+        <title>DIFF-2019-001</title>
+        <link>/2019/06/24/Weekly-Diffense.html</link>
+        <guid isPermaLink="true">/2019/06/24/Weekly-Diffense.html</guid>
+        <description>&lt;hr /&gt;
+
+&lt;h1 id=&quot;issues&quot;&gt;Issues&lt;/h1&gt;
+
+&lt;h3 id=&quot;coinbase-암호화폐-거래소-해킹-공격&quot;&gt;Coinbase 암호화폐 거래소 해킹 공격&lt;/h3&gt;
+
+&lt;p&gt;6월 19일, Coinbase라는 암호화폐 거래소에서 보안 담당자로 일하는 Philip Martin이란 사람이 트윗(&lt;a href=&quot;https://twitter.com/SecurityGuyPhil/status/1141466335592869888&quot;&gt;https://twitter.com/SecurityGuyPhil/status/1141466335592869888&lt;/a&gt;)을 하나 올립니다.
+&lt;img src=&quot;https://user-images.githubusercontent.com/50191798/60066734-068cbb00-9743-11e9-807a-e6c559f2ec39.png&quot; alt=&quot;&quot; /&gt;
+6월 17일 월요일에 자기 회사 직원들의 PC를 대상으로 파이어폭스 0day가 포함된 해킹 공격이 시도된 것을 탐지하여 차단했다는 내용입니다. 지난 주 꽤 큰 이슈가 되었습니다. 아무래도 거래소는 돈과 관련이 있으니까요.&lt;/p&gt;
+
+&lt;p&gt;해킹에 사용된 취약점은 Firefox 원격코드실행 취약점(CVE-2019-11707)과 샌드박스탈출 취약점(CVE-2019-11708) 2종이 사용되었습니다. Coinbase는 공격체인에 사용된 2개의 취약점을 Mozilla에 보고하게 됩니다. 흥미로운 부분은 취약점 중 하나가 Google Project Zero팀의 Saelo가 이미 보고(4월15일)한 것과 동일하였다는 점입니다. 어떻게 해커들은 해당 취약점 정보를 입수할 수 있었을까요? 해커들이 직접 발견했을 수도 있고, 모질라 버그이슈 트래커 접근 권한을 가지고 있었을 수도 있겠죠. 여러가지 썰들이 나오고 있는 상황입니다.&lt;/p&gt;
+
+&lt;p&gt;해킹 방식은 타겟팅된 직원들 대상으로 피싱 이메일을 보내 첨부된 링크를 클릭하면 Firefox 취약점이 발동하는 식으로 동작합니다. 공격이 성공하면 최종적으로 RAT(원격 관리 툴)이 PC에 설치됩니다.&lt;/p&gt;
+
+&lt;p&gt;RAT는 Win/Mac 용으로 제작되어 있다고 하네요. Mac용 백도어는 이 곳(&lt;a href=&quot;https://objective-see.com/blog/blog_0x43.html&quot;&gt;https://objective-see.com/&lt;/a&gt;)에서 분석을 잘해놓았습니다. 다운로드도 가능합니다. 분석용도로만 보시기 바랍니다. 여기서 분석한 내용을 요약해드리면 다음과 같습니다. (자세한 내용은 해당사이트 참조)&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;이 악성코드(OSX.Netwire)는 바이러스토탈에서 Tencent 만 탐지하였음&lt;/li&gt;
+  &lt;li&gt;2012년에 Dr.Web에 처음으로 탐지되었는데 리눅스,Mac 대상으로 패스워드를 훔치는 최초의 악성코드라고 함&lt;/li&gt;
+  &lt;li&gt;패스워드는 키로깅과 디스크내 파일을 통해 훔침&lt;/li&gt;
+  &lt;li&gt;2012년 샘플과 2019년 것은 유사한 부분도 있지만 매우 다르기도 함. 추측해보건데 같은 개발자가 개발한 것 같지만 악성코드의 목적이 완전히 다른 것 같다며 악성코드 분석 내용을 게재할 예정이라 함&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;거래소 직원 PC를 해킹하는 목적은 최종적으로 거래소 전산 시스템에 접근하여 코인을 탈취하려는 것입니다. 우리는 이미 국내에서 발생한 은행/거래소 해킹 사례를 통해, 내부 직원 PC가 뚫리면 더 큰 사고로 이어질 수 있음을 경험했습니다. 가상 화폐 거래소를 대상으로 하는 공격이 지속적으로 이루어지고 있으므로, 거래소의 보안 인식 및 기술수준이 더욱 높아져야 할 것입니다.&lt;/p&gt;
+
+&lt;p&gt;참고링크:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.bleepingcomputer.com/news/security/firefox-0-day-used-in-targeted-attacks-against-cryptocurrency-firms/&quot;&gt;Firefox 0-day Used in Targeted Attacks Against Cryptocurrency Firms&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://objective-see.com/blog/blog_0x43.html&quot;&gt;Burned by Fire(fox)&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://twitter.com/SecurityGuyPhil/status/1141466335592869888&quot;&gt;Martin’s a Tweet&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;rdp-bluekeepcve-2019-0708&quot;&gt;RDP BlueKeep(CVE-2019-0708)&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://user-images.githubusercontent.com/50191798/60060521-fa493380-972b-11e9-9f92-8ba9273f04e5.png&quot; alt=&quot;Micrsoft Security Updates&quot; /&gt;
+5월 14일, RDP(Remote Desktop Services) 서버 취약점에 대한 &lt;a href=&quot;https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2019-0708&quot;&gt;패치&lt;/a&gt;가 릴리즈되었습니다.&lt;/p&gt;
+
+&lt;p&gt;이 사실은 엄청난 파장을 일으켰습니다. 왜냐하면 해당 버그는 &lt;u&gt;인증 과정 필요없이 RDP서버를 원격에서 해킹할 수 있는 취약점이라서, 이 공격에 영향을 받는 컴퓨터가 대략 수 백만대&lt;/u&gt;로 추정되었기 때문이죠. Windows8 이전의 운영체제(WinXP, 7, 2008등)가 모두 이 취약점에 영향을 받습니다.&lt;/p&gt;
+
+&lt;p&gt;초기에는 가짜 PoC들이 Github에 올라왔었고, 심지어 cve-2019-0708.com에서 가짜 익스플로잇을 판매하기도 했습니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://user-images.githubusercontent.com/50191798/60064826-9da24480-973c-11e9-93dd-6bbe736892a7.png&quot; alt=&quot;Fake Exploit&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;이후 여러 분석가들 및 보안회사들에서 분석 내용을 공유하였습니다.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;McAfee, &lt;a href=&quot;https://securingtomorrow.mcafee.com/other-blogs/mcafee-labs/rdp-stands-for-really-do-patch-understanding-the-wormable-rdp-vulnerability-cve-2019-0708/&quot;&gt;RDP Stands for “Really DO Patch!” – Understanding the Wormable RDP Vulnerability CVE-2019-0708&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;ZDI, &lt;a href=&quot;https://www.zerodayinitiative.com/blog/2019/5/27/cve-2019-0708-a-comprehensive-analysis-of-a-remote-desktop-services-vulnerability&quot;&gt;CVE-2019-0708: A COMPREHENSIVE ANALYSIS OF A REMOTE DESKTOP SERVICES VULNERABILITY&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;MalwareTech, &lt;a href=&quot;https://www.malwaretech.com/2019/05/analysis-of-cve-2019-0708-bluekeep.html&quot;&gt;Analysis of CVE-2019-0708 (BlueKeep)&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;커널(termdd.sys)에서 발생하는 UAF(Use-After-Free) 취약점으로 자세한 내용은 위 링크를 참조해주세요.&lt;/p&gt;
+
+&lt;p&gt;취약점 스캐너도 여럿 공개된 상황입니다. Qihoo360에서 웹기반 스캐너를 먼저 공개(4월19일)하였고, 이 후 zerosum0x0(eternalblue 분석으로도 유명한)이라는 리서쳐도 공개(4월22일)하였습니다.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://twitter.com/mj0011sec/status/1130387741538054144&quot;&gt;CVE-2019-0708 remote scan tool by 360Vulcan team&lt;/a&gt;
+    &lt;ul&gt;
+      &lt;li&gt;일반인에게는 공개하지 않은 것 같고, 360 에 메일 문의를 해야 스캐닝 서비스를 받을 수 있는 것으로 보이네요.
+&lt;img src=&quot;https://user-images.githubusercontent.com/50191798/60062762-7bf18f00-9735-11e9-9bb0-0d31df976fa8.png&quot; alt=&quot;&quot; /&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;zerosum0x0 Github, &lt;a href=&quot;https://github.com/zerosum0x0/CVE-2019-0708&quot;&gt;Scanner PoC for CVE-2019-0708 RDP RCE vuln&lt;/a&gt;
+    &lt;ul&gt;
+      &lt;li&gt;rdesktop를 수정하여 만든 스캐너입니다. github 에서 받아 테스트해볼 수 있습니다.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Qihoo360, McAfee, Theori 등의 보안 회사에서 익스플로잇 데모 동영상을 공개하였으나 익스플로잇 개발과 관련된 민감한 내용은 인류평화(?)를 위해 공개하지 않고 있습니다. 관련 내용이 공개되는 순간 여러 해킹 툴킷에 탑재될 것이 자명하고, 많은 수의 컴퓨터가 위험에 노출될 것이니까요.&lt;/p&gt;
+
+&lt;p&gt;패치가 릴리즈되고 나서 한달이 지난 지금에도 수십만대의 PC가 여전히 패치되지 않고 취약점에 노출되어 있습니다.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://user-images.githubusercontent.com/50191798/60063263-48176900-9737-11e9-8291-43486f8bb234.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;EternalBlue가 Shadow Broker에 의해 공개(2017년 4월)된 이후 한달여만에 WannaCry(2017년 5월)가 그것을 탑재하였듯이, 머지않아 BlueKeep 익스플로잇이 대규모 공격에 사용되는 날이 올 것입니다.&lt;/p&gt;
+
+&lt;p&gt;RDP를 사용하는 분(Pre-Windows8 사용자)들은 꼭 패치해주세요.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h1 id=&quot;vulnerabilities&quot;&gt;Vulnerabilities&lt;/h1&gt;
+
+&lt;h3 id=&quot;cve-2019-1064-appxsvc-local-privilege-escalation&quot;&gt;&lt;a href=&quot;https://www.rythmstick.net/posts/cve-2019-1064/&quot;&gt;CVE-2019-1064 AppXSVC Local Privilege Escalation&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;SandboxEscaper가 2019년 6월에 공개한 &lt;em&gt;Windows AppX Deployment Service(AppXSVC)&lt;/em&gt; 권한상승 0-day 에 대한 내용입니다. 해당 취약점은 6월 패치에 포함되었습니다. 요약하면,&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;AppData\Local\Packages의 서브 폴더(예:LocalState)가 제거되면, AppXSVC가 해당 폴더를 다시 생성함&lt;/li&gt;
+  &lt;li&gt;&lt;u&gt;LocalState 폴더가 다시 생성될 때, 해당 폴더내의 파일 DACL이 변경됨&lt;/u&gt;(일반사용자가 Full Control을 가지도록)&lt;/li&gt;
+  &lt;li&gt;Race Condition을 이용하면 임의 파일의 DACL을 변경할 수 있음&lt;/li&gt;
+  &lt;li&gt;익스플로잇 과정
+    &lt;ul&gt;
+      &lt;li&gt;LocalState 폴더를 제거하고서, 다시 생성되는 시점까지 대기&lt;/li&gt;
+      &lt;li&gt;익스플로잇에서 해당 폴더 밑에 파일(rs.txt)을 생성하고 임의 파일(예: c:\windows\system.ini)로 Hardlink를 걸어둠&lt;/li&gt;
+      &lt;li&gt;AppXSVC는 system.ini의 DACL을 변경하여 일반 사용자에게 Full Control 권한 부여함&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr /&gt;
+
+&lt;h1 id=&quot;techniques&quot;&gt;Techniques&lt;/h1&gt;
+
+&lt;h3 id=&quot;heap-overflow-exploitation-on-windows-10-explained&quot;&gt;&lt;a href=&quot;https://blog.rapid7.com/2019/06/12/heap-overflow-exploitation-on-windows-10-explained/&quot;&gt;“Heap Overflow Exploitation on Windows 10 Explained”&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;Corelan의 이전 멤버였던 Wei Chen이란 분이 Windows 10 힙 오버플로우 익스플로잇 방법을 기술한 글입니다. Win10에서는 어떤 차이가 있는지 도움이 되는 글입니다. 요약하면,&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;힙 오버플로우 성공하기 위해선, 메모리청크들을 원하는 위치에 배치할 수 있어야 하고 그들간의 오프셋이 얼마인지 예측할 수 있어야 합니다.&lt;/li&gt;
+  &lt;li&gt;동일한 크기의 힙청크를 연속적으로 할당할 때, Win7에서는 메모리 청크간의 오프셋이 일정하지만 Win10에서는 그것이 랜덤합니다. 하지만 항상 랜덤은 아니고, &lt;u&gt;LFH가 활성화 되기전에는 청크간의 오프셋이 고정적이란 사실을 이용&lt;/u&gt;해서, LFH가 활성화되기 전에 힙 레이아웃을 맞춰놓고 오버플로우해야 한다고 설명합니다.&lt;/li&gt;
+  &lt;li&gt;BSTR 문자열 객체를 이용해 메모리릭 예제를 보여줍니다. Vector 객체를 이용해 코드실행 예제를 보여줍니다.&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+        <pubDate>Mon, 24 Jun 2019 00:00:00 +0900</pubDate>
+      </item>
+    
+      <item>
+        <title>Better than spoolsv</title>
+        <link>/2019/03/04/Better-than-spoolsv.html</link>
+        <guid isPermaLink="true">/2019/03/04/Better-than-spoolsv.html</guid>
+        <description>&lt;p&gt;안녕하세요. 디펜스입니다.&lt;/p&gt;
 
 &lt;p&gt;이전 글(&lt;a href=&quot;http://blog.diffense.co.kr/2019/02/22/hard-link/&quot;&gt;Windows HardLink Attack &amp;amp; Defense&lt;/a&gt;)에서 우리는 &lt;em&gt;sandboxescaper&lt;/em&gt;의 익스플로잇이 &lt;em&gt;스풀러 서비스(Spoolsv)&lt;/em&gt;를 통해서 최종적으로 페이로드를 실행한다는 점을 살펴보았습니다. 복습하는 차원에서 그 과정을 단순화해보면 다음과 같습니다.&lt;/p&gt;
 
@@ -191,19 +1076,14 @@
   &lt;/ol&gt;
 &lt;/div&gt;
 </description>
-				
-				<pubDate>Mon, 04 Mar 2019 00:00:00 +0900</pubDate>
-				<link>http://localhost:4000/2019/03/04/Better-than-spoolsv/</link>
-				<guid isPermaLink="true">http://localhost:4000/2019/03/04/Better-than-spoolsv/</guid>
-			</item>
-		
-			<item>
-				<title>Windows HardLink Attack &amp; Defense</title>
-				
-					<dc:creator>{&quot;name&quot;=&gt;&quot;Yongil Lee of Diffense&quot;}</dc:creator>
-				
-				
-					<description>&lt;p&gt;안녕하세요! 디펜스입니다.&lt;/p&gt;
+        <pubDate>Mon, 04 Mar 2019 00:00:00 +0900</pubDate>
+      </item>
+    
+      <item>
+        <title>Windows HardLink Attack &amp; Defense</title>
+        <link>/2019/02/22/hard-link.html</link>
+        <guid isPermaLink="true">/2019/02/22/hard-link.html</guid>
+        <description>&lt;p&gt;안녕하세요! 디펜스입니다.&lt;/p&gt;
 
 &lt;p&gt;이번 글에서는 하드링크란 무엇이며, 익스플로잇에서 활용되는 하드링크와 일반적인 하드링크와의 차이점이 무엇인지 알아보겠습니다.&lt;/p&gt;
 
@@ -442,24 +1322,12 @@ C:\test&amp;gt;
 &lt;p&gt;&lt;img src=&quot;https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/hardlink/sandboxescaper_2.png&quot; alt=&quot;sandboxescaper exploit&quot; /&gt;&lt;/p&gt;
 
 &lt;ol&gt;
-  &lt;li&gt;
-    &lt;p&gt;tasks 폴더에 &lt;strong&gt;하드링크&lt;/strong&gt;(c:\windows\tasks\UpdateTask.job -&amp;gt; c:\windows\…\PrintConfig.dll)를 하나 생성합니다. &lt;em&gt;일반사용자가 tasks 폴더에 파일을 생성할 수 있고, 대상 파일(PrintConfig.dll)에 하드링크도 걸 수 있으니 1번 작업이 가능해집니다.&lt;/em&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;&lt;em&gt;SchRpcSetSecurity&lt;/em&gt;를 호출하여, “일반사용자가 c:\windows\tasks\UpdateTask.job의 파일쓰기권한을 가지도록” DACL 변경을 요청합니다.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;태스크 스케쥴러 서비스는 DACL 변경을 수행합니다. 하드링크 대상인 PrintConfig.dll의 DACL을 변경될 것입니다. 일반사용자가 PrintConfig.dll에 대한 쓰기 권한을 갖게 됩니다.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;익스플로잇이 가진 페이로드로 PrintConfig.dll을 덮어씁니다.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;스풀러(Spooler) 서비스를 호출하여 PrintConfig.dll을 로드하도록 합니다.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;스풀러 프로세스 컨텍스트(시스템권한)에서 페이로드가 실행되어 권한상승을 완료합니다.&lt;/p&gt;
-  &lt;/li&gt;
+  &lt;li&gt;tasks 폴더에 &lt;strong&gt;하드링크&lt;/strong&gt;(c:\windows\tasks\UpdateTask.job -&amp;gt; c:\windows\…\PrintConfig.dll)를 하나 생성합니다. &lt;em&gt;일반사용자가 tasks 폴더에 파일을 생성할 수 있고, 대상 파일(PrintConfig.dll)에 하드링크도 걸 수 있으니 1번 작업이 가능해집니다.&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;SchRpcSetSecurity&lt;/em&gt;를 호출하여, “일반사용자가 c:\windows\tasks\UpdateTask.job의 파일쓰기권한을 가지도록” DACL 변경을 요청합니다.&lt;/li&gt;
+  &lt;li&gt;태스크 스케쥴러 서비스는 DACL 변경을 수행합니다. 하드링크 대상인 PrintConfig.dll의 DACL을 변경될 것입니다. 일반사용자가 PrintConfig.dll에 대한 쓰기 권한을 갖게 됩니다.&lt;/li&gt;
+  &lt;li&gt;익스플로잇이 가진 페이로드로 PrintConfig.dll을 덮어씁니다.&lt;/li&gt;
+  &lt;li&gt;스풀러(Spooler) 서비스를 호출하여 PrintConfig.dll을 로드하도록 합니다.&lt;/li&gt;
+  &lt;li&gt;스풀러 프로세스 컨텍스트(시스템권한)에서 페이로드가 실행되어 권한상승을 완료합니다.&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;p&gt;PrintConfig.dll 외에도 앞서 설명드렸듯이 Open할 수 있는 파일이면 모두 하드링크 대상으로 삼을 수 있습니다.&lt;/p&gt;
@@ -572,11 +1440,8 @@ C:\test&amp;gt;
   &lt;/ol&gt;
 &lt;/div&gt;
 </description>
-				
-				<pubDate>Fri, 22 Feb 2019 00:00:00 +0900</pubDate>
-				<link>http://localhost:4000/2019/02/22/hard-link/</link>
-				<guid isPermaLink="true">http://localhost:4000/2019/02/22/hard-link/</guid>
-			</item>
-		
-	</channel>
+        <pubDate>Fri, 22 Feb 2019 00:00:00 +0900</pubDate>
+      </item>
+    
+  </channel>
 </rss>

@@ -1,10 +1,8 @@
 ---
 title: Better than spoolsv
 
-summary: 윈도우즈 권한상승 익스플로잇의 페이로드(DLL) 벡터로써 스풀러 서비스 외에 다른 방법이 있는지 살펴봅니다.
+subtitle: 윈도우즈 권한상승 익스플로잇의 페이로드(DLL) 벡터로써 스풀러 서비스 외에 다른 방법이 있는지 살펴봅니다.
 
-author:
-    name: Yongil Lee of Diffense
 ---
 
 안녕하세요. 디펜스입니다.
@@ -112,9 +110,7 @@ D-Hub 방식은 이런 과정이 필요 없습니다.
 
 D-Hub 방식을 적용한 후 EoP 0-day의 동작 테스트를 진행해보았습니다. 
 
-
 [![](https://github.com/yong1212/blog.diffense.co.kr/raw/master/img/DHub/video.png)](https://www.youtube.com/embed/cBIXxn85oLM)
-
 
 동영상 데모의 단계별 설명입니다. 
 (페이로드로 덮어쓸 파일은 `System32\CIRCoInst.dll`을 선택했습니다.)

@@ -1,10 +1,8 @@
 ---
 title: DIFF-2019-002
 
-summary: Intel TSX CPU 버그 / Exim 메일 서버 취약점
+subtitle: Intel TSX CPU 버그 / Exim 메일 서버 취약점
 
-author:
-    name: Diffense
 ---
 
 --- 
@@ -20,16 +18,22 @@ Pwn2Own 2018 우승팀으로도 유명한 ret2system에서 **Intel TSX 버그**�
 
 **Intel TSX?**<br>
 Intel의 TSX(Transactional Synchronization eXtensions)은 멀티스레드의 동기화 문제를 간소화시키는 데 도움을 주는 하드웨어 기술입니다. 
+
 다음 예는 Intel에서 발표한 내용의 일부를 가져온 것인데요.
 <img src="https://user-images.githubusercontent.com/50191798/60555722-23e00b80-9d79-11e9-8359-41f5db8d02f1.png" width="80%" height="80%">
-2개의 스레드(Alice, Bob)가 공유자원(Table)에 동시에 접근할 경우, 원치 않는 결과(-10)가 나올 수 있음을 왼쪽 그림이 보여주고 있습니다. 이를 해결하기 위해 개발자들은 보통 오른쪽 그림처럼 Lock을 사용하죠.  다음 그림을 보겠습니다.
+
+2개의 스레드(Alice, Bob)가 공유자원(Table)에 동시에 접근할 경우, 원치 않는 결과(-10)가 나올 수 있음을 왼쪽 그림이 보여주고 있습니다. 이를 해결하기 위해 개발자들은 보통 오른쪽 그림처럼 Lock을 사용하죠.  
+
+다음 그림을 보겠습니다.
+
 <img src="https://user-images.githubusercontent.com/50191798/60555911-cf895b80-9d79-11e9-94e4-e8bb3165c034.png" width="80%" height="80%">
+
 왼쪽 그림은 앞서 본 것처럼 테이블 전체에다 Lock을 걸어 놓은 것입니다. Coarse Grain Locking이라고 하는데요. 테이블 전체에다 Lock을 걸어 놓은 것이라 Alice와 Bob이 테이블의 다른 항목(A,B)에 접근하려는 경우에도 Alice나 Bob 둘 중 한 스레드가 테이블을 독점하는 비효율이 발생하게 됩니다.
 이에 대한 해결책으로 테이블을 더 잘게 항목별로 나눠서 각 항목마다 Lock을 걸어주는 방법이 있습니다. Fine Grain Locking이라 부르고 오른쪽 그림과 같은 상황을 얘기하는 것입니다. <br>
 
 Coarse Grain Locking의 장점은 사용하기 쉽다는 것이고, 단점은 성능이 떨어진다는 것입니다. Fine Grain Locking은 그 반대라고 보시면 되겠죠. 
 
-Intel TSX는 바로 이 지점에서 솔루션을 제시합니다. 개발자들이 Coarse Grain Locking을 걸어놓으면 하드웨어 레벨에서 Fine Grain Locking 처리를 해주겠다는 것입니다.
+Intel TSX는 바로 이 지점에서 솔루션을 제시합니다. 개발자들이 Coarse Grain Locking을 걸어놓으면 하드웨어 레벨에서 Fine Grain Locking 처리를 해주는 것입니다.
 <img src="https://user-images.githubusercontent.com/50191798/60556606-247aa100-9d7d-11e9-85e0-b03fcb2405c6.png" width="80%" height="80%">
 
 바로 "Fine Grain Behavior at Coarse Grain Effort"라는 목표를 위해 개발된 기술이 Intel TSX 라는 것입니다. 결국 개발자의 편의성과 성능 2가지 토끼를 다 잡겠다는 얘기입니다. 
@@ -93,8 +97,9 @@ Pwn2Own 우승팀(Safari 카테고리)으로도 유명한 ret2system에서 위 �
 
 하지만, 이러한 <u>명령어cache와 트랜잭션 메모리간의 불일치 현상이 존재함에도 불구하고, 명령어cache에서 fetch 해올 때 이러한 불일치 현상을 체크하지 않는 버그</u>가 있습니다. 
 
-<img src="https://blog.ret2.io/assets/img/tsx_jmp_key_z.png" width="80%" height="80%">
-<center><a href="">ret2system blog</a></center>
+![ret2system blog](https://blog.ret2.io/assets/img/tsx_jmp_key_z.png)
+
+
 그래서 lock으로 jmp를 하게 되면 key_Z를 실행하는 대신, 명령어 cache에 있던 (key_X)를 실행하게 되는 것입니다!
 
 
