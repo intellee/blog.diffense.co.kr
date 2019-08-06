@@ -3,7 +3,7 @@
 	<title>{% if page.title %}{{ page.title }} |{% endif %} {{ site.theme_settings.title }}</title>
 
     <meta property="og:site_name" content="{{ site.name }}">
-	<meta property="og:title" content="{% if page.title %}{{ page.title }} • {{ site.subtitle }}{% else %}{{ site.name }}{% endif %}">
+	<meta property="og:title" content="{% if page.title %}{{ page.title }} • {{ page.subtitle }}{% else %}{{ site.name }}{% endif %}">
 	<meta property="og:locale" content="{{ site.lang }}">
 	{% if page.og-image %}
 	  <meta property="og:image" content="{{ site.url }}{{ site.baseurl }}/img/{{ page.og-image }}">
