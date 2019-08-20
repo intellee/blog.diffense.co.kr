@@ -7,20 +7,14 @@
     z-index: 100;
 }
 
-@media print{
+@media print {
    .noprint{
        display:none;
    }
 }
 
-#content-desktop {display: block;}
-#content-mobile {display: none;}
-
-@media screen and (max-width: 768px) {
-
-#content-desktop {display: none;}
-#content-mobile {display: block;}
-
+@media screen and (min-width: 0px) and (max-width: 720px) {
+  .mobile-hide{ display: none; }
 }
 
 
