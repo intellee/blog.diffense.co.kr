@@ -1,5 +1,6 @@
 <head>
 	<meta charset="utf-8">
+    <meta http-equiv="CACHE-CONTROL" content="NO-CACHE">
 	<title>{% if page.title %}{{ page.title }} |{% endif %} {{ site.theme_settings.title }}</title>
 
     <meta property="og:site_name" content="{{ site.name }}">
@@ -21,6 +22,9 @@
 	<meta name="description"
 		content="{% if page.excerpt %}{{ page.excerpt | strip_html | strip_newlines | truncate: 160 }}{% else %}{{ site.theme_settings.description }}{% endif %}">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- PageMap -->
+	<link rel="stylesheet" href="/pagemap.css">
 
 	<!-- CSS -->
 	<link rel="stylesheet" href="{{ "/assets/css/main.css" | relative_url }}">
