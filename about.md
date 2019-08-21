@@ -19,6 +19,14 @@ Our customers have access to
 * Exploit code for vulnerabilities 
 * Guidance on how to detect an attack
 
+#### Trainings
+
+We also provide training courses on a variety of advanced security topics such as
+
+* Building a 1-day Exploit 
+* Windows Kernel Bug Hunting and Exploit
+* Advanced Reverse Engineering and Malware Analysis
+
 ---
 
 #### CONTACT US
