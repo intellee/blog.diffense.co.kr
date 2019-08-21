@@ -11,7 +11,7 @@ Diffense is a cyber security company based in South Korea.
 
 #### Vulnerability Intelligence
 
-We provide our customers with detailed information of vulnerabilities to protect their enterprise entworks.
+We provide our customers with detailed information of vulnerabilities to protect their enterprise networks.
 
 Our customers have access to
 
