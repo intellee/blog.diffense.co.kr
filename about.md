@@ -23,9 +23,9 @@ Our customers have access to
 
 We also provide training courses on a variety of advanced security topics such as
 
-* Building 1-day Exploits 
-* Windows Kernel Bug Hunting and Exploit
-* Advanced Reverse Engineering and Malware Analysis
+* Windows Bug Hunting and Exploit Course
+* Writing 1-day Exploits 
+* Advanced Reverse Engineering and Malware Analysis Course
 
 ---
 
