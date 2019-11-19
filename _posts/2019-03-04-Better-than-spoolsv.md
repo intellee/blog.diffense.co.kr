@@ -3,6 +3,8 @@ title: Better than spoolsv
 
 subtitle: 윈도우즈 권한상승 익스플로잇의 페이로드(DLL) 벡터로써 스풀러 서비스 외에 다른 방법이 있는지 살펴봅니다.
 
+author: Yongil Lee
+
 ---
 
 안녕하세요. 디펜스입니다.
