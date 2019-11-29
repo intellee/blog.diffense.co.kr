@@ -9,7 +9,7 @@ author: Yongil Lee
 
 안녕하세요. 디펜스입니다.
 
-이전 글([Windows HardLink Attack & Defense](http://blog.diffense.co.kr/2019/02/22/hard-link/))에서 우리는 *sandboxescaper*의 익스플로잇이 *스풀러 서비스(Spoolsv)*를 통해서 최종적으로 페이로드를 실행한다는 점을 살펴보았습니다. 복습하는 차원에서 그 과정을 단순화해보면 다음과 같습니다.
+이전 글([Windows HardLink Attack & Defense](http://blog.diffense.co.kr/2019/02/22/hard-link.html))에서 우리는 *sandboxescaper*의 익스플로잇이 *스풀러 서비스(Spoolsv)*를 통해서 최종적으로 페이로드를 실행한다는 점을 살펴보았습니다. 복습하는 차원에서 그 과정을 단순화해보면 다음과 같습니다.
 
 ![](https://user-images.githubusercontent.com/39076499/69857971-5d8b5300-12d4-11ea-8555-774efb6c6560.png)
 
