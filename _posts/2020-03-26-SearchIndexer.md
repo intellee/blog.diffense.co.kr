@@ -28,6 +28,7 @@ The below screenshot shows how to adjust the basic options for Search Indexer. T
 At this point, we thought the vulnerability was probably a logical flaw vulnerability due to the creation of a temporary data file and a Local Privilege Escalation (LPE) in the indexing process. The reason is that many windows service-related vulnerabilities take this pattern. As such, we analyzed how the vulnerability could have occurred in this indexing process.
 
 
+
 ### Patch Analysis
 
 The analysis environment is Windows7 x86. The reason we chose Win7 is that the size of the updated file was very small, making diffing more intuitive. We downloaded both patched and unpatched versions of this module.
@@ -54,6 +55,7 @@ Usually ExclusiveLock and ShardLock are techniques used when a shared resource e
 ![b](https://user-images.githubusercontent.com/39076499/77615097-d5f7dd00-6f71-11ea-9156-70199300ab65.png)
 
 Based on the patch history, it seems that a race condition vulnerability has occurred. Now all we have to do is look at what shared resources are stored in the class and how they could lead to vulnerabilities!
+
 
 
 ### Root Cause Analysis
@@ -132,6 +134,7 @@ Eventually, the vulnerability was in the process of double fetching length, and 
 2. Second fetch: Shared variable used as memory copy size (line 13)
 
 If there is a discrepancy between the size used for the first fetch and the size used for the second fetch, a heap overflow may occur, especially if the size of the second fetch is larger. We thought we could change the size of pszURL(shared value) sufficiently before the memory copy occurs through race condition!
+
 
 
 ### Triggering POC
@@ -216,6 +219,7 @@ Okay, now we created a crash!
 As expected, a heap overflow occurred while StringCchCopyW function copied RootURL data.
 
 ![crash](https://user-images.githubusercontent.com/39076499/77615795-8adec980-6f73-11ea-90f1-aa6db29ec21a.png)
+
 
 
 ### Exploit (until EIP Control)
@@ -308,9 +312,12 @@ In the end, we can show that indirect calls to any function in memory are possib
 ![eip](https://user-images.githubusercontent.com/39076499/77615799-8ca88d00-6f73-11ea-961b-6081eccf634d.png)
 
 
+
 ### Conclusion
 
 We are excited to have known a "new attack vector" for the Windows Search Indexer. And we think that the memory corruption in Windows Service is also impressive. This is because memory corruption vulnerabilities are not common in Windows Service. Through further analysis of the Search Indexer, vulnerabilities in other functions may be found in addition to the functions that were reported. We look forward to it!
+
+
 
 ### Reference
 
