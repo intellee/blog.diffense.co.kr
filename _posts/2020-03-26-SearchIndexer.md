@@ -30,7 +30,7 @@ At this point, we thought the vulnerability was probably a logical flaw vulnerab
 
 ### Patch Analysis
 
-The analysis environment is Windows7 x86. The reason we chose Win7 is that the size of the updated file was very small, making diffing more intuitive. The affected module was searchindexer.exe. We downloaded both patched and unpatched versions of this module.
+The analysis environment is Windows7 x86. The reason we chose Win7 is that the size of the updated file was very small, making diffing more intuitive. We downloaded both patched and unpatched versions of this module.
 
 For win7 x86 those were:
 
@@ -43,7 +43,7 @@ We started with a BinDiff of the binaries modified by the patch (in this case th
 
 ![diffing](https://user-images.githubusercontent.com/11327974/77633500-e66c7f80-6f92-11ea-84bf-cc56ea4d18d7.png)
 
-Most of the patch was done in the CSearchRoot  and CSearchCrawlScopeManager class methods. Both class contained the same change, so we focused on the recently patched CSearchRoot.
+Most of the patches were done in the CSearchRoot and CSearchCrawlScopeManager class methods. Both classes contained the same changes, so we focused on the recently patched CSearchRoot.
 
 Patch details are as follows:
 
