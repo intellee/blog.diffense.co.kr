@@ -188,15 +188,13 @@ int wmain(int argc, wchar_t *argv[])
 }
 ```
 
-Since then, triggering the bug is quite simple.
-
-We turned on Gflag.exe's page heap and created two threads : 
+Since then, triggering the bug is quite simple. We turned on Gflag.exe's page heap and created two threads.
 
 While one thread repeatedly writes data of different lengths to the shared buffer, the other thread reads data from the shared buffer.
 
 1. Thread_01
 ```cpp
-DWORD __stdcall thread_shared_write(LPVOID param)
+DWORD __stdcall thread_shared_data_write(LPVOID param)
 {
 	ISearchManager *pSearchManager = (ISearchManager*)param;
 	while (1) {
@@ -209,7 +207,7 @@ DWORD __stdcall thread_shared_write(LPVOID param)
 
 2. Thread_02
 ```cpp
-DWORD __stdcall thread_shared_read(LPVOID param)
+DWORD __stdcall thread_shared_data_read(LPVOID param)
 {
 	ISearchRoot *pISearchRoot = (ISearchRoot*)param;
 	PWSTR get_pszUrl;
