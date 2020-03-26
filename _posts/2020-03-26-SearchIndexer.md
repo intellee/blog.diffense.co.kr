@@ -128,7 +128,7 @@ The put_RootURL function wrote a user-specified RootURL in the memory of CSearch
 
 ![fff](https://user-images.githubusercontent.com/39076499/77615291-4868bd00-6f72-11ea-9dc2-6e6d9f5e3deb.png)
 
-Thus, we finally arrived at the point where the vulnerability actually occurred. The vulnerability was caused by using shared variables in the process of allocation and copying.  CopyOutStr function is called by the get_RootURL function. This function first reads the pszURL(shared variable) in the CSearchRoot class and allocates the heap for that length. Then, StringCchCopyW is called with length equal to pszURL.
+Thus, we finally arrived at the point where the vulnerability actually occurred. The vulnerability was caused by using shared variables(pszURL) in the process of allocation and copying. CopyOutStr function is called by the get_RootURL function. This function first reads the pszURL in the CSearchRoot class and allocates the heap for that length. Then, StringCchCopyW is called with length equal to pszURL.
 
 ![1111](https://user-images.githubusercontent.com/39076499/77615326-633b3180-6f72-11ea-9dcc-9e00a60f3933.png)
 
