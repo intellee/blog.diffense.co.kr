@@ -14,12 +14,12 @@ Reported CVEs is as follows[^1] :
 
 ![cve](https://user-images.githubusercontent.com/11327974/77618263-51a95800-6f79-11ea-8fb7-725d72f333d8.jpg)
 
-It is not common for such many vulnerabilities found one service. It seems that there might be a new attack vector, and we were very curious about what it was. We were hoping that if we finished the analysis we could find another similar 0-day vulnerability. So we began analyzing right away!
+It is not a common casee for such many vulnerabilities found one service. It seems that there might be a new attack vector, and we were very curious about what it was. We were hoping that if we finished the analysis we could find another similar 0-day vulnerability. So we began analyzing right away!
 
 
 ### Windows Search Indexer
 
-Before analyzing, we needed to learn about the Windows Search Indexer. Search Indexer is an app that indexes files for quick search and stores this indexing information as data. From a more detailed perspective, SearchIndexer.exe is a windows service that handles indexing of your files for Windows Search, which fuels the file search engine built into Windows that powers everything from the Start Menu search box to Windows Explorer, and even the Libraries feature.
+Windows Search Indexer is an app that indexes files for quick search and stores this indexing information as data. From a more detailed perspective, SearchIndexer.exe is a windows service that handles indexing of your files for Windows Search, which fuels the file search engine built into Windows that powers everything from the Start Menu search box to Windows Explorer, and even the Libraries feature.
 
 The below screenshot shows how to adjust the basic options for Search Indexer. The "Modify option" allows users to adjust the indexing range. By default, it indexes the Start Menu and Users Folder under the C: \ drive. Also, through the "Advanced option", we can add the extension or contents of files to be indexed to the index list in more detail.
 
