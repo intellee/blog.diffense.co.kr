@@ -7,8 +7,9 @@ author: SungHyun Park @ Diffense
 
 The Jan-Feb 2020 security patch fixes multiple bugs in the *Windows Search Indexer*. 
 
-- CVE-2020-0613[^1], CVE-2020-0614[^2], CVE-2020-0623[^3], CVE-2020-0625[^4], CVE-2020-0626[^5], CVE-2020-0627[^6], CVE-2020-0628[^7], CVE-2020-0629[^8], CVE-2020-0630[^9], CVE-2020-0631[^10], CVE-2020-0632[^11], CVE-2020-0633[^12] (Jan, 2020)
-- CVE-2020-0666[^13], CVE-2020-0667[^14], CVE-2020-0735[^15], CVE-2020-0752[^16] (Feb, 2020)
+Reported CVEs is as follows[^1] :
+- CVE-2020-0613, CVE-2020-0614, CVE-2020-0623, CVE-2020-0625, CVE-2020-0626, CVE-2020-0627, CVE-2020-0628, CVE-2020-0629, CVE-2020-0630, CVE-2020-0631, CVE-2020-0632, CVE-2020-0633 (Jan, 2020)
+- CVE-2020-0666, CVE-2020-0667, CVE-2020-0735, CVE-2020-0752 (Feb, 2020)
 
 ![cve](https://user-images.githubusercontent.com/11327974/77618263-51a95800-6f79-11ea-8fb7-725d72f333d8.jpg)
 
@@ -35,7 +36,7 @@ For win7 x86 those were:
 - patched version (January Patch Tuesday) : KB4534314
 - patched version (February Patch Tuesday) : KB4537813
 
-They can be downloaded from Microsoft Update Catalog[^17]
+They can be downloaded from Microsoft Update Catalog[^2]
 
 We begin with comparing the December(2019) and January(2020) version of searchindexer.exe in BinDiff :
 
@@ -57,7 +58,7 @@ As a result of analyzing the patched contents, the shared resource exists in the
 
 We referenced the MSDN docs to see how those classes are used and found that they were all related to the Crawl Scope Manager. And we could check the method information of this class.
 
-And the MSDN docs said[^18]: 
+And the MSDN docs said[^3]: 
 
 > The Crawl Scope Manager (CSM) is a set of APIs that lets you add, remove, and enumerate search roots and scope rules for the Windows Search indexer. When you want the indexer to begin crawling a new container, you can use the CSM to set the search root(s) and scope rules for paths within the search root(s). For example, if you install a new protocol handler, you can create a search root and add one or more inclusion rules; then the indexer can start a crawl for the initial indexing. The CSM offers the following interfaces to help you do this programmatically.
 
@@ -133,7 +134,7 @@ If there is a discrepancy between the size used for the first fetch and the size
 
 ### Triggering POC
 
-Windows Search Indexer is a windows service. Windows service is generally designed to allow COM RPC connection, and clients can exchange data with the server through the interface provided by the service. Through OleView[^20], we were able to see the interface provided by Windows Search Manager. And we need to be able to trigger vulnerable functions based on the methods of that interface.
+Windows Search Indexer is a windows service. Windows service is generally designed to allow COM RPC connection, and clients can exchange data with the server through the interface provided by the service. Through OleView[^5], we were able to see the interface provided by Windows Search Manager. And we need to be able to trigger vulnerable functions based on the methods of that interface.
 
 ![Trigger](https://user-images.githubusercontent.com/39076499/77615361-86fe7780-6f72-11ea-8de5-1fb81e2291c3.png)
 
@@ -148,7 +149,7 @@ First of all, we need to construct the core of the COM client to trigger the vul
 **CoUninitialize** Finally, CoUninitialize releases any maintained COM resources and closes all RPC connections.
 
 
-Luckily, we were able to compile and test it through the COM based command line source code provided by MSDN[^19]. And We were able to write COM client code that triggers a vulnerable function like this:
+Luckily, we were able to compile and test it through the COM based command line source code provided by MSDN[^4]. And We were able to write COM client code that triggers a vulnerable function like this:
 
 ```cpp
 int wmain(int argc, wchar_t *argv[])
@@ -311,43 +312,13 @@ We are excited to have known a "new attack vector" for the Windows Search Indexe
 
 ### Reference
 
-[^1]: [https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0613](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0613)
+[^1]: [https://portal.msrc.microsoft.com/en-us/security-guidance/acknowledgments](https://portal.msrc.microsoft.com/en-us/security-guidance/acknowledgments)
 
-[^2]: [https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0614](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0614)
+[^2]: [https://www.catalog.update.microsoft.com/Home.aspx](https://www.catalog.update.microsoft.com/Home.aspx)
 
-[^3]: [https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0623](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0623)
+[^3]: [https://docs.microsoft.com/en-us/windows/win32/search/-search-3x-wds-extidx-csm](https://docs.microsoft.com/en-us/windows/win32/search/-search-3x-wds-extidx-csm)
 
-[^4]: [https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2020-0625](https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2020-0625)
+[^4]: [https://docs.microsoft.com/en-us/windows/win32/search/-search-sample-crawlscopecommandline](https://docs.microsoft.com/en-us/windows/win32/search/-search-sample-crawlscopecommandline)
 
-[^5]: [https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0626](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0626)
-
-[^6]: [https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0627](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0627)
-
-[^7]: [https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0628](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0628)
-
-[^8]: [https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0629](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0629)
-
-[^9]: [https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0630](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0630)
-
-[^10]: [https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0631](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0631)
-
-[^11]: [https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0632](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0632)
-
-[^12]: [https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0633](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0633)
-
-[^13]: [https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2020-0666](https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2020-0666)
-
-[^14]: [https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2020-0667](https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2020-0667)
-
-[^15]: [https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0735](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0735)
-
-[^16]: [https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0752](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0752)
-
-[^17]: [https://www.catalog.update.microsoft.com/Home.aspx](https://www.catalog.update.microsoft.com/Home.aspx)
-
-[^18]: [https://docs.microsoft.com/en-us/windows/win32/search/-search-3x-wds-extidx-csm](https://docs.microsoft.com/en-us/windows/win32/search/-search-3x-wds-extidx-csm)
-
-[^19]: [https://docs.microsoft.com/en-us/windows/win32/search/-search-sample-crawlscopecommandline](https://docs.microsoft.com/en-us/windows/win32/search/-search-sample-crawlscopecommandline)
-
-[^20]: [https://github.com/tyranid/oleviewdotnet](https://github.com/tyranid/oleviewdotnet)
+[^5]: [https://github.com/tyranid/oleviewdotnet](https://github.com/tyranid/oleviewdotnet)
 
