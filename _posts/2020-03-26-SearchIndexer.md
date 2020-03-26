@@ -62,7 +62,7 @@ Based on the patch history, it seems that a race condition vulnerability has occ
 
 We referenced the MSDN to see how those classes are used and found that they were all related to the Crawl Scope Manager. And we could check the method information of this class.
 
-And the MSDN said[^3]: 
+And the MSDN said[^3] : 
 
 > The Crawl Scope Manager (CSM) is a set of APIs that lets you add, remove, and enumerate search roots and scope rules for the Windows Search indexer. When you want the indexer to begin crawling a new container, you can use the CSM to set the search root(s) and scope rules for paths within the search root(s). For example, if you install a new protocol handler, you can create a search root and add one or more inclusion rules; then the indexer can start a crawl for the initial indexing. The CSM offers the following interfaces to help you do this programmatically.
 
@@ -74,7 +74,7 @@ And the MSDN said[^3]:
 - [ISearchScopeRule](https://docs.microsoft.com/en-us/windows/desktop/api/Searchapi/nn-searchapi-isearchscoperule)
 - [ISearchItem](https://msdn.microsoft.com/library/dd756722(VS.85).aspx)
 
-For examples, adding, removing, and enumerating search roots and scope rules can be written by the following:
+For examples, adding, removing, and enumerating search roots and scope rules can be written by the following :
 
 The ISearchCrawlScopeManager tells the search engine about containers to crawl and/or watch, and items under those containers to include or exclude. To add a new search root, instantiate an ISearchRoot object, set the root attributes (ISearchRoot::put_RootURL), and then call ISearchCrawlScopeManager::AddRoot and pass it a pointer to ISearchRoot object.
 
@@ -119,7 +119,7 @@ wcout << L"\t" << pszUrl;
 
 We thought that a vulnerability would arise in the process of manipulating the rules. And we decided to analyze the functions associated with it. 
 
-We conducted binary analysis focusing in the following functions :
+We conducted binary analysis focusing by the following functions :
 
 - [ISearchRoot::put_RootURL](https://docs.microsoft.com/en-us/windows/win32/api/searchapi/nf-searchapi-isearchroot-put_rooturl)
 - [ISearchCrawlScopeManager::AddRoot](https://docs.microsoft.com/en-us/windows/win32/api/searchapi/nf-searchapi-isearchcrawlscopemanager-addroot)
