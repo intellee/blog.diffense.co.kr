@@ -33,7 +33,7 @@ At this point, we thought the vulnerability was probably a logical flaw vulnerab
 
 The analysis environment is Windows7 x86. The reason we chose Win7 is that the size of the updated file was very small, making diffing more intuitive. We downloaded both patched and unpatched versions of this module.
 
-For win7 x86 those were:
+For win7 x86 those were :
 
 - patched version (January Patch Tuesday) : KB4534314
 - patched version (February Patch Tuesday) : KB4537813
@@ -46,7 +46,7 @@ We started with a BinDiff of the binaries modified by the patch (in this case th
 
 Most of the patch was done in the CSearchRoot and CSearchCrawlScopeManager class methods. In January, SearchCrawlScopeManager was patched, and in February, SearchRoot was patched. Both class contained the same change, so we focused on the recently patched CSearchRoot.
 
-Patch details are as follows:
+Patch details are as follows :
 
 Usually ExclusiveLock and ShardLock are techniques used when a shared resource exists. It seemed that a vulnerability occurred in the process of reading and writing CSearchRoot object's data(shared resource).
 
@@ -128,7 +128,7 @@ We conducted binary analysis focusing by the following functions :
 
 While analyzing ISearchRoot::put_RootURL and ISearchRoot::get_RootURL, we figured out that the object's shared variable (CSearchRoot + 0x14) is actually referenced. 
 
-The put_RootURL function wrote a user-specified RootURL in the memory of CSearchRoot+0x14. And get_RootURL function read the memory value located in CSearchRoot+0x14. At the point of patching, it appeared that the problem was caused by this shared variable.
+The put_RootURL function wrote a user-specified RootURL in the memory of CSearchRoot+0x14. And get_RootURL function read the memory value located in CSearchRoot+0x14. At the point of patching, it appeared that the vulnerability was caused by this shared variable.
 
 ![image](https://user-images.githubusercontent.com/11327974/77665342-de2c3880-6fc2-11ea-90a8-1021135102e2.png)
 
@@ -193,8 +193,7 @@ Since then, triggering the bug is quite simple.
 
 We turned on Gflag.exe's page heap and created two threads : 
 
-While one thread repeatedly writes data of different lengths to a shared buffer, the other thread reads data from the shared buffer.
-
+While one thread repeatedly writes data of different lengths to the shared buffer, the other thread reads data from the shared buffer.
 
 1. Thread_01
 ```cpp
@@ -256,7 +255,6 @@ int wmain(int argc, wchar_t *argv[])
 
     if (1)
     {
-        wcout << L"Tread Start!!!." << endl;
         HANDLE t1 = CreateThread(NULL, 0, test_thread_01, (LPVOID)pISearchRoot[13], 0, NULL);
         HANDLE t2 = CreateThread(NULL, 0, test_thread_02, (LPVOID)pISearchRoot[13], 0, NULL);
         WaitForSingleObject(t1, 500);
@@ -266,7 +264,7 @@ int wmain(int argc, wchar_t *argv[])
 }
 ```
 
-We completed the analysis and found that if the client did not release the pISearchRoot object, an IRpcStubBuffer objects would remain on the server heap. And we also saw that the IRpcStubBuffer object remained near the location of the heap where the vulnerability occurs!
+We completed the analysis and found that if the client did not release the pISearchRoot object, an IRpcStubBuffer objects would remain on the server heap. And we also saw that the IRpcStubBuffer object was remained near the location of the heap where the vulnerability occured!
 
 ```
     0:010> !heap -p -all
@@ -291,12 +289,12 @@ We completed the analysis and found that if the client did not release the pISea
       ? mssprxy!_ISearchRootStubVtbl+10                       <-- IRpcStubBuffer Obj
 ```
 
-In COM, all interfaces have their own interface stub space. Stubs are small memory spaces used to support remote method calls during RPC communication, and IRpcStubBuffer is the primary interface for such interface stubs. In this process, the IRpcStubBuffer to support pISearchRoot's interface stub remains on the server's heap.
+In COM, all interfaces have their own interface stub space. Stubs are a small memory spaces used to support remote method calls during RPC communication, and IRpcStubBuffer is the primary interface for such interface stubs. In this process, the IRpcStubBuffer to support pISearchRoot's interface stub remains on the server's heap.
 
 
 If pISearchRoot is instantiated, IRpcStubBuffer::Connect provides the interface stub with a actual object pointer associated with the stub object. And when the client's COM Uninitialized, IRpcStubBuffer::Disconnect disconnects all connections of object pointer.
 
-The vtfunction of IRpcStubBuffer is as follows. If the client calls CoUninitialize function after an oob attack, CStdStubBuffer_Disconnect function is called on the server. This means that users can construct fake vtable and call that functions.
+The vtfunction of IRpcStubBuffer is as follows. If the client calls CoUninitialize function after an oob attack, CStdStubBuffer_Disconnect function is called on the server. It means that users can construct fake vtable and call that functions.
 
 
 ```
@@ -305,7 +303,7 @@ The vtfunction of IRpcStubBuffer is as follows. If the client calls CoUninitiali
     71215bcc  71217073 mssprxy!CStdStubBuffer_AddRef
     71215bd0  71216840 mssprxy!CStdStubBuffer_Release
     71215bd4  71217926 mssprxy!CStdStubBuffer_Connect
-    71215bd8  71216866 mssprxy!CStdStubBuffer_Disconnect <-- Client Call : CoUninitialize();
+    71215bd8  71216866 mssprxy!CStdStubBuffer_Disconnect <-- client call : CoUninitialize();
     71215bdc  7121687c mssprxy!CStdStubBuffer_Invoke
     71215be0  7121791b mssprxy!CStdStubBuffer_IsIIDSupported
     71215be4  71217910 mssprxy!CStdStubBuffer_CountRefs
