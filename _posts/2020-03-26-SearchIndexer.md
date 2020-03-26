@@ -3,8 +3,6 @@ title: Analysis of vulnerabilities in MS SearchIndexer
 author: SungHyun Park @ Diffense
 ---
 
-### Windows Search Indexer
-
 The Jan-Feb 2020 security patch fixes multiple bugs in the *Windows Search Indexer*. 
 
 ![s-indexer](https://user-images.githubusercontent.com/39076499/77614587-aeecdb80-6f70-11ea-94d7-68123684ab1b.png)
@@ -14,13 +12,14 @@ The Jan-Feb 2020 security patch fixes multiple bugs in the *Windows Search Index
 
 It is not common for such many vulnerabilities found one service. It seems that there might be a new attack vector, and we were very curious about what it was. We were hoping that if we finished the analysis we could find another similar 0-day vulnerability. So we began analyzing right away!
 
-Before analyzing, we needed to learn about the Windows Search Indexer. Search Indexer is an app that indexes files for quick search and stores this indexing information as data. From a more detailed perspective, SearchIndexer.exe is a windows service that handles indexing of your files for Windows Search, which fuels the file search engine built into Windows that powers everything from the Start Menu search box to Windows Explorer, and even the Libraries feature.
 
+### Windows Search Indexer
+
+Before analyzing, we needed to learn about the Windows Search Indexer. Search Indexer is an app that indexes files for quick search and stores this indexing information as data. From a more detailed perspective, SearchIndexer.exe is a windows service that handles indexing of your files for Windows Search, which fuels the file search engine built into Windows that powers everything from the Start Menu search box to Windows Explorer, and even the Libraries feature.
 
 The below screenshot shows how to adjust the basic options for Search Indexer. The "Modify option" allows users to adjust the indexing range. By default, it indexes the Start Menu and Users Folder under the C: \ drive. Also, through the "Advanced option", we can add the extension or contents of files to be indexed to the index list in more detail.
 
 ![s-index2](https://user-images.githubusercontent.com/39076499/77614696-e9ef0f00-6f70-11ea-9c86-344603014c34.png)
-
 
 At this point, we thought the vulnerability was probably a logical flaw vulnerability due to the creation of a temporary data file and a Local Privilege Escalation (LPE) in the indexing process. The reason is that many windows service-related vulnerabilities take this pattern. As such, we analyzed how the vulnerability could have occurred in this indexing process.
 
