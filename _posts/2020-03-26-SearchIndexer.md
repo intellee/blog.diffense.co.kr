@@ -137,7 +137,7 @@ Eventually, the vulnerability was in the process of double fetching length, and 
 1. First fetch: Shared variable used as memory allocation size (line 9)
 2. Second fetch: Shared variable used as memory copy size (line 13)
 
-If there is a discrepancy between the size used for the first fetch and the size used for the second fetch, a heap overflow may occur, especially if the size of the second fetch is larger. We thought we could change the size of pszURL(shared value) sufficiently before the memory copy occurs through race condition!
+If there is a discrepancy between the size used for the first fetch and the size for the second fetch, a heap overflow may occur, especially if the size of the second fetch is larger. We thought we could change the size of pszURL(shared value) sufficiently before the memory copy occurs through race condition!
 
 
 
