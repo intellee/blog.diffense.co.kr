@@ -8,7 +8,7 @@ The Jan-Feb 2020 security patch fixes multiple bugs in the *Windows Search Index
 - CVE-2020-0666, CVE-2020-0667, CVE-2020-0735, CVE-2020-0752 (Feb, 2020)
 - CVE-2020-0613, CVE-2020-0614, CVE-2020-0623, CVE-2020-0625, CVE-2020-0626, CVE-2020-0627, CVE-2020-0628, CVE-2020-0629, CVE-2020-0630, CVE-2020-0631, CVE-2020-0632, CVE-2020-0633 (Jan, 2020)
 
-![s-indexer](https://user-images.githubusercontent.com/39076499/77614587-aeecdb80-6f70-11ea-94d7-68123684ab1b.png)
+![cve](https://user-images.githubusercontent.com/11327974/77618263-51a95800-6f79-11ea-8fb7-725d72f333d8.jpg)
 
 It is not common for such many vulnerabilities found one service. It seems that there might be a new attack vector, and we were very curious about what it was. We were hoping that if we finished the analysis we could find another similar 0-day vulnerability. So we began analyzing right away!
 
@@ -19,7 +19,7 @@ Before analyzing, we needed to learn about the Windows Search Indexer. Search In
 
 The below screenshot shows how to adjust the basic options for Search Indexer. The "Modify option" allows users to adjust the indexing range. By default, it indexes the Start Menu and Users Folder under the C: \ drive. Also, through the "Advanced option", we can add the extension or contents of files to be indexed to the index list in more detail.
 
-![s-index2](https://user-images.githubusercontent.com/39076499/77614696-e9ef0f00-6f70-11ea-9c86-344603014c34.png)
+![indexing_option](https://user-images.githubusercontent.com/11327974/77618360-84ebe700-6f79-11ea-8fd1-cfca179ef2a3.png)
 
 At this point, we thought the vulnerability was probably a logical flaw vulnerability due to the creation of a temporary data file and a Local Privilege Escalation (LPE) in the indexing process. The reason is that many windows service-related vulnerabilities take this pattern. As such, we analyzed how the vulnerability could have occurred in this indexing process.
 
