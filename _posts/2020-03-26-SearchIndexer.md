@@ -3,6 +3,7 @@ title: Analysis of vulnerabilities in MS SearchIndexer
 author: SungHyun Park @ Diffense
 ---
 
+
 ### Introduction
 
 The Jan-Feb 2020 security patch fixes multiple bugs in the *Windows Search Indexer*. 
@@ -38,20 +39,21 @@ For win7 x86 those were:
 
 They can be downloaded from Microsoft Update Catalog[^2]
 
-We begin with comparing the December(2019) and January(2020) version of searchindexer.exe in BinDiff :
+We started with a BinDiff of the binaries modified by the patch (in this case there is only one: searchindexer.exe)
 
-![3](https://user-images.githubusercontent.com/39076499/77614903-6eda2880-6f71-11ea-9b19-a6e2079ce58c.png)
+![diffing](https://user-images.githubusercontent.com/11327974/77633500-e66c7f80-6f92-11ea-84bf-cc56ea4d18d7.png)
 
-In the January monthly patch, virtual functions of the CSearchCrawlScopeManager class were patched. We saw diffing on one of the patched functions, the save function. The function read the critical section ID from the class pointer (CSearchCrawlScopeManager) and identified the critical area based on it. Interestingly, all patched CSearchCrawlScopeManger methods have been added to initialize with the same critical section ID (this + 0x48) as shown below. Perhaps a race condition problem occurred between virtual function calls in CSearchCrawlScopeManager.
+Most of the patch was done in the CSearchRoot  and CSearchCrawlScopeManager class methods. Both class contained the same change, so we focused on the recently patched CSearchRoot.
 
-![11](https://user-images.githubusercontent.com/39076499/77614975-96c98c00-6f71-11ea-8198-cd86fbd7b619.png)
+Patch details are as follows:
 
-In the February monthly patch, virtual functions of the CSearchRoot class were patched. Seeing that the put_ * and get_ * functions were patched, it seemed that a vulnerability occurred in the process of reading and writing data. Looking at the patch history, similar to the January monthly patch, the put function took the Exclusive Lock and the get function took the Shared Lock.
+Usually ExclusiveLock and ShardLock are techniques used when a shared resource exists. It seemed that a vulnerability occurred in the process of reading and writing CSearchRoot object's data(shared resource).
 
 ![a](https://user-images.githubusercontent.com/39076499/77615091-d42e1980-6f71-11ea-8cfe-9e53c018546c.png)
+
 ![b](https://user-images.githubusercontent.com/39076499/77615097-d5f7dd00-6f71-11ea-9156-70199300ab65.png)
 
-As a result of analyzing the patched contents, the shared resource exists in the class, and race condition vulnerability is likely to occur in the process of storing and reading indexing information. Now all we have to do is look at what shared resources are stored in the class and how they could lead to vulnerabilities!
+Based on the patch history, it seems that a race condition vulnerability has occurred. Now all we have to do is look at what shared resources are stored in the class and how they could lead to vulnerabilities!
 
 
 ### Root Cause Analysis
