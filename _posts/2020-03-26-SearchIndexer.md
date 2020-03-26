@@ -5,10 +5,10 @@ author: SungHyun Park @ Diffense
 
 The Jan-Feb 2020 security patch fixes multiple bugs in the *Windows Search Indexer*. 
 
-![s-indexer](https://user-images.githubusercontent.com/39076499/77614587-aeecdb80-6f70-11ea-94d7-68123684ab1b.png)
-
 - CVE-2020-0666, CVE-2020-0667, CVE-2020-0735, CVE-2020-0752 (Feb, 2020)
 - CVE-2020-0613, CVE-2020-0614, CVE-2020-0623, CVE-2020-0625, CVE-2020-0626, CVE-2020-0627, CVE-2020-0628, CVE-2020-0629, CVE-2020-0630, CVE-2020-0631, CVE-2020-0632, CVE-2020-0633 (Jan, 2020)
+
+![s-indexer](https://user-images.githubusercontent.com/39076499/77614587-aeecdb80-6f70-11ea-94d7-68123684ab1b.png)
 
 It is not common for such many vulnerabilities found one service. It seems that there might be a new attack vector, and we were very curious about what it was. We were hoping that if we finished the analysis we could find another similar 0-day vulnerability. So we began analyzing right away!
 
