@@ -25,8 +25,7 @@ The below screenshot shows how to adjust the basic options for Search Indexer. T
 
 ![indexing_option](https://user-images.githubusercontent.com/11327974/77618360-84ebe700-6f79-11ea-8fd1-cfca179ef2a3.png)
 
-At this point, we thought the vulnerability was probably a logical flaw vulnerability due to the creation of a temporary data file and a Local Privilege Escalation (LPE) in the indexing process. The reason is that many windows service-related vulnerabilities take this pattern. As such, we analyzed how the vulnerability could have occurred in this indexing process.
-
+In the beginning, we thought the vulnerability was probably a logical flaw vulnerability and LPE(Local Privilege Escalation) due to the creation of a temporary data file in the indexing process.
 
 
 ### Patch Analysis
@@ -44,11 +43,11 @@ We started with a BinDiff of the binaries modified by the patch (in this case th
 
 ![diffing_2](https://user-images.githubusercontent.com/11327974/77664228-5d207180-6fc1-11ea-8b6c-74a47f6839d5.PNG)
 
-Most of the patch was done in the CSearchRoot and CSearchCrawlScopeManager class methods. In January, SearchCrawlScopeManager was patched, and in February, SearchRoot was patched. Both class contained the same change, so we focused on the recently patched CSearchRoot.
+Most of the patch was done in the CSearchCrawlScopeManager and CSearchRoot class. In January, SearchCrawlScopeManager was patched, and in February, SearchRoot was patched. Both class contained the same change, so we focused on CSearchRoot patched recently.
 
 Patch details are as follows :
 
-Usually ExclusiveLock and ShardLock are techniques used when a shared resource exists. It seemed that a vulnerability occurred in the process of reading and writing CSearchRoot object's data(shared resource).
+A routine for specifying critical areas has been added. Usually ExclusiveLock and ShardLock are techniques used when a shared resource exists. It seemed that a vulnerability occurred in the process of reading and writing shared resource (CSearchRoot object's data)
 
 ![a](https://user-images.githubusercontent.com/39076499/77615091-d42e1980-6f71-11ea-8cfe-9e53c018546c.png)
 
@@ -128,13 +127,13 @@ We conducted binary analysis focusing by the following functions :
 
 While analyzing ISearchRoot::put_RootURL and ISearchRoot::get_RootURL, we figured out that the object's shared variable (CSearchRoot + 0x14) is actually referenced. 
 
-The put_RootURL function wrote a user-specified RootURL in the memory of CSearchRoot+0x14. And get_RootURL function read the memory value located in CSearchRoot+0x14. At the point of patching, it appeared that the vulnerability was caused by this shared variable.
+The put_RootURL function wrote a user-controlled data in the memory of CSearchRoot+0x14. And get_RootURL function read the data located in memory of CSearchRoot+0x14. At the perspective of patching, it appeared that the vulnerability was caused by this shared variable.
 
-![image](https://user-images.githubusercontent.com/11327974/77665342-de2c3880-6fc2-11ea-90a8-1021135102e2.png)
+![image](https://user-images.githubusercontent.com/11327974/77677607-484cd980-6fd3-11ea-91ce-91638c0da03c.png)
 
-![image](https://user-images.githubusercontent.com/11327974/77665389-f0a67200-6fc2-11ea-8fb4-2e6d45ba9480.png)
+![image](https://user-images.githubusercontent.com/11327974/77677685-60bcf400-6fd3-11ea-8c64-462952e4c8b3.png)
 
-Thus, we finally arrived at the point where the vulnerability actually occurred. The vulnerability was caused by using shared variables(pszURL) in the process of allocation and copying. CopyOutStr function is called by the get_RootURL function. This function first reads the pszURL in the CSearchRoot class and allocates the heap for that length. Then, StringCchCopyW is called with length equal to pszURL.
+Thus, we finally arrived at the point where the vulnerability actually occurred. The vulnerability was caused by using shared variables(pszURL) in the process of allocating and copying. CopyOutStr function is called by the get_RootURL function. This function first reads the pszURL in the CSearchRoot class and allocates the heap for that length. Then, StringCchCopyW is called with length equal to pszURL.
 
 ![image](https://user-images.githubusercontent.com/11327974/77665477-0ddb4080-6fc3-11ea-8e18-6e631dd77f89.png)
 
@@ -253,12 +252,11 @@ int wmain(int argc, wchar_t *argv[])
     pISearchRoot[9]->Release();
     pISearchRoot[11]->Release();
 
-    if (1)
-    {
-        HANDLE t1 = CreateThread(NULL, 0, test_thread_01, (LPVOID)pISearchRoot[13], 0, NULL);
-        HANDLE t2 = CreateThread(NULL, 0, test_thread_02, (LPVOID)pISearchRoot[13], 0, NULL);
-        WaitForSingleObject(t1, 500);
-    }
+    
+    HANDLE t1 = CreateThread(NULL, 0, test_thread_01, (LPVOID)pISearchRoot[13], 0, NULL);
+    HANDLE t2 = CreateThread(NULL, 0, test_thread_02, (LPVOID)pISearchRoot[13], 0, NULL);
+    WaitForSingleObject(t1, 500);
+    
     CoUninitialize();
     return 0;
 }
