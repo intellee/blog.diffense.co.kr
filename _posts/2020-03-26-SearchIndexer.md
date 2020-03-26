@@ -19,7 +19,7 @@ It is not a common casee for such many vulnerabilities found one service. It see
 
 ### Windows Search Indexer
 
-Windows Search Indexer is an app that indexes files for quick search and stores this indexing information as data. From a more detailed perspective, SearchIndexer.exe is a windows service that handles indexing of your files for Windows Search, which fuels the file search engine built into Windows that powers everything from the Start Menu search box to Windows Explorer, and even the Libraries feature.
+Windows Search Indexer is an app that indexes files for quick search and stores this indexing information as data. From a more detailed, Search Indexer is a Windows service that handles indexing of your files for Windows Search, which fuels the file search engine built into windows that powers everything from the Start Menu search box to Windows Explorer, and even the Libraries feature.
 
 The below screenshot shows how to adjust the basic options for Search Indexer. The "Modify option" allows users to adjust the indexing range. By default, it indexes the Start Menu and Users Folder under the C: \ drive. Also, through the "Advanced option", we can add the extension or contents of files to be indexed to the index list in more detail.
 
