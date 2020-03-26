@@ -120,7 +120,9 @@ We thought that a vulnerability would arise in the course of manipulating the ru
 - ISearchCrawlScopeManager::RemoveRoot
 - ISearchRoot::get_RootURL
 
-We conducted binary analysis with IDA Pro to look at the detailed internal behavior. While analyzing ISearchRoot::put_RootURL and ISearchRoot::get_RootURL, we figured out that the object's shared variable (CSearchRoot + 0x14) is actually referenced. The put_RootURL function wrote a user-specified RootURL in the memory of CSearchRoot+0x14. And get_RootURL function read the memory value located in CSearchRoot+0x14. From the point of view of vulnerability patch, it appeared that the problem was caused by this shared variable.
+We conducted binary analysis with IDA Pro to look at the detailed internal behavior. While analyzing ISearchRoot::put_RootURL and ISearchRoot::get_RootURL, we figured out that the object's shared variable (CSearchRoot + 0x14) is actually referenced. 
+
+The put_RootURL function wrote a user-specified RootURL in the memory of CSearchRoot+0x14. And get_RootURL function read the memory value located in CSearchRoot+0x14. From the point of view of vulnerability patch, it appeared that the problem was caused by this shared variable.
 
 ![ff](https://user-images.githubusercontent.com/39076499/77615289-46066300-6f72-11ea-8e25-7fef00284126.png)
 ![fff](https://user-images.githubusercontent.com/39076499/77615291-4868bd00-6f72-11ea-9dc2-6e6d9f5e3deb.png)
