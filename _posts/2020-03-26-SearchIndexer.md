@@ -42,9 +42,9 @@ They can be downloaded from Microsoft Update Catalog[^2]
 
 We started with a BinDiff of the binaries modified by the patch (in this case there is only one: searchindexer.exe)
 
-![diffing](https://user-images.githubusercontent.com/11327974/77633500-e66c7f80-6f92-11ea-84bf-cc56ea4d18d7.png)
+![diffing_2](https://user-images.githubusercontent.com/11327974/77664228-5d207180-6fc1-11ea-8b6c-74a47f6839d5.PNG)
 
-Most of the patches were done in the CSearchRoot and CSearchCrawlScopeManager class methods. Both classes contained the same changes, so we focused on the recently patched CSearchRoot.
+Most of the patch was done in the CSearchRoot and CSearchCrawlScopeManager class methods. In January, SearchCrawlScopeManager was patched, and in February, SearchRoot was patched. Both class contained the same change, so we focused on the recently patched CSearchRoot.
 
 Patch details are as follows:
 
@@ -60,9 +60,9 @@ Based on the patch history, it seems that a race condition vulnerability has occ
 
 ### Root Cause Analysis
 
-We referenced the MSDN docs to see how those classes are used and found that they were all related to the Crawl Scope Manager. And we could check the method information of this class.
+We referenced the MSDN to see how those classes are used and found that they were all related to the Crawl Scope Manager. And we could check the method information of this class.
 
-And the MSDN docs said[^3]: 
+And the MSDN said[^3]: 
 
 > The Crawl Scope Manager (CSM) is a set of APIs that lets you add, remove, and enumerate search roots and scope rules for the Windows Search indexer. When you want the indexer to begin crawling a new container, you can use the CSM to set the search root(s) and scope rules for paths within the search root(s). For example, if you install a new protocol handler, you can create a search root and add one or more inclusion rules; then the indexer can start a crawl for the initial indexing. The CSM offers the following interfaces to help you do this programmatically.
 
@@ -83,7 +83,9 @@ The ISearchCrawlScopeManager tells the search engine about containers to crawl a
 pISearchRoot->put_RootURL(L"file:///C:\ ");
 pSearchCrawlScopeManager->AddRoot(pISearchRoot);
 pSearchCrawlScopeManager->AddDefaultScopeRule(L"file:///C:\Windows", fInclude, FF_INDEXCOMPLEXURLS);
-pSearchCrawlScopeManager->SaveAll(); // Set Registry key
+
+// Set Registry key
+pSearchCrawlScopeManager->SaveAll(); 
 ```
 
 We can also use ISearchCrawlScopeManager to remove a root from the crawl scope when we no longer want that URL indexed. Removing a root also deletes all scope rules for that URL. We can uninstall the application, remove all data, and then remove the search root from the crawl scope, and the Crawl Scope Manager will remove the root and all scope rules associated with the root.
@@ -91,7 +93,9 @@ We can also use ISearchCrawlScopeManager to remove a root from the crawl scope w
 ```cpp
 // Remove RootInfo & Scope Rule
 ISearchCrawlScopeManager->RemoveRoot(pszURL);
-ISearchCrawlScopeManager->SaveAll(); // Set Registry key
+
+// Set Registry key
+ISearchCrawlScopeManager->SaveAll(); 
 ``` 
 
 The CSM enumerates search roots using IEnumSearchRoots. We can use this class to enumerate search roots for a number of purposes. For example, we might want to display the entire crawl scope in a user interface, or discover whether a particular root or the child of a root is already in the crawl scope.
@@ -115,22 +119,22 @@ wcout << L"\t" << pszUrl;
 
 We thought that a vulnerability would arise in the course of manipulating the rules. And we decided to analyze the functions associated with it. We conducted binary analysis focusing on the following functions.
 
-- ISearchRoot::put_RootURL
-- ISearchCrawlScopeManager::AddRoot
-- ISearchCrawlScopeManager::RemoveRoot
-- ISearchRoot::get_RootURL
+- [ISearchRoot::put_RootURL](https://docs.microsoft.com/en-us/windows/win32/api/searchapi/nf-searchapi-isearchroot-put_rooturl)
+- [ISearchCrawlScopeManager::AddRoot](https://docs.microsoft.com/en-us/windows/win32/api/searchapi/nf-searchapi-isearchcrawlscopemanager-addroot)
+- [ISearchCrawlScopeManager::RemoveRoot](https://docs.microsoft.com/en-us/windows/win32/api/searchapi/nf-searchapi-isearchcrawlscopemanager-removeroot)
+- [ISearchRoot::get_RootURL](https://docs.microsoft.com/en-us/windows/win32/api/searchapi/nf-searchapi-isearchroot-get_rooturl)
 
 While analyzing ISearchRoot::put_RootURL and ISearchRoot::get_RootURL, we figured out that the object's shared variable (CSearchRoot + 0x14) is actually referenced. 
 
-The put_RootURL function wrote a user-specified RootURL in the memory of CSearchRoot+0x14. And get_RootURL function read the memory value located in CSearchRoot+0x14. From the point of view of vulnerability patch, it appeared that the problem was caused by this shared variable.
+The put_RootURL function wrote a user-specified RootURL in the memory of CSearchRoot+0x14. And get_RootURL function read the memory value located in CSearchRoot+0x14. At the point of patching, it appeared that the problem was caused by this shared variable.
 
-![ff](https://user-images.githubusercontent.com/39076499/77615289-46066300-6f72-11ea-8e25-7fef00284126.png)
+![image](https://user-images.githubusercontent.com/11327974/77665342-de2c3880-6fc2-11ea-90a8-1021135102e2.png)
 
-![fff](https://user-images.githubusercontent.com/39076499/77615291-4868bd00-6f72-11ea-9dc2-6e6d9f5e3deb.png)
+![image](https://user-images.githubusercontent.com/11327974/77665389-f0a67200-6fc2-11ea-8fb4-2e6d45ba9480.png)
 
 Thus, we finally arrived at the point where the vulnerability actually occurred. The vulnerability was caused by using shared variables(pszURL) in the process of allocation and copying. CopyOutStr function is called by the get_RootURL function. This function first reads the pszURL in the CSearchRoot class and allocates the heap for that length. Then, StringCchCopyW is called with length equal to pszURL.
 
-![1111](https://user-images.githubusercontent.com/39076499/77615326-633b3180-6f72-11ea-9dcc-9e00a60f3933.png)
+![image](https://user-images.githubusercontent.com/11327974/77665477-0ddb4080-6fc3-11ea-8e18-6e631dd77f89.png)
 
 Eventually, the vulnerability was in the process of double fetching length, and the vulnerability could be triggered when the following occurs:
 
@@ -187,40 +191,38 @@ Since then, triggering the bug is quite simple.
 
 We turned on Gflag.exe's page heap and created two threads : 
 
-The first thread (Thread_01) was programmed to repeatedly write different lengths of the RootURL. The second thread (Thread_02) was programmed to read the written RootURL and return it to the client.
+While one thread repeatedly writes data of different lengths to a shared buffer, the other thread reads data from the shared buffer.
 
 
 1. Thread_01
 ```cpp
-DWORD __stdcall test_thread_01(LPVOID param)
+DWORD __stdcall thread_shared_write(LPVOID param)
 {
-    ISearchManager *pSearchManager = (ISearchManager*)param;
-    wcout << L"First Tread Start!!!." << endl;
-    while (1) {
-        pSearchManager->put_RootURL(L"AA");
-        pSearchManager->put_RootURL(L"AAAAAAAAAA");
-    }
-    return 0;
+	ISearchManager *pSearchManager = (ISearchManager*)param;
+	while (1) {
+		pSearchManager->put_RootURL(L"AA");
+		pSearchManager->put_RootURL(L"AAAAAAAAAA");
+	}
+	return 0;
 }
 ```
 
 2. Thread_02
 ```cpp
-DWORD __stdcall test_thread_02(LPVOID param)
+DWORD __stdcall thread_shared_read(LPVOID param)
 {
-    ISearchRoot *pISearchRoot = (ISearchRoot*)param;
-    PWSTR get_pszUrl;
-    wcout << L"Second Tread Start!!!." << endl;
-    while (1) {
-        pISearchRoot->get_RootURL(&get_pszUrl);
-    }
-    return 0;
+	ISearchRoot *pISearchRoot = (ISearchRoot*)param;
+	PWSTR get_pszUrl;
+	while (1) {
+		pISearchRoot->get_RootURL(&get_pszUrl);
+	}
+	return 0;
 }
 ```
 
 Okay, now we created a crash!
 
-As expected, a heap overflow occurred while StringCchCopyW function copied RootURL data.
+As expected, the race condition succeeded before the StringCchCopyW function copied the RootURL data, and then a heap overflow occurred.
 
 ![crash](https://user-images.githubusercontent.com/39076499/77615795-8adec980-6f73-11ea-90f1-aa6db29ec21a.png)
 
