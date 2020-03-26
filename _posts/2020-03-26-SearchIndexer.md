@@ -117,7 +117,9 @@ pSearchScopeRule->get_PatternOrURL(&pszUrl);
 wcout << L"\t" << pszUrl;
 ```
 
-We thought that a vulnerability would arise in the course of manipulating the rules. And we decided to analyze the functions associated with it. We conducted binary analysis focusing on the following functions.
+We thought that a vulnerability would arise in the process of manipulating the rules. And we decided to analyze the functions associated with it. 
+
+We conducted binary analysis focusing in the following functions :
 
 - [ISearchRoot::put_RootURL](https://docs.microsoft.com/en-us/windows/win32/api/searchapi/nf-searchapi-isearchroot-put_rooturl)
 - [ISearchCrawlScopeManager::AddRoot](https://docs.microsoft.com/en-us/windows/win32/api/searchapi/nf-searchapi-isearchcrawlscopemanager-addroot)
