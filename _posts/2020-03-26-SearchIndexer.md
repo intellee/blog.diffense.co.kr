@@ -188,7 +188,7 @@ While one thread repeatedly writes data of different lengths to the shared buffe
 
 Thread_01
 ```cpp
-DWORD __stdcall thread_shared_data_write(LPVOID param)
+DWORD __stdcall thread_putter(LPVOID param)
 {
 	ISearchManager *pSearchManager = (ISearchManager*)param;
 	while (1) {
@@ -201,7 +201,7 @@ DWORD __stdcall thread_shared_data_write(LPVOID param)
 
 Thread_02
 ```cpp
-DWORD __stdcall thread_shared_data_read(LPVOID param)
+DWORD __stdcall thread_getter(LPVOID param)
 {
 	ISearchRoot *pISearchRoot = (ISearchRoot*)param;
 	PWSTR get_pszUrl;
