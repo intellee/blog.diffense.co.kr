@@ -274,11 +274,7 @@ We found that if the client did not release the pISearchRoot object, an IRpcStub
 
 In COM, all interfaces have their own interface stub space. Stubs are a small memory spaces used to support remote method calls during RPC communication, and IRpcStubBuffer is the primary interface for such interface stubs. In this process, the IRpcStubBuffer to support pISearchRoot's interface stub remains on the server's heap.
 
-
-If pISearchRoot is instantiated, IRpcStubBuffer::Connect provides the interface stub with a actual object pointer associated with the stub object. And when the client's COM Uninitialized, IRpcStubBuffer::Disconnect disconnects all connections of object pointer.
-
-The vtfunction of IRpcStubBuffer is as follows. If the client calls CoUninitialize function after an oob attack, CStdStubBuffer_Disconnect function is called on the server. It means that users can construct fake vtable and call that functions.
-
+The vtfunction of IRpcStubBuffer is as follows : 
 
 ```
     0:003> dds poi(03d58f18) l10
@@ -293,6 +289,8 @@ The vtfunction of IRpcStubBuffer is as follows. If the client calls CoUninitiali
     71215be8  71217905 mssprxy!CStdStubBuffer_DebugServerQueryInterface
     71215bec  712178fa mssprxy!CStdStubBuffer_DebugServerRelease
 ```
+
+When the client's COM is Uninitialized, IRpcStubBuffer::Disconnect disconnects all connections of object pointer. If the client calls CoUninitialize function after an oob attack, CStdStubBuffer_Disconnect function is called on the server. It means that users can construct fake vtable and call that functions.
 
 However, we haven't always seen IRpcStubBuffer allocated on the same location heap. Therefore, several tries were needed to expect the attackable heap. After several attacks, the IRpcStubBuffer object was covered with the controllable value (0x45454545) as follows.
 
