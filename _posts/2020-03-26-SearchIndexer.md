@@ -3,6 +3,8 @@ title: Analysis of vulnerabilities in MS SearchIndexer
 author: SungHyun Park @ Diffense
 ---
 
+번역가님께 :
+영문으로 작성한 것은 감수 부탁드리고, 한글로 작성된 부분은 번역 부탁드립니다.
 
 ### Introduction
 
@@ -14,7 +16,7 @@ Reported CVEs is as follows[^1] :
 
 ![cve](https://user-images.githubusercontent.com/11327974/77618263-51a95800-6f79-11ea-8fb7-725d72f333d8.jpg)
 
-위에서 보듯이, 서치인덱서에서 Elevation of Privilege(EoP) 취약점이 많이 나왔다. 그래서 우리는 패치된 내용을 분석해보기로 결정했고, 그 내용을 공유한다.
+보다시피 서치인덱서에서 Elevation of Privilege(EoP) 취약점이 많이 나왔다. 그래서 우리는 패치된 내용을 분석해보기로 결정했고, 그 내용을 공유한다.
 
 
 ### Windows Search Indexer
@@ -25,9 +27,6 @@ Windows Search Indexer is a Windows service that handles indexing of your files 
 
 ![indexing_option](https://user-images.githubusercontent.com/11327974/77618360-84ebe700-6f79-11ea-8fd1-cfca179ef2a3.png)
 
-최근 윈도우 서비스에서 발생하는 대부분의 EoP는 논리적 결함 취약점이었다.
-우리 또한 Windows Search Indexer도 동일한 취약점일 것이라고 생각하고 분석을 시작하였지만, 우리가 생각했던 것이 아니였다.
-이와 관련된 자세한 내용은 뒤에서 자세히 소개한다.
 
 ### Patch Diffing
 
@@ -51,6 +50,8 @@ Most of the patch was done in the CSearchCrawlScopeManager and CSearchRoot class
 ![a](https://user-images.githubusercontent.com/39076499/77615091-d42e1980-6f71-11ea-8cfe-9e53c018546c.png)
 
 ![b](https://user-images.githubusercontent.com/39076499/77615097-d5f7dd00-6f71-11ea-9156-70199300ab65.png)
+
+최근 윈도우 서비스에서 발생하는 대부분의 EoP는 논리적 결함 취약점이었다.우리 또한 Windows Search Indexer도 동일한 취약점일 것이라고 생각하고 분석을 시작하였지만, 우리가 생각했던 것이 아니였다.이와 관련된 자세한 내용은 뒤에서 자세히 소개한다.
 
 
 ### More detailed analysis of patched functions.
@@ -265,8 +266,6 @@ We found that if the client did not release the pISearchRoot object, an IRpcStub
     03d590c8 0005 0005  [00]   03d590d0    0001c - (busy)
       ? mssprxy!_ISearchRootStubVtbl+10                       <-- IRpcStubBuffer Obj
 ```
-
-(COM에 대한 내용은 더 확실하게 적던지, 빼던지 하겠음)
 
 In COM, all interfaces have their own interface stub space. Stubs are a small memory spaces used to support remote method calls during RPC communication, and IRpcStubBuffer is the primary interface for such interface stubs. In this process, the IRpcStubBuffer to support pISearchRoot's interface stub remains on the server's heap.
 
