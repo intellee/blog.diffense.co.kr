@@ -218,9 +218,8 @@ As expected, the race condition succeeded before the StringCchCopyW function cop
 
 ### EIP Control
 
-우리는 .. (작성중)
-
-We wrote the code like this:
+우리는 EIP 컨트롤을 하기 위해 취약점이 발생하는 서버 힙에 컨트롤 가능한 오브젝트를 올려야 했다. 
+다음과 같이 클라이언트 코드를 작성하고 힙의 상태를 추적했다.
 
 ```cpp
 int wmain(int argc, wchar_t *argv[])
@@ -246,7 +245,7 @@ int wmain(int argc, wchar_t *argv[])
 }
 ```
 
-We completed the analysis and found that if the client did not release the pISearchRoot object, an IRpcStubBuffer objects would remain on the server heap. And we also saw that the IRpcStubBuffer object was remained near the location of the heap where the vulnerability occured!
+We found that if the client did not release the pISearchRoot object, an IRpcStubBuffer objects would remain on the server heap. And we also saw that the IRpcStubBuffer object was remained near the location of the heap where the vulnerability occured.
 
 ```
     0:010> !heap -p -all
@@ -270,6 +269,8 @@ We completed the analysis and found that if the client did not release the pISea
     03d590c8 0005 0005  [00]   03d590d0    0001c - (busy)
       ? mssprxy!_ISearchRootStubVtbl+10                       <-- IRpcStubBuffer Obj
 ```
+
+(COM에 대한 내용은 더 확실하게 적던지, 빼던지 하겠음)
 
 In COM, all interfaces have their own interface stub space. Stubs are a small memory spaces used to support remote method calls during RPC communication, and IRpcStubBuffer is the primary interface for such interface stubs. In this process, the IRpcStubBuffer to support pISearchRoot's interface stub remains on the server's heap.
 
