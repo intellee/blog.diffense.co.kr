@@ -135,7 +135,7 @@ The put_RootURL function wrote a user-controlled data in the memory of CSearchRo
 
 Thus, we finally arrived at the point where the vulnerability actually occurred. The vulnerability was caused by using shared variables(pszURL) in the process of allocating and copying. CopyOutStr function is called by the get_RootURL function. This function first reads the pszURL in the CSearchRoot class and allocates the heap for that length. Then, StringCchCopyW is called with length equal to pszURL.
 
-![image](https://user-images.githubusercontent.com/11327974/77665477-0ddb4080-6fc3-11ea-8e18-6e631dd77f89.png)
+![image](https://user-images.githubusercontent.com/11327974/77712748-0c883300-7018-11ea-8c2f-9d588f4d8388.png)
 
 Eventually, the vulnerability was in the process of double fetching length, and the vulnerability could be triggered when the following occurs:
 
