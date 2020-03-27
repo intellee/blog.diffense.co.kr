@@ -304,8 +304,8 @@ In the end, we can show that indirect calls to any function in memory are possib
 
 ### Conclusion
 
-We are excited to have known a "new attack vector" for the Windows Search Indexer. And we think that the memory corruption in Windows Service is also impressive. This is because memory corruption vulnerabilities are not common in Windows Service. Through further analysis of the Search Indexer, vulnerabilities in other functions may be found in addition to the functions that were reported. We look forward to it!
-
+최근 윈도우 서비스 관련 논리적 결함 취약점에 의한 EoP가 많이 나타나고 있다. 그로 인해 메모리 코럽션 관련 취약점을 쉽게 간과할 수도 있다.
+그런 측면에서 Windows Search Indexer는 매우 흥미로운 분석이 되었고, 이 분석 결과가 취약점 리서처들에게 많은 도움이 되었으면 좋겠다. 
 
 
 ### Reference
