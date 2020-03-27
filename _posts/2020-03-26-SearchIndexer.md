@@ -16,7 +16,7 @@ Reported CVEs is as follows[^1] :
 
 ![cve](https://user-images.githubusercontent.com/11327974/77618263-51a95800-6f79-11ea-8fb7-725d72f333d8.jpg)
 
-보다시피 서치인덱서에서 Elevation of Privilege(EoP) 취약점이 많이 나왔다. 그래서 우리는 패치된 내용을 분석해보기로 결정했고, 그 내용을 공유한다.
+보다시피 Search Indexer에서 Elevation of Privilege(EoP) 취약점이 많이 나왔다. 그래서 우리는 패치된 내용을 분석해보기로 결정했고, 그 내용을 공유한다.
 
 
 ### Windows Search Indexer
@@ -26,6 +26,10 @@ Windows Search Indexer is a Windows service that handles indexing of your files 
 일반적으로 Search Indexer는 Indexing Option 을 통해서 아래와 같이 사용자 관점에서 GUI를 통해 해당 서비스의 인터페이스에 접근이 가능하다.
 
 ![indexing_option](https://user-images.githubusercontent.com/11327974/77618360-84ebe700-6f79-11ea-8fd1-cfca179ef2a3.png)
+
+인덱싱 과정에서 생성되는 DB정보와 관련된 임시 데이터는 모두 파일로 저장되고 관리된다. 보통 이 과정에서 서비스는 *NT AUTHORITY SYSTEM* 권한으로 파일을 다루기 때문에 파일 경로 조작에 따른 논리적 결함 취약점이 존재할 경우 EoP를 유도할 수 있다. 
+
+우리는 Search Indexer 또한 이와 같은 취약점일 것이라고 생각했다. 왜냐하면 최근 발생한 윈도우 서비스 취약점 대부분이 논리적 결함에 따른 EoP였기 때문이었다. 하지만 분석 결과 우리가 생각했던 것이 아니였고, 이와 관련한 내용을 뒤에서 자세히 소개하겠다.
 
 
 ### Patch Diffing
@@ -51,7 +55,7 @@ Most of the patch was done in the CSearchCrawlScopeManager and CSearchRoot class
 
 ![b](https://user-images.githubusercontent.com/39076499/77615097-d5f7dd00-6f71-11ea-9156-70199300ab65.png)
 
-최근 윈도우 서비스에서 발생하는 대부분의 EoP는 논리적 결함 취약점이었다.우리 또한 Windows Search Indexer도 동일한 취약점일 것이라고 생각하고 분석을 시작하였지만, 우리가 생각했던 것이 아니였다.이와 관련된 자세한 내용은 뒤에서 자세히 소개한다.
+
 
 
 ### More detailed analysis of patched functions.
