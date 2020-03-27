@@ -14,7 +14,7 @@ Reported CVEs is as follows[^1] :
 
 ![cve](https://user-images.githubusercontent.com/11327974/77618263-51a95800-6f79-11ea-8fb7-725d72f333d8.jpg)
 
-위에서 보듯이, 서치인덱서에서 Elevation of Privilege 취약점이 많이 나왔다. 그래서 우리는 패치된 내용을 분석해보기로 결정했고, 그 내용을 공유한다.
+위에서 보듯이, 서치인덱서에서 Elevation of Privilege(EoP) 취약점이 많이 나왔다. 그래서 우리는 패치된 내용을 분석해보기로 결정했고, 그 내용을 공유한다.
 
 
 ### Windows Search Indexer
@@ -25,6 +25,9 @@ Windows Search Indexer is a Windows service that handles indexing of your files 
 
 ![indexing_option](https://user-images.githubusercontent.com/11327974/77618360-84ebe700-6f79-11ea-8fd1-cfca179ef2a3.png)
 
+최근 윈도우 서비스에서 발생하는 대부분의 EoP는 논리적 결함 취약점이었다.
+우리 또한 Windows Search Indexer도 동일한 취약점일 것이라고 생각하고 분석을 시작하였지만, 우리가 생각했던 것이 아니였다.
+이와 관련된 자세한 내용은 뒤에서 자세히 소개한다.
 
 ### Patch Diffing
 
@@ -48,10 +51,6 @@ Most of the patch was done in the CSearchCrawlScopeManager and CSearchRoot class
 ![a](https://user-images.githubusercontent.com/39076499/77615091-d42e1980-6f71-11ea-8cfe-9e53c018546c.png)
 
 ![b](https://user-images.githubusercontent.com/39076499/77615097-d5f7dd00-6f71-11ea-9156-70199300ab65.png)
-
-최근 윈도우 서비스에서 발생하는 EoP는 대부분 논리적 결함 취약점일 것이라고 생각할 것이다. 
-우리 또한 Windows Search Indexer도 동일한 취약점일 것이라고 생각하고 분석을 시작하였지만, 우리가 생각했던 것이 아니였다.
-이와 관련된 자세한 내용은 뒤에서 자세히 소개한다.
 
 
 ### More detailed analysis of patched functions.
@@ -123,13 +122,10 @@ We conducted binary analysis focusing by the following functions :
 
 - [ISearchRoot::put_RootURL](https://docs.microsoft.com/en-us/windows/win32/api/searchapi/nf-searchapi-isearchroot-put_rooturl)
 - [ISearchRoot::get_RootURL](https://docs.microsoft.com/en-us/windows/win32/api/searchapi/nf-searchapi-isearchroot-get_rooturl)
-- [ISearchCrawlScopeManager::AddRoot](https://docs.microsoft.com/en-us/windows/win32/api/searchapi/nf-searchapi-isearchcrawlscopemanager-addroot)
-- [ISearchCrawlScopeManager::RemoveRoot](https://docs.microsoft.com/en-us/windows/win32/api/searchapi/nf-searchapi-isearchcrawlscopemanager-removeroot)
-
 
 While analyzing ISearchRoot::put_RootURL and ISearchRoot::get_RootURL, we figured out that the object's shared variable (CSearchRoot + 0x14) is actually referenced. 
 
-The put_RootURL function wrote a user-controlled data in the memory of CSearchRoot+0x14. The get_RootURL function read the data located in memory of CSearchRoot+0x14. 패치 내용에서 보면, it appeared that the vulnerability was caused by this shared variable.
+The put_RootURL function wrote a user-controlled data in the memory of CSearchRoot+0x14. The get_RootURL function read the data located in memory of CSearchRoot+0x14. 패치 관점에서 보면, it appeared that the vulnerability was caused by this shared variable.
 
 ![image](https://user-images.githubusercontent.com/11327974/77677607-484cd980-6fd3-11ea-91ce-91638c0da03c.png)
 
