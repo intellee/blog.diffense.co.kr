@@ -14,21 +14,19 @@ Reported CVEs is as follows[^1] :
 
 ![cve](https://user-images.githubusercontent.com/11327974/77618263-51a95800-6f79-11ea-8fb7-725d72f333d8.jpg)
 
-It is not a common casee for such many vulnerabilities found one service. It seems that there might be a new attack vector, and we were very curious about what it was. We were hoping that if we finished the analysis we could find another similar 0-day vulnerability. So we began analyzing right away!
+위에서 보듯이, 서치인덱서에서 Elevation of Privilege 취약점이 많이 나왔다. 그래서 우리는 패치된 내용을 분석해보기로 결정했고, 그 내용을 공유한다.
 
 
 ### Windows Search Indexer
 
-Windows Search Indexer is an app that indexes files for quick search and stores this indexing information as data. From a more detailed, Search Indexer is a Windows service that handles indexing of your files for Windows Search, which fuels the file search engine built into windows that powers everything from the Start Menu search box to Windows Explorer, and even the Libraries feature.
+Windows Search Indexer is a Windows service that handles indexing of your files for Windows Search, which fuels the file search engine built into windows that powers everything from the Start Menu search box to Windows Explorer, and even the Libraries feature.
 
-The below screenshot shows how to adjust the basic options for Search Indexer. The "Modify option" allows users to adjust the indexing range. By default, it indexes the Start Menu and Users Folder under the C: \ drive. Also, through the "Advanced option", we can add the extension or contents of files to be indexed to the index list in more detail.
+일반적으로 Search Indexer는 Indexing Option 을 통해서 아래와 같이 사용자 관점에서 GUI를 통해 해당 서비스의 인터페이스에 접근이 가능하다.
 
 ![indexing_option](https://user-images.githubusercontent.com/11327974/77618360-84ebe700-6f79-11ea-8fd1-cfca179ef2a3.png)
 
-In the beginning, we thought the vulnerability was probably a logical flaw vulnerability and LPE(Local Privilege Escalation) due to the creation of a temporary data file in the indexing process.
 
-
-### Patch Analysis
+### Patch Diffing
 
 The analysis environment is Windows7 x86. The reason we chose Win7 is that the size of the updated file was very small, making diffing more intuitive. We downloaded both patched and unpatched versions of this module.
 
@@ -45,19 +43,18 @@ We started with a BinDiff of the binaries modified by the patch (in this case th
 
 Most of the patch was done in the CSearchCrawlScopeManager and CSearchRoot class. In January, SearchCrawlScopeManager was patched, and in February, SearchRoot was patched. Both class contained the same change, so we focused on CSearchRoot patched recently.
 
-Patch details are as follows :
-
-A routine for specifying critical areas has been added. Usually ExclusiveLock and ShardLock are techniques used when a shared resource exists. It seemed that a vulnerability occurred in the process of reading and writing shared resource (CSearchRoot object's data)
+아래 그림을 보면 공유 리소스에 접근하는 Lock 관련 primitive 코드들이 추가된 것을 볼 수 있다. 해당 패치가 putter, getter 함수에서 이루어진 것으로 봐서 공유 리소스에 접근하는 과정에서 race condition 취약점이 발생했을 가능성이 높다고 판단했다.
 
 ![a](https://user-images.githubusercontent.com/39076499/77615091-d42e1980-6f71-11ea-8cfe-9e53c018546c.png)
 
 ![b](https://user-images.githubusercontent.com/39076499/77615097-d5f7dd00-6f71-11ea-9156-70199300ab65.png)
 
-Based on the patch history, it seems that a race condition vulnerability has occurred. Now all we have to do is look at what shared resources are stored in the class and how they could lead to vulnerabilities!
+최근 윈도우 서비스에서 발생하는 EoP는 대부분 논리적 결함 취약점일 것이라고 생각할 것이다. 
+우리 또한 Windows Search Indexer도 동일한 취약점일 것이라고 생각하고 분석을 시작하였지만, 우리가 생각했던 것이 아니였다.
+이와 관련된 자세한 내용은 뒤에서 자세히 소개한다.
 
 
-
-### Root Cause Analysis
+### More detailed analysis of patched functions.
 
 We referenced the MSDN to see how those classes are used and found that they were all related to the Crawl Scope Manager. And we could check the method information of this class.
 
@@ -116,18 +113,23 @@ pSearchScopeRule->get_PatternOrURL(&pszUrl);
 wcout << L"\t" << pszUrl;
 ```
 
-We thought that a vulnerability would arise in the process of manipulating the rules. And we decided to analyze the functions associated with it. 
+We thought that a vulnerability would arise in the process of manipulating the url.
+그에 따라 우리는 루트커즈 분석을 시작했다.
+
+
+### Root Cause Analysis
 
 We conducted binary analysis focusing by the following functions :
 
 - [ISearchRoot::put_RootURL](https://docs.microsoft.com/en-us/windows/win32/api/searchapi/nf-searchapi-isearchroot-put_rooturl)
+- [ISearchRoot::get_RootURL](https://docs.microsoft.com/en-us/windows/win32/api/searchapi/nf-searchapi-isearchroot-get_rooturl)
 - [ISearchCrawlScopeManager::AddRoot](https://docs.microsoft.com/en-us/windows/win32/api/searchapi/nf-searchapi-isearchcrawlscopemanager-addroot)
 - [ISearchCrawlScopeManager::RemoveRoot](https://docs.microsoft.com/en-us/windows/win32/api/searchapi/nf-searchapi-isearchcrawlscopemanager-removeroot)
-- [ISearchRoot::get_RootURL](https://docs.microsoft.com/en-us/windows/win32/api/searchapi/nf-searchapi-isearchroot-get_rooturl)
+
 
 While analyzing ISearchRoot::put_RootURL and ISearchRoot::get_RootURL, we figured out that the object's shared variable (CSearchRoot + 0x14) is actually referenced. 
 
-The put_RootURL function wrote a user-controlled data in the memory of CSearchRoot+0x14. And get_RootURL function read the data located in memory of CSearchRoot+0x14. At the perspective of patching, it appeared that the vulnerability was caused by this shared variable.
+The put_RootURL function wrote a user-controlled data in the memory of CSearchRoot+0x14. The get_RootURL function read the data located in memory of CSearchRoot+0x14. 패치 내용에서 보면, it appeared that the vulnerability was caused by this shared variable.
 
 ![image](https://user-images.githubusercontent.com/11327974/77677607-484cd980-6fd3-11ea-91ce-91638c0da03c.png)
 
@@ -148,22 +150,11 @@ If there is a discrepancy between the size used for the first fetch and the size
 
 ### Triggering POC
 
-Windows Search Indexer is a windows service. Windows service is generally designed to allow COM RPC connection, and clients can exchange data with the server through the interface provided by the service. Through OleView[^5], we were able to see the interface provided by Windows Search Manager. And we need to be able to trigger vulnerable functions based on the methods of that interface.
+Through OleView[^5], we were able to see the interface provided by Windows Search Manager. And we need to trigger vulnerable functions based on the methods of that interface.
 
 ![Trigger](https://user-images.githubusercontent.com/39076499/77615361-86fe7780-6f72-11ea-8de5-1fb81e2291c3.png)
 
-First of all, we need to construct the core of the COM client to trigger the vulnerable function.  COM client is constructed with the following steps:
-
-**CoInitializeEx** All COM applications start with a call to the CoInitializeEx function, which initializes the COM library. Except for some COM memory allocation functions, we should always call this function before using the service.
-
-
-**CoCreateInstance** After initializing the COM library using CoInitializeEx, we need to make it possible to instantiate the class through the CoCreateInsance call. If multiple interfaces are supported, each class must register a unique CLSID. So we can call the method of the interface provided by the service.
-
-
-**CoUninitialize** Finally, CoUninitialize releases any maintained COM resources and closes all RPC connections.
-
-
-Luckily, we were able to compile and test it through the COM based command line source code provided by MSDN[^4]. And We were able to write COM client code that triggers a vulnerable function like this:
+First of all, we programmed the core of the COM client to trigger the vulnerable function. 그리고 운이 좋게도, we were able to compile and test it through the COM based command line source code provided by MSDN[^4]. And We were able to write COM client code that triggers a vulnerable function like this:
 
 ```cpp
 int wmain(int argc, wchar_t *argv[])
@@ -188,11 +179,12 @@ int wmain(int argc, wchar_t *argv[])
 }
 ```
 
-Since then, triggering the bug is quite simple. We turned on Gflag.exe's page heap and created two threads.
+Since then, triggering the bug is quite simple. And we created two threads.
 
-While one thread repeatedly writes data of different lengths to the shared buffer, the other thread reads data from the shared buffer.
+While one thread repeatedly writes data of different lengths to the shared buffer, the other thread reads data from the shared buffer. -> 영문 표현 감수 요청합니다.
+(원문: 하나의 스레드가 서로 다른 길이를 갖는 데이터를 쉐어드 버퍼에 쓰는 동안, 또 다른 스레드는 해당 쉐어드 버퍼에서 데이터를 읽는다.)
 
-1. Thread_01
+<Thread_01>
 ```cpp
 DWORD __stdcall thread_shared_data_write(LPVOID param)
 {
@@ -205,7 +197,7 @@ DWORD __stdcall thread_shared_data_write(LPVOID param)
 }
 ```
 
-2. Thread_02
+<Thread_02>
 ```cpp
 DWORD __stdcall thread_shared_data_read(LPVOID param)
 {
@@ -218,23 +210,17 @@ DWORD __stdcall thread_shared_data_read(LPVOID param)
 }
 ```
 
-Okay, now we created a crash!
+Okay, Crash!
 
-As expected, the race condition succeeded before the StringCchCopyW function copied the RootURL data, and then a heap overflow occurred.
+![image](https://user-images.githubusercontent.com/11327974/77719834-9f7d9900-7029-11ea-872c-d9bd67702479.png)
 
-![crash](https://user-images.githubusercontent.com/39076499/77615795-8adec980-6f73-11ea-90f1-aa6db29ec21a.png)
+As expected, the race condition succeeded before the StringCchCopyW function copied the RootURL data, and then heap overflow occurred.
 
+### EIP Control
 
+우리는 .. (작성중)
 
-### Exploit (until EIP Control)
-
-Since Windows service basically operates under NT AUTHORITY SYSTEM privilege, it is possible to write executable code with elevated privileges if Window service has a vulnerability.
-
-In this section, we will demonstrate some of the possibilities of code execution. Finally, acquiring a shell requires more COM knowledge. However, we will show that even without knowledge of COM, EIP control is easily possible.
-
-Despite the Win 7 environment, it was very difficult for the client to manage the server heap. We tried diligently to control the heap, and we succeeded in putting controllable objects on the heap. (In fact, this wasn't a Win7 issue, it was a COM issue.)
-
-We programed the code like this:
+We wrote the code like this:
 
 ```cpp
 int wmain(int argc, wchar_t *argv[])
