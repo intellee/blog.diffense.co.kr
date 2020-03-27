@@ -251,8 +251,8 @@ int wmain(int argc, wchar_t *argv[])
     pISearchRoot[11]->Release();
 
     
-    HANDLE t1 = CreateThread(NULL, 0, test_thread_01, (LPVOID)pISearchRoot[13], 0, NULL);
-    HANDLE t2 = CreateThread(NULL, 0, test_thread_02, (LPVOID)pISearchRoot[13], 0, NULL);
+    HANDLE t1 = CreateThread(NULL, 0, thread_shared_data_write, (LPVOID)pISearchRoot[13], 0, NULL);
+    HANDLE t2 = CreateThread(NULL, 0, thread_shared_data_read, (LPVOID)pISearchRoot[13], 0, NULL);
     WaitForSingleObject(t1, 500);
     
     CoUninitialize();
