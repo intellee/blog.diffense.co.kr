@@ -181,8 +181,8 @@ int wmain(int argc, wchar_t *argv[])
 
 Since then, triggering the bug is quite simple. And we created two threads.
 
-While one thread repeatedly writes data of different lengths to the shared buffer, the other thread reads data from the shared buffer. -> 영문 표현 감수 요청합니다.
-(원문: 하나의 스레드가 서로 다른 길이를 갖는 데이터를 쉐어드 버퍼에 쓰는 동안, 또 다른 스레드는 해당 쉐어드 버퍼에서 데이터를 읽는다.)
+While one thread repeatedly writes data of different lengths to the shared buffer, the other thread reads data from the shared buffer.
+원문: 하나의 스레드가 서로 다른 길이를 갖는 데이터를 쉐어드 버퍼에 쓰는 동안, 또 다른 스레드는 해당 쉐어드 버퍼에서 데이터를 읽는다.
 
 Thread_01
 ```cpp
