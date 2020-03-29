@@ -21,13 +21,13 @@ Several Elevation of Privilege (EoP) vulnerabilities in the Windows Search Index
 
 ### Windows Search Indexer
 
-Windows Search Indexer is a Windows service that handles indexing of your files for Windows Search, which fuels the file search engine built into windows that powers everything from the Start Menu search box to Windows Explorer, and even the Libraries feature.
+Windows Search Indexer is a Windows Service that handles indexing of your files for Windows Search, which fuels the file search engine built into windows that powers everything from the Start Menu search box to Windows Explorer, and even the Libraries feature.
 
 Search Indexer helps direct the users to the service interface through GUI, an indexing option, from their perspectives, as indicated below.
 
 ![indexing_option](https://user-images.githubusercontent.com/11327974/77618360-84ebe700-6f79-11ea-8fd1-cfca179ef2a3.png)
 
-All the DB and temporary data during the indexing process are stored as files and managed. Meanwhile, logical flaws may occur due to modifying file paths and lead to the exploitation of EoP vulnerability forasmuch as the files are handled with the *NT AUTHORITY SYSTEM*. Besides, according to recent trends, vulnerabilities found in Windows service were EoP resulting from logical flaws. In this sense, we were sure that the vulnerability exists in the Windows Search Indexer as well. However, the outcome of our analysis was totally unexpected; more details are covered afterward.
+All the DB and temporary data during the indexing process are stored as files and managed. Meanwhile, logical flaws may occur due to modifying file paths and lead to the exploitation of EoP vulnerability forasmuch as the files are handled with the *NT AUTHORITY SYSTEM*. Besides, according to recent trends, vulnerabilities found in Windows Service were EoP resulting from logical flaws. In this sense, we were sure that the vulnerability exists in the Windows Search Indexer as well. However, the outcome of our analysis was totally unexpected; more details are covered afterward.
 
 
 
