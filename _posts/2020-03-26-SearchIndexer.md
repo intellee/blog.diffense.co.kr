@@ -76,7 +76,7 @@ And the MSDN said[^3] :
 
 For examples, adding, removing, and enumerating search roots and scope rules can be written by the following :
 
-The ISearchCrawlScopeManager tells the search engine about containers to crawl and/or watch, and items under those containers to include or exclude. To add a new search root, instantiate an ISearchRoot object, set the root attributes (ISearchRoot::put_RootURL), and then call ISearchCrawlScopeManager::AddRoot and pass it a pointer to ISearchRoot object.
+The ISearchCrawlScopeManager tells the search engine about containers to crawl and/or watch, and items under those containers to include or exclude. To add a new search root, instantiate an ISearchRoot object, set the root attributes, and then call ISearchCrawlScopeManager::AddRoot and pass it a pointer to ISearchRoot object.
 
 ```cpp
 // Add RootInfo & Scope Rule
@@ -117,7 +117,7 @@ pSearchScopeRule->get_PatternOrURL(&pszUrl);
 wcout << L"\t" << pszUrl;
 ```
 
-We thought that a vulnerability would arise in the process of manipulating url. Accordingly, we started analyzing the root causes.
+We thought that a vulnerability would arise in the process of manipulating URL. Accordingly, we started analyzing the root causes.
 
 
 
@@ -157,7 +157,8 @@ Through OleView[^5], we were able to see the interface provided by Windows Searc
 
 ![Trigger](https://user-images.githubusercontent.com/39076499/77615361-86fe7780-6f72-11ea-8de5-1fb81e2291c3.png)
 
-Fortunately, we were able to compile and test it through the COM based command line source code provided by MSDN[^4]. Moreover, We were able to write COM client code that triggered a vulnerable function as following:
+Fortunately, we were able to compile and test it through the COM based command line source code provided by MSDN[^4]. 
+We were able to write COM client code that triggered a vulnerable function as following:
 
 ```cpp
 int wmain(int argc, wchar_t *argv[])
@@ -182,7 +183,8 @@ int wmain(int argc, wchar_t *argv[])
 }
 ```
 
-Thereafter, bug triggering was quite simple. We created two threads: one writing different lengths of data to the shared buffer and the other reading data from the shared buffer at the same time.
+Thereafter, bug triggering was quite simple. 
+We created two threads: one writing different lengths of data to the shared buffer and the other reading data from the shared buffer at the same time.
 
 
 Thread_01
@@ -293,7 +295,7 @@ The vtfunction of IRpcStubBuffer is as follows :
     71215bec  712178fa mssprxy!CStdStubBuffer_DebugServerRelease
 ```
 
-When the client's COM is Uninitialized, IRpcStubBuffer::Disconnect disconnects all connections of object pointer. If the client calls CoUninitialize function after an oob attack, CStdStubBuffer_Disconnect function is called on the server. It means that users can construct fake vtable and call these function.
+When the client's COM is Uninitialized, IRpcStubBuffer::Disconnect disconnects all connections of object pointer. Therefore, if the client call CoUninitialize function after an oob attack, CStdStubBuffer_Disconnect function is called on the server. It means that users can construct fake vtable and call these function.
 
 However, we haven't always seen IRpcStubBuffer allocated on the same location heap. Therefore, several tries were needed to expect the attackable heap. After several attacks, the IRpcStubBuffer object was covered with the controllable value (0x45454545) as follows.
 
