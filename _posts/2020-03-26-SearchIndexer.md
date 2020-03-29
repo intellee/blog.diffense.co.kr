@@ -14,7 +14,7 @@ Reported CVEs is as follows[^1] :
 
 ![cve](https://user-images.githubusercontent.com/11327974/77618263-51a95800-6f79-11ea-8fb7-725d72f333d8.jpg)
 
-Several local privilege escalation vulnerability in the Windows Search Indexer have been found, as shown above. Thus, we decided to analyze details from the applied patches and share them. 
+Several Local Privilege Escalation vulnerability in the Windows Search Indexer have been found, as shown above. Thus, we decided to analyze details from the applied patches and share them. 
 
 
 
@@ -27,7 +27,7 @@ Search Indexer helps direct the users to the service interface through GUI, an i
 
 ![indexing_option](https://user-images.githubusercontent.com/11327974/77618360-84ebe700-6f79-11ea-8fd1-cfca179ef2a3.png)
 
-All the DB and temporary data during the indexing process are stored as files and managed. Meanwhile, logic bug may occur due to modifying file paths and lead to the local privilege escalation forasmuch as the files are handled with the *NT AUTHORITY SYSTEM*. Besides, according to recent trends, vulnerabilities found in Windows Service were mostly LPE vulnerability resulting from logic bug. In this sense, we were sure that the vulnerability exists in the Windows Search Indexer as well. However, the outcome of our analysis was totally unexpected; more details are covered afterward.
+All the DB and temporary data during the indexing process are stored as files and managed. Meanwhile, logic bug may occur due to modifying file paths and lead to the Local Privilege Escalation forasmuch as the files are handled with the *NT AUTHORITY SYSTEM*. Besides, according to recent trends, vulnerabilities found in Windows Service were mostly LPE vulnerability resulting from logic bug. In this sense, we were sure that the vulnerability exists in the Windows Search Indexer as well. However, the outcome of our analysis was totally unexpected; more details are covered afterward.
 
 
 
