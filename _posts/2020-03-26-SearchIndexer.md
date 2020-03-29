@@ -27,7 +27,7 @@ Search Indexer helps direct the users to the service interface through GUI, an i
 
 ![indexing_option](https://user-images.githubusercontent.com/11327974/77618360-84ebe700-6f79-11ea-8fd1-cfca179ef2a3.png)
 
-All the DB and temporary data during the indexing process are stored as files and managed. Meanwhile, logical flaws may occur due to modifying file paths and lead to the exploitation of EoP vulnerability forasmuch as the files are handled with the *NT AUTHORITY SYSTEM*. Besides, according to recent trends, vulnerabilities found in Windows Service were mostly EoP resulting from logical flaws. In this sense, we were sure that the vulnerability exists in the Windows Search Indexer as well. However, the outcome of our analysis was totally unexpected; more details are covered afterward.
+All the DB and temporary data during the indexing process are stored as files and managed. Meanwhile, logic bug may occur due to modifying file paths and lead to the exploitation of EoP vulnerability forasmuch as the files are handled with the *NT AUTHORITY SYSTEM*. Besides, according to recent trends, vulnerabilities found in Windows Service were mostly EoP resulting from logic bug. In this sense, we were sure that the vulnerability exists in the Windows Search Indexer as well. However, the outcome of our analysis was totally unexpected; more details are covered afterward.
 
 
 
