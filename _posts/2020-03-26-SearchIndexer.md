@@ -15,8 +15,10 @@ Reported CVEs is as follows[^1] :
 ![cve](https://user-images.githubusercontent.com/11327974/77618263-51a95800-6f79-11ea-8fb7-725d72f333d8.jpg)
 
 Several Elevation of Privilege (EoP) vulnerabilities in the Windows Search Indexer have been found, as shown above. Thus, we decided to analyze details from the applied patches and share them. 
-　
-　
+
+
+
+
 ### Windows Search Indexer
 
 Windows Search Indexer is a Windows service that handles indexing of your files for Windows Search, which fuels the file search engine built into windows that powers everything from the Start Menu search box to Windows Explorer, and even the Libraries feature.
@@ -26,6 +28,8 @@ Search Indexer helps direct the users to the service interface through GUI, an i
 ![indexing_option](https://user-images.githubusercontent.com/11327974/77618360-84ebe700-6f79-11ea-8fd1-cfca179ef2a3.png)
 
 All the DB and temporary data during the indexing process are stored as files and managed. Meanwhile, logical flaws may occur due to modifying file paths and lead to the exploitation of EoP vulnerability forasmuch as the files are handled with the NT Authority system. Besides, according to recent trends, vulnerabilities found in Windows service were EoP resulting from logical flaws. In this sense, we were sure that the vulnerability exists in the Windows Search Indexer as well. However, the outcome of our analysis was totally unexpected; more details are covered afterward.
+
+
 
 
 ### Patch Diffing
@@ -50,6 +54,8 @@ The following figure shows that primitive codes were added, which used a Lock to
 ![a](https://user-images.githubusercontent.com/39076499/77615091-d42e1980-6f71-11ea-8cfe-9e53c018546c.png)
 
 ![b](https://user-images.githubusercontent.com/39076499/77615097-d5f7dd00-6f71-11ea-9156-70199300ab65.png)
+
+
 
 
 ### More detailed analysis of patched functions.
@@ -114,6 +120,8 @@ wcout << L"\t" << pszUrl;
 We thought that a vulnerability would arise in the process of manipulating url. Accordingly, we started analyzing the root causes.
 
 
+
+
 ### Root Cause Analysis
 
 We conducted binary analysis focusing by the following functions :
@@ -139,6 +147,8 @@ The vulnerability was in the process of double fetching length, and the vulnerab
 ![image](https://user-images.githubusercontent.com/11327974/77712748-0c883300-7018-11ea-8c2f-9d588f4d8388.png)
 
 If the size of the first and that of the second differed, a heap overflow might occur, especially when the second fetch had a large size. We maintained that we change the size of pszURL (shared value) sufficiently through the race condition before the memory copy occurs.
+
+
 
 
 ### Triggering POC
@@ -206,6 +216,8 @@ Okay, Crash!
 ![image](https://user-images.githubusercontent.com/11327974/77719834-9f7d9900-7029-11ea-872c-d9bd67702479.png)
 
 Undoubtedly, the race condition had succeeded before the StringCchCopyW function copied the RootURL data, leading to heap overflow.
+
+
 
 
 ### EIP Control
@@ -290,9 +302,13 @@ In the end, we could show that indirect calls to any function in memory are poss
 ![eip](https://user-images.githubusercontent.com/39076499/77615799-8ca88d00-6f73-11ea-961b-6081eccf634d.png)
 
 
+
+
 ### Conclusion
 
 Lately, many of the EoP exploits have occurred due to the vulnerabilities resulting from errors in the logic regarding Windows Service. The analysis of Windows Search Indexer was unusual, inasmuch as vulnerabilities on memory corruption have been commonly overlooked. We hope that the analysis will serve as an insight to other researchers and be applied to further studies.
+
+
 
 
 ### Reference
