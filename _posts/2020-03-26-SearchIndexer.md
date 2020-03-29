@@ -23,13 +23,13 @@ Several Local Privilege Escalation(LPE) vulnerability in the Windows Search Inde
 
 Windows Search Indexer is a Windows Service that handles indexing of your files for Windows Search, which fuels the file search engine built into windows that powers everything from the Start Menu search box to Windows Explorer, and even the Libraries feature.
 
-Search Indexer helps direct the users to the service interface through GUI, an indexing option, from their perspectives, as indicated below.
+Search Indexer helps direct the users to the service interface through GUI, an indexing options, from their perspectives, as indicated below.
 
 ![indexing_option](https://user-images.githubusercontent.com/11327974/77618360-84ebe700-6f79-11ea-8fd1-cfca179ef2a3.png)
 
-All the DB and temporary data during the indexing process are stored as files and managed. Usually in Windows service, the whole process is carried out with *NT AUTHORITY SYSTEM* privileges. If the logic bug happens to exist due to modifying file paths, it may trigger privilege escalation. (E.g. TOCTOU)
+All the DB and temporary data during the indexing process are stored as files and managed. Usually in Windows service, the whole process is carried out with *NT AUTHORITY SYSTEM* privileges. If the logic bugs happen to exist due to modifying file paths, it may trigger privilege escalation. (E.g. TOCTOU)
 
-We assumed that Search Indexer might be the vulnerability like so, given that most of the vulnerabilities recently occurred in Windows Service were LPE vulnerabilities due to logic bug. However, the outcome of our analysis was totally unexpected; more details are covered afterward.
+We assumed that Search Indexer might be the vulnerability like so, given that most of the vulnerabilities recently occurred in Windows Service were LPE vulnerabilities due to logic bugs. However, the outcome of our analysis was totally unexpected; more details are covered afterward.
 
 
 
@@ -311,7 +311,7 @@ In the end, we could show that indirect calls to any function in memory are poss
 
 ### Conclusion
 
-Most of the LPE vulnerabilities, recently occurred in Windows Service, were Logic Bugs. In this manner, analysis on Memory corruption vulnerabilities of Windows Search Indexer was quite interesting. Thereby, such Memory Corruption vulnerabilities are likely to occur in Windows Service hereafter. We should not overlook the possibilities.
+Most of the LPE vulnerabilities, recently occurred in Windows Service, were logic bugs. In this manner, analysis on Memory corruption vulnerabilities of Windows Search Indexer was quite interesting. Thereby, such Memory Corruption vulnerabilities are likely to occur in Windows Service hereafter. We should not overlook the possibilities.
 
 We hope that the analysis will serve as an insight to other vulnerabilities researchers and be applied to further studies.
 
