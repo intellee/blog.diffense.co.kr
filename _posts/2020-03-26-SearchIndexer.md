@@ -141,8 +141,8 @@ Thus, we finally got to the point where the vulnerability actually initiated.
 
 The vulnerability was in the process of double fetching length, and the vulnerability could be triggered when the following occurs:
 
-&nbsp;&nbsp;1. First fetch: Shared variable used as memory allocation size (line 9)
-&nbsp;&nbsp;2. Second fetch: Shared variable used as memory copy size (line 13)
+1. First fetch: Shared variable used as memory allocation size (line 9)
+2. Second fetch: Shared variable used as memory copy size (line 13)
 
 ![image](https://user-images.githubusercontent.com/11327974/77712748-0c883300-7018-11ea-8c2f-9d588f4d8388.png)
 
