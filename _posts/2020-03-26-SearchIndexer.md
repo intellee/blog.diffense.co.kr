@@ -26,8 +26,8 @@ Search Indexer helps direct the users to the service interface through GUI, an i
 ![indexing_option](https://user-images.githubusercontent.com/11327974/77618360-84ebe700-6f79-11ea-8fd1-cfca179ef2a3.png)
 
 All the DB and temporary data during the indexing process are stored as files and managed. Meanwhile, logical flaws may occur due to modifying file paths and lead to the exploitation of EoP vulnerability forasmuch as the files are handled with the NT Authority system. Besides, according to recent trends, vulnerabilities found in Windows service were EoP resulting from logical flaws. In this sense, we were sure that the vulnerability exists in the Windows Search Indexer as well. However, the outcome of our analysis was totally unexpected; more details are covered afterward.
-
-
+  
+  
 ### Patch Diffing
 
 The analysis environment was Windows7 x86 in that it had a small size of updated file and enabled intuitive diffing. We downloaded both patched and unpatched versions of this module.
@@ -146,11 +146,11 @@ If the size of the first and that of the second differed, a heap overflow might 
 
 ### Triggering POC
 
-Through OleView^5, we were able to see the interface provided by Windows Search Manager. And we needed to trigger vulnerable functions based on the methods of the interface.
+Through OleView[^5], we were able to see the interface provided by Windows Search Manager. And we needed to trigger vulnerable functions based on the methods of the interface.
 
 ![Trigger](https://user-images.githubusercontent.com/39076499/77615361-86fe7780-6f72-11ea-8de5-1fb81e2291c3.png)
 
-Fortunately, we were able to compile and test it through the COM based command line source code provided by MSDN^4. Moreover, We were able to write COM client code that triggered a vulnerable function as following:
+Fortunately, we were able to compile and test it through the COM based command line source code provided by MSDN[^4]. Moreover, We were able to write COM client code that triggered a vulnerable function as following:
 
 ```cpp
 int wmain(int argc, wchar_t *argv[])
