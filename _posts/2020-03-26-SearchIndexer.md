@@ -27,7 +27,7 @@ Search Indexer helps direct the users to the service interface through GUI, an i
 
 ![indexing_option](https://user-images.githubusercontent.com/11327974/77618360-84ebe700-6f79-11ea-8fd1-cfca179ef2a3.png)
 
-All the DB and temporary data during the indexing process are stored as files and managed.Usually in Windows service, the whole process are occurred with NT AUTHORITY SYSTEM privileges. If the logic bug happens to exist due to modifying file paths, it may trigger privilege escalation. (E.g. TOCTOU)
+All the DB and temporary data during the indexing process are stored as files and managed.Usually in Windows service, the whole process is carried out with NT AUTHORITY SYSTEM privileges. If the logic bug happens to exist due to modifying file paths, it may trigger privilege escalation. (E.g. TOCTOU)
 
 We assumed that Search Indexer might be the vulnerability like so, given that most of the vulnerabilities recently occurred in Windows Service were LPE vulnerabilities due to logic bug. However, the outcome of our analysis was totally unexpected; more details are covered afterward.
 
