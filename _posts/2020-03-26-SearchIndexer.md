@@ -27,8 +27,9 @@ Search Indexer helps direct the users to the service interface through GUI, an i
 
 ![indexing_option](https://user-images.githubusercontent.com/11327974/77618360-84ebe700-6f79-11ea-8fd1-cfca179ef2a3.png)
 
-인덱싱 과정에서 생성되는 DB정보와 관련된 임시 데이터는 모두 파일로 저장되고 관리된다. 보통 이 과정에서 서비스는 NT AUTHORITY SYSTEM 권한으로 파일을 다루기 때문에 만약(If) 파일 경로 조작에 따른 논리적 결함 취약점이 존재할 경우 EoP를 유도할 수 있다.
-우리는 Search Indexer 또한 이와 같은 취약점 일 것이라고 생각했다. 왜냐하면 최근 윈도우 서비스에서 발생한 취약점의 대부분이 logic bug에 따른 LPE 취약점이었기 때문이었다. 하지만 분석 결과 우리가 생각했던 것이 아니었고, 이와 관련한 내용을 뒤에서 자세히 소개하겠다.
+All the DB and temporary data during the indexing process are stored as files and managed.Usually in Windows service, the whole process are occurred with NT AUTHORITY SYSTEM privileges. If the logic bug happens to exist due to modifying file paths, it may trigger privilege escalation. (E.g. TOCTOU)
+
+We assumed that Search Indexer might be the vulnerability like so, given that most of the vulnerabilities recently occurred in Windows Service were LPE vulnerabilities due to logic bug. However, the outcome of our analysis was totally unexpected; more details are covered afterward.
 
 
 
@@ -310,7 +311,9 @@ In the end, we could show that indirect calls to any function in memory are poss
 
 ### Conclusion
 
-최근에 윈도우 서비스에서 발생한 LPE 취약점의 대부분은 Logic Bugs 였다. 그런 측면에서 Windows Search Indexer에서 발생한 Memory Corruption 취약점은 매우 흥미로웠다. 그리고 앞으로도 이와 같은 Memory Corruption 취약점이 윈도우 서비스에서 많이 발생할 수 있을 것이다. 우리는 이 점을 간과해서는 안될 것이다. 이 분석의 결과가 많은 취약점 리서처들에게 도움이 되었으면 좋겠다.
+Most of the LPE vulnerabilities, recently occurred in Windows Service, were Logic Bugs. In this manner, analysis on Memory corruption vulnerabilities of Windows Search Indexer was quite interesting. Thereby, such Memory Corruption vulnerabilities are likely to occur in Windows Service hereafter. We should not overlook the possibilities.
+
+We hope that the analysis will serve as an insight to other vulnerabilities researchers and be applied to further studies.
 
 
 
