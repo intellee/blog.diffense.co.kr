@@ -310,7 +310,7 @@ In the end, we could show that indirect calls to any function in memory are poss
 
 ### Conclusion
 
-최근에 윈도우 서비스에서 발생한 LPE 취약점의 대부분은 Logic Bugs 였다. 그런 측면에서 Windows Search Indexer에서 발생한 Memory Corruption 취약점은 매우 흥미로웠다. 또 앞으로도 이와 같은 Memory Corruption 취약점이 윈도우 서비스에서 많이 발생할 수 있을 것이다. 우리는 이 점을 간과해서는 안될 것이다. 이 분석의 결과가 많은 취약점 리서처들에게 도움이 되었으면 좋겠다.
+최근에 윈도우 서비스에서 발생한 LPE 취약점의 대부분은 Logic Bugs 였다. 그런 측면에서 Windows Search Indexer에서 발생한 Memory Corruption 취약점은 매우 흥미로웠다. 그리고 앞으로도 이와 같은 Memory Corruption 취약점이 윈도우 서비스에서 많이 발생할 수 있을 것이다. 우리는 이 점을 간과해서는 안될 것이다. 이 분석의 결과가 많은 취약점 리서처들에게 도움이 되었으면 좋겠다.
 
 
 
