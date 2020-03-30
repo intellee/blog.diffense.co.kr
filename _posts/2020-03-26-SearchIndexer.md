@@ -145,7 +145,7 @@ The vulnerability was in the process of double fetching length, and the vulnerab
 1. First fetch: Used as memory allocation size (line 9)
 2. Second fetch: Used as memory copy size (line 13)
 
-![image](https://user-images.githubusercontent.com/11327974/77712748-0c883300-7018-11ea-8c2f-9d588f4d8388.png){: width="90%" height="90%"}
+![image](https://user-images.githubusercontent.com/11327974/77879083-a2c88d00-7294-11ea-96cb-d2191e5460d5.png){: width="90%" height="90%"}
 
 If the size of the first and that of the second differed, a heap overflow might occur, especially when the second fetch had a large size. We maintained that we change the size of pszURL sufficiently through the race condition before the memory copy occurs.
 
