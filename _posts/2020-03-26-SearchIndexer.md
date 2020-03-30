@@ -310,7 +310,7 @@ In the end, we could show that indirect calls to any function in memory are poss
 
 Most of the LPE vulnerabilities recently occurred in Windows Service, were logic bugs. In this manner, analysis on Memory corruption vulnerabilities of Windows Search Indexer was quite interesting. Thereby, such Memory Corruption vulnerabilities are likely to occur in Windows Service hereafter. We should not overlook the possibilities.
 
-We hope that the analysis will serve as an insight to other vulnerabilities researchers and be applied to further studies.
+We hope that the analysis will serve as an insight to other vulnerability researchers and be applied to further studies.
 
 
 
