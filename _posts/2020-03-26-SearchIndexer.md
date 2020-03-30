@@ -1,5 +1,5 @@
 ---
-title: Analysis of vulnerabilities in MS SearchIndexer
+title: Analysis of 1-day LPE vulnerabilities in MS SearchIndexer
 author: SungHyun Park @ Diffense
 ---
 
@@ -10,7 +10,7 @@ The Jan-Feb 2020 security patch fixes multiple bugs in the *Windows Search Index
 
 ![cve](https://user-images.githubusercontent.com/11327974/77618263-51a95800-6f79-11ea-8fb7-725d72f333d8.jpg)
 
-Several LPE vulnerabilities in the Windows Search Indexer have been found, as shown above[^1]. Thus, we decided to analyze details from the applied patches and share them. 
+Many LPE vulnerabilities in the Windows Search Indexer have been found, as shown above[^1]. Thus, we decided to analyze details from the applied patches and share them. 
 
 
 
@@ -243,8 +243,8 @@ int wmain(int argc, wchar_t *argv[])
     pISearchRoot[11]->Release();
 
     
-    HANDLE t1 = CreateThread(NULL, 0, thread_getter, (LPVOID)pISearchRoot[13], 0, NULL);
-    HANDLE t2 = CreateThread(NULL, 0, thread_getter, (LPVOID)pISearchRoot[13], 0, NULL);
+    CreateThread(NULL, 0, thread_putter, (LPVOID)pISearchRoot[13], 0, NULL);
+    CreateThread(NULL, 0, thread_getter, (LPVOID)pISearchRoot[13], 0, NULL);
     Sleep(500);
     
     CoUninitialize();
@@ -295,7 +295,7 @@ The vtfunction of IRpcStubBuffer is as follows :
     71215bec  712178fa mssprxy!CStdStubBuffer_DebugServerRelease
 ```
 
-When the client's COM is Uninitialized, IRpcStubBuffer::Disconnect disconnects all connections of object pointer. Therefore, if the client calls CoUninitialize function after an oob attack, CStdStubBuffer_Disconnect function is called on the server. It means that user can construct fake vtable and call this function.
+When the client's COM is Uninitialized, IRpcStubBuffer::Disconnect disconnects all connections of object pointer. Therefore, if the client calls CoUninitialize function, CStdStubBuffer_Disconnect function is called on the server. It means that user can construct fake vtable and call this function.
 
 However, we haven't always seen IRpcStubBuffer allocated on the same location heap. Therefore, several tries were needed to construct the heap layout. After several tries, the IRpcStubBuffer object was covered with the controllable value (0x45454545) as follows.
 
