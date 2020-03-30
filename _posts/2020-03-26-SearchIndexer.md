@@ -1,5 +1,5 @@
 ---
-title: Analysis of 1-day bug in MS SearchIndexer
+title: Analyzing a MS SearchIndexer bug
 author: SungHyun Park @ Diffense
 ---
 
