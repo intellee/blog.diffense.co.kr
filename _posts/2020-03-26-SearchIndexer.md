@@ -301,7 +301,7 @@ However, we haven't always seen IRpcStubBuffer allocated on the same location he
 
 In the end, we could show that indirect calls to any function in memory are possible!
 
-![image](https://user-images.githubusercontent.com/11327974/77872957-807a4380-7283-11ea-849b-1e5cf6f03d8e.png)
+![image](https://user-images.githubusercontent.com/11327974/77879458-74977d00-7295-11ea-8f89-8b5590080a59.png)
 
 
 
