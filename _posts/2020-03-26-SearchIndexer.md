@@ -19,11 +19,11 @@ Several LPE vulnerabilities in the Windows Search Indexer have been found, as sh
 
 Windows Search Indexer is a Windows Service that handles indexing of your files for Windows Search, which fuels the file search engine built into windows that powers everything from the Start Menu search box to Windows Explorer, and even the Libraries feature.
 
-Search Indexer helps direct the users to the service interface through GUI, an indexing options, from their perspectives, as indicated below.
+Search Indexer helps direct the users to the service interface through GUI, indexing options, from their perspectives, as indicated below.
 
 ![indexing_option](https://user-images.githubusercontent.com/11327974/77618360-84ebe700-6f79-11ea-8fd1-cfca179ef2a3.png){: width="500" height="300"}
 
-All the DB and temporary data during the indexing process are stored as files and managed. Usually in Windows Service, the whole process is carried out with *NT AUTHORITY SYSTEM* privileges. If the logic bugs happen to exist due to modifying file paths, it may trigger privilege escalation. (E.g. Symlink attack)
+All the DB and temporary data during the indexing process are stored as files and managed. Usually, in Windows Service the whole process is carried out with *NT AUTHORITY SYSTEM* privileges. If the logic bugs happen to exist due to modifying file paths, it may trigger privilege escalation. (E.g. Symlink attack)
 
 We assumed that Search Indexer might be the vulnerability like so, given that most of the vulnerabilities recently occurred in Windows Service were LPE vulnerabilities due to logic bugs. However, the outcome of our analysis was not that; more details are covered afterward.
 
@@ -46,7 +46,7 @@ We started with a BinDiff of the binaries modified by the patch (in this case th
 
 ![diffing_2](https://user-images.githubusercontent.com/11327974/77664228-5d207180-6fc1-11ea-8b6c-74a47f6839d5.PNG)
 
-Most of the patches were done in the CSearchCrawlScopeManager and CSearchRoot class.  The former was patched in January, and then the latter was patched the following month. Both class contained the same change, so we focused on CSearchRoot patched.
+Most of the patches were done in the CSearchCrawlScopeManager and CSearchRoot class.  The former was patched in January, and then the latter was patched the following month. Both classes contained the same change, so we focused on CSearchRoot patched.
 
 The following figure shows that primitive codes were added, which used a Lock to securely access shared resources. We deduced that accessing the shared resources gave rise to the occurrence of the race condition vulnerability in that the patch consisted of putter, getter function.
 
@@ -125,12 +125,12 @@ We thought that a vulnerability would arise in the process of manipulating URL. 
 
 ### Root Cause Analysis
 
-We conducted binary analysis focusing by the following functions :
+We conducted binary analysis focusing on the following functions :
 
 - [ISearchRoot::put_RootURL](https://docs.microsoft.com/en-us/windows/win32/api/searchapi/nf-searchapi-isearchroot-put_rooturl)
 - [ISearchRoot::get_RootURL](https://docs.microsoft.com/en-us/windows/win32/api/searchapi/nf-searchapi-isearchroot-get_rooturl)
 
-While analyzing ISearchRoot::put_RootURL and ISearchRoot::get_RootURL, we figured out that the object's shared variable (CSearchRoot + 0x14) was actually referenced.
+While analyzing ISearchRoot::put_RootURL and ISearchRoot::get_RootURL, we figured out that the object's shared variable (CSearchRoot + 0x14) was referenced.
 
 The put_RootURL function wrote a user-controlled data in the memory of CSearchRoot+0x14. The get_RootURL function read the data located in the memory of CSearchRoot+0x14. , it appeared that the vulnerability was caused by this shared variable concerning patches.
 
@@ -138,7 +138,7 @@ The put_RootURL function wrote a user-controlled data in the memory of CSearchRo
 
 ![image](https://user-images.githubusercontent.com/11327974/77871978-a8b47300-7280-11ea-943a-d54aad5e41d7.png)
 
-Thus, we finally got to the point where the vulnerability actually initiated.
+Thus, we finally got to the point where the vulnerability initiated.
 
 The vulnerability was in the process of double fetching length, and the vulnerability could be triggered when the following occurs:
 
@@ -154,7 +154,7 @@ If the size of the first and that of the second differed, a heap overflow might 
 
 ### Crash
 
-Through OleView[^5], we were able to see the interface provided by Windows Search Manager. And we needed to hit vulnerable functions based on the methods of the interface.
+Through OleView[^5], we were able to see the interface provided by the Windows Search Manager. And we needed to hit vulnerable functions based on the methods of the interface.
 
 ![image](https://user-images.githubusercontent.com/11327974/77872142-1365ae80-7281-11ea-964f-ba0295ce0715.png)
 
@@ -252,7 +252,7 @@ int wmain(int argc, wchar_t *argv[])
 }
 ```
 
-We found out that if the client did not release the pISearchRoot object, an IRpcStubBuffer objects would remain on the server heap. And we also saw that the IRpcStubBuffer object remained near the location of the heap where the vulnerability occurred.
+We found out that if the client did not release the pISearchRoot object, IRpcStubBuffer objects would remain on the server heap. And we also saw that the IRpcStubBuffer object remained near the location of the heap where the vulnerability occurred.
 
 ```
     0:010> !heap -p -all
@@ -308,7 +308,7 @@ In the end, we could show that indirect calls to any function in memory are poss
 
 ### Conclusion
 
-Most of the LPE vulnerabilities, recently occurred in Windows Service, were logic bugs. In this manner, analysis on Memory corruption vulnerabilities of Windows Search Indexer was quite interesting. Thereby, such Memory Corruption vulnerabilities are likely to occur in Windows Service hereafter. We should not overlook the possibilities.
+Most of the LPE vulnerabilities recently occurred in Windows Service, were logic bugs. In this manner, analysis on Memory corruption vulnerabilities of Windows Search Indexer was quite interesting. Thereby, such Memory Corruption vulnerabilities are likely to occur in Windows Service hereafter. We should not overlook the possibilities.
 
 We hope that the analysis will serve as an insight to other vulnerabilities researchers and be applied to further studies.
 
