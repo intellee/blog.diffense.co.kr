@@ -167,7 +167,7 @@ int wmain(int argc, wchar_t *argv[])
     // Initialize COM library
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 
-    // Class Instantiate
+    // Class instantiate
     ISearchRoot *pISearchRoot;
     CoCreateInstance(CLSID_CSearchRoot, NULL, CLSCTX_ALL, IID_PPV_ARGS(&pISearchRoot));
 
@@ -295,7 +295,7 @@ The vtfunction of IRpcStubBuffer is as follows :
     71215bec  712178fa mssprxy!CStdStubBuffer_DebugServerRelease
 ```
 
-When the client's COM is Uninitialized, IRpcStubBuffer::Disconnect disconnects all connections of object pointer. Therefore, if the client calls CoUninitialize function, CStdStubBuffer_Disconnect function is called on the server. It means that user can construct fake vtable and call this function.
+When the client's COM is Uninitialized, IRpcStubBuffer::Disconnect disconnects all connections of object pointer. Therefore, if the client calls CoUninitialize function, CStdStubBuffer_Disconnect function is called on the server. It means that users can construct fake vtable and call that function.
 
 However, we haven't always seen IRpcStubBuffer allocated on the same location heap. Therefore, several tries were needed to construct the heap layout. After several tries, the IRpcStubBuffer object was covered with the controllable value (0x45454545) as follows.
 
