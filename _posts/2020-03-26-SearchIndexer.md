@@ -1,5 +1,5 @@
 ---
-title: Analysis of 1-day LPE vulnerabilities in MS SearchIndexer
+title: Analysis of 1-day bug in MS SearchIndexer
 author: SungHyun Park @ Diffense
 ---
 
