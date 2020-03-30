@@ -33,12 +33,12 @@ We assumed that Search Indexer might be the vulnerability like so, given that mo
 
 ### Patch Diffing
 
-The analysis environment was Windows7 x86 in that it had a small size of the updated file and easy to identified the spot differences. We downloaded both patched and unpatched versions of this module.
+The analysis environment was Windows7 x86 in that it had a small size of the updated file and easy to identified the spot differences. We downloaded both patched versions of this module.
 
 They can be downloaded from Microsoft Update Catalog :
 
-- unpatched version (July, 2019) : KB4534314[^2]
-- patched version (Feb, 2020) : KB4537813[^3]
+- patched version (January Patch Tuesday) : KB4534314[^2]
+- patched version (February Patch Tuesday) : KB4537813[^3]
 
 
 
