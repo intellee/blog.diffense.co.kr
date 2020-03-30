@@ -8,7 +8,7 @@ author: SungHyun Park @ Diffense
 
 The Jan-Feb 2020 security patch fixes multiple bugs in the *Windows Search Indexer*. 
 
-![cve](https://user-images.githubusercontent.com/11327974/77618263-51a95800-6f79-11ea-8fb7-725d72f333d8.jpg){: width="80%" height="80%"}
+![cve](https://user-images.githubusercontent.com/11327974/77618263-51a95800-6f79-11ea-8fb7-725d72f333d8.jpg)
 
 Many LPE vulnerabilities in the Windows Search Indexer have been found, as shown above[^1]. Thus, we decided to analyze details from the applied patches and share them. 
 
@@ -134,9 +134,9 @@ While analyzing ISearchRoot::put_RootURL and ISearchRoot::get_RootURL, we figure
 
 The put_RootURL function wrote a user-controlled data in the memory of CSearchRoot+0x14. The get_RootURL function read the data located in the memory of CSearchRoot+0x14. , it appeared that the vulnerability was caused by this shared variable concerning patches.
 
-![image](https://user-images.githubusercontent.com/11327974/77871953-963a3980-7280-11ea-89a3-125de41b957d.png){: width="80%" height="80%"}
+![image](https://user-images.githubusercontent.com/11327974/77871953-963a3980-7280-11ea-89a3-125de41b957d.png){: width="90%" height="90%"}
 
-![image](https://user-images.githubusercontent.com/11327974/77871978-a8b47300-7280-11ea-943a-d54aad5e41d7.png){: width="80%" height="80%"}
+![image](https://user-images.githubusercontent.com/11327974/77871978-a8b47300-7280-11ea-943a-d54aad5e41d7.png){: width="90%" height="90%"}
 
 Thus, we finally got to the point where the vulnerability initiated.
 
@@ -145,7 +145,7 @@ The vulnerability was in the process of double fetching length, and the vulnerab
 1. First fetch: Used as memory allocation size (line 9)
 2. Second fetch: Used as memory copy size (line 13)
 
-![image](https://user-images.githubusercontent.com/11327974/77712748-0c883300-7018-11ea-8c2f-9d588f4d8388.png){: width="80%" height="80%"}
+![image](https://user-images.githubusercontent.com/11327974/77712748-0c883300-7018-11ea-8c2f-9d588f4d8388.png){: width="90%" height="90%"}
 
 If the size of the first and that of the second differed, a heap overflow might occur, especially when the second fetch had a large size. We maintained that we change the size of pszURL sufficiently through the race condition before the memory copy occurs.
 
