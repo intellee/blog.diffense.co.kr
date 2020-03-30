@@ -136,7 +136,7 @@ The put_RootURL function wrote a user-controlled data in the memory of CSearchRo
 
 ![image](https://user-images.githubusercontent.com/11327974/77879315-19fe2100-7295-11ea-9683-743c80c541da.png){: width="90%" height="90%"}
 
-![image](https://user-images.githubusercontent.com/11327974/77879320-1c607b00-7295-11ea-844d-2d4b5d9ad20c.png){: width="90%" height="90%"}
+![image](https://user-images.githubusercontent.com/11327974/77880984-dad1cf00-7298-11ea-9f5c-a1588d8bbf74.png){: width="90%" height="90%"}
 
 Thus, we finally got to the point where the vulnerability initiated.
 
