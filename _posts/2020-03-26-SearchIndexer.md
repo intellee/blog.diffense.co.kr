@@ -1,5 +1,5 @@
 ---
-title: Analyzing a MS SearchIndexer bug (CVE-2020-0666)
+title: Analyzing a MS SearchIndexer Bug (CVE-2020-0666)
 author: SungHyun Park @ Diffense
 ---
 
