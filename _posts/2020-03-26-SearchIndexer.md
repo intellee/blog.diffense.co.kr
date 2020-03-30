@@ -1,5 +1,5 @@
 ---
-title: Analyzing a 1-Day Bug in MS SearchIndexer
+title: Analyzing a Windows Search Indexer LPE bug
 author: SungHyun Park @ Diffense
 ---
 
