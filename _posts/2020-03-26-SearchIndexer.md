@@ -57,7 +57,7 @@ The following figure shows that primitive codes were added, which used a Lock to
 
 
 
-### How to interact with the interface
+### How to Interact with the Interface
 
 We referred to the MSDN to see how those classes were used and uncovered that they were all related to the Crawl Scope Manager. And we could check the method information of this class.
 
