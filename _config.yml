@@ -5,7 +5,7 @@ url: "https://blog.diffense.co.kr/"
 # THEME-SPECIFIC CONFIGURATION
 theme_settings:
   # Meta
-  title: DIFFENSE
+  title: Diffense
   avatar: og-img.png
   favicon: favicon-32x32.png
   gravatar: # Email MD5 hash
