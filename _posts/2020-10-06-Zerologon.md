@@ -61,7 +61,7 @@ AES Block Cipher는 16 바이트의 Input을 받고 그것을 같은 크기의 �
 
 AES-CFB8는 16 바이트의 IV 값을 가집니다. 그리고 난 후 IV에 Session Key를 인자로 AES를 수행하고 나온 결과값의 첫 바이트와 Plain Text의 첫 바이트를 xor하여 Cipher Text에 저장합니다. 이를 반복해서 수행하여 모든 평문을 암호화합니다.
 
-![aes_cfb8_1.png](/img/Zerologon/aes_cfb8_1.png)
+![aes_cfb8_1_v2.png](/img/Zerologon/aes_cfb8_1_v2.png)
 
 AES-CFB8의 Requirement에서는 IV 값이 랜덤일 때 평문을 안전하게 보호할 수 있다고 명시되어있지만 **NlComputeCredentials** 함수에서는 IV 값을 Zero(0)으로 사용함을 알 수 있습니다.  
 
@@ -73,7 +73,7 @@ AES-CFB8의 Requirement에서는 IV 값이 랜덤일 때 평문을 안전하게 
 
 만약 IV 값을 Session key로 AES 암호화를 수행한 뒤 나온 결과값의 첫 바이트가 0이라면 Plain Text도 0이고 Cipher Text도 0인 경우가 생깁니다.  공격자 입장에서는 Session Key를 몰라도 IV값을 Session Key로 암호화한 결과값의 첫 바이트가 0이 되는 경우만 생기면 Cipher Text도 0이 되므로 이 취약점을 악용할 수 있습니다.
 
-![aes_cfb8_2.png](/img/Zerologon/aes_cfb8_2.png)
+![aes_cfb8_2_v2.png](/img/Zerologon/aes_cfb8_2_v2.png)
 
 인증은 NetrServerAuthenticate3 함수에서 수행되는데 NlComputeCredentials을 통해 Server가 계산한 ClientCredential(MADE)과 Client가 보낸 ClientCredential(GOT)가 동일하다면 인증을 허용하여 줍니다.
 
