@@ -308,7 +308,7 @@ NlIsChallengeCredentialPairVulnerable 함수가 추가되었습니다. 이 함�
 <br>
 
 # Conclusion
-이번 글에서는 Zerologon 취약점에 관해 다뤄봤습니다. 본 포스팅에서 다뤘던 Exploit 방법 외에도 다양한 [방법](https://dirkjanm.io/a-different-way-of-abusing-zerologon/)도 존재하기 때문에 추가적인 정보는 아래 레퍼런스를 참고해주세요. 감사합니다.
+이번 글에서는 Zerologon 취약점에 관해 다뤄봤습니다. 본 포스팅에서 다뤘던 Exploit 방법 외에도 다양한 [방법](https://dirkjanm.io/a-different-way-of-abusing-zerologon/)이 공개되어 있습니다. 추가적인 정보는 아래의 레퍼런스를 참고해 주세요. 감사합니다.
 <br>
 <br>
 
