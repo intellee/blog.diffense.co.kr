@@ -1,5 +1,6 @@
 ---
 title: Zerologon
+subtitle: Anatomy of CVE-2020-1472
 author: Sibaek Lee of Diffense
 ---
 
