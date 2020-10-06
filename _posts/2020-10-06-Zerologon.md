@@ -1,6 +1,6 @@
 ---
-title: Zerologon
-subtitle: Anatomy of CVE-2020-1472
+title: Anatomy of Zerologon
+subtitle: Zero To Logon, Domain를 장악할 수 있는 CVE-2020-1472 취약점 파헤치기
 author: Sibaek Lee of Diffense
 ---
 
