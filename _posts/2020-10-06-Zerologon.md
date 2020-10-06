@@ -190,7 +190,7 @@ int main()
             }
 
             else {
-                printf("[!]<%d> Passed. It's differnet.\n", x);
+                printf("[!]<%d> Passed. It's different.\n", x);
                 printf("\t EncryptText(0x%0x 0x%0x), PlainText(0x%0x 0x%0x)\n ", EncryptText[0], EncryptText[1], PlainText[0], PlainText[1]);
                 free(RandomKey);
                 HeapFree(GetProcessHeap(), 0, KeyBlob);
