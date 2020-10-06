@@ -1,6 +1,11 @@
-Microsoft는 2020년 8월에 CVE-2020-1472 취약점에 대한 패치 업데이트를 공개하였습니다. 해당 취약점은 통칭 Zerologon 이라 불리며, 공격자가 Domain Controller에 대한 TCP 연결만 수립할 수 있다면 Active Directory 상의 모든 Account의 패스워드를 초기화 할 수 있었던 취약점입니다. 매우 파급력이 커서 CVSS 10점으로 평가되었으며 취약점에 대한 내용이 공개된 지 얼마 지나지 않아 Mimikatz나 여러 APT 공격 도구 등에 모듈로써 포함되게 되었습니다.
+---
+title: Zerologon
+author: Sibaek Lee of Diffense
+---
 
-이 글에서는 아래와 같은 내용을 다룰 것입니다.
+Microsoft는 2020년 8월에 CVE-2020-1472 취약점에 대한 패치 업데이트를 공개하였습니다. 해당 취약점은 통칭 Zerologon 이라 불리며, 공격자가 Domain Controller에 대한 TCP 연결만 수립할 수 있다면 Active Directory 상의 모든 Account의 패스워드를 초기화 할 수 있는 취약점입니다. 매우 파급력이 커서 CVSS 10점으로 평가되었으며 취약점에 대한 내용이 공개된 지 얼마 지나지 않아 Mimikatz나 여러 APT 공격 도구 등에 모듈로써 포함되었습니다.
+
+이 글에서는 다음과 같은 내용을 다룰 것입니다.
 
 - 취약점 개요
 - 취약점 상세 분석
@@ -28,7 +33,8 @@ NlMakeSessionKey(in cryptFlag, in passwordHash, in clientChall, in serverChall, 
 
 인증 작업을 수행하는 Client와 Host는 인증 수립 후의 Message들에 대해 Sign+Seal 작업을 수행할 지에 대해 Negotiation 할 수 있습니다.  
 
-취약점 자체는 Client와 Server 모두 Credential Value를 만들기 위해 **ComputeNetlogonCredential**이라는 함수를 사용하는데 이 암호화 과정 중 IV 값이 0으로 고정되어 있어 발생한 문제였습니다. 공격자는 이것을 악용하여 Client Credential을 0으로 만들 수 있었고 그로 인해 정상적인 Client로 인증받아 대상의 Password를 초기화시킬 수 있었습니다.         
+Domain Client와 Domain Server는 Credential Value를 만들기 위해 **ComputeNetlogonCredential**이라는 함수를 사용하는데 이 암호화 과정 중 IV 값이 0으로 고정되어 있어 발생한 취약점입니다. 
+공격자는 이것을 악용하여 Client Credential을 0으로 만들 수 있고 그로 인해 정상적인 Client로 인증받아 대상의 Password를 초기화시킬 수 있습니다.
 <br>
 <br>
 
@@ -40,9 +46,9 @@ NlMakeSessionKey(in cryptFlag, in passwordHash, in clientChall, in serverChall, 
 
 ![NlComputeCredentials.png](/img/Zerologon/NlComputeCredentials.png)
 
-**NlComputeCredentials** 함수는 2DES 또는 AES 암호화를 사용하는데 어떠한 암호화 알고리즘을 사용 할 지는 Client와 Negotiation한 Flag값에 따라 달라집니다. 그러나 최신 Windows Server의 Default 설정은 2DES Scheme를 사용한 어떠한 인증도 거부하므로 대부분의 Domain Server에서는 AES 방식만이 사용됩니다.
+**NlComputeCredentials** 함수는 2DES 또는 AES 암호화를 지원하는데 어떤 암호화 알고리즘을 사용 할 지는 Client와 Negotiation한 Flag값에 따라 결정됩니다. 그러나 최신 Windows Server의 Default 설정은 2DES Scheme를 사용한 어떠한 인증도 거부하므로 대부분의 Domain Server에서는 AES 방식만이 사용됩니다.
 
-AES Block Cipher는 16 BYTE의 Input을 받고 그것을 같은 크기의 다른 Output으로 치환합니다. 여기에는 기본 블록 단위보다 크거나 작은 Input을 어떻게 처리할 건지에 대한 Operation Mode가 존재합니다. **NlComputeCredentials** 함수 또한 Operation Mode를 사용하는데 흔히 알려진 ECB 같은 것이 아닌 CFB이란 Operation Mode를 사용합니다.
+AES Block Cipher는 16 바이트의 Input을 받고 그것을 같은 크기의 다른 Output으로 치환합니다. 여기에는 기본 블록 단위보다 크거나 작은 Input을 어떻게 처리할 건지에 대한 Operation Mode가 존재합니다. **NlComputeCredentials** 함수 또한 Operation Mode를 사용하는데 흔히 알려진 ECB 같은 것이 아닌 CFB이란 Operation Mode를 사용합니다.
 
 암호화 관련 초기화 함수인 **NlInitalizeCNG** 함수를 통해 AES-CFB를 사용하는 것을 알 수 있습니다.
 
@@ -52,11 +58,11 @@ AES Block Cipher는 16 BYTE의 Input을 받고 그것을 같은 크기의 다른
 
 ## AES-CFB8 동작 방식
 
-AES-CFB8는 16 BYTE의 IV 값을 가집니다. 그리고 난 후 16 BYTE IV에 Session Key를 인자로 AES를 수행하고 나온 결괏값의 첫 바이트와 Plain Text의 첫 바이트를 xor하여 Cipher Text에 저장합니다. 이를 반복해서 수행하여 모든 평문을 암호화합니다.
+AES-CFB8는 16 바이트의 IV 값을 가집니다. 그리고 난 후 IV에 Session Key를 인자로 AES를 수행하고 나온 결과값의 첫 바이트와 Plain Text의 첫 바이트를 xor하여 Cipher Text에 저장합니다. 이를 반복해서 수행하여 모든 평문을 암호화합니다.
 
 ![aes_cfb8_1.png](/img/Zerologon/aes_cfb8_1.png)
 
-AES-CFB8의 Requirement에서는 AES-CFB8로 평문을 안전하게 보호하기 위해서는 IV 값이 랜덤일 때 가능하다고 명시되어있지만 **NlComputeCredentials** 함수에서는 IV 값을 NULL로 사용함을 알 수 있습니다.  
+AES-CFB8의 Requirement에서는 IV 값이 랜덤일 때 평문을 안전하게 보호할 수 있다고 명시되어있지만 **NlComputeCredentials** 함수에서는 IV 값을 Zero(0)으로 사용함을 알 수 있습니다.  
 
 ![iv_null.png](/img/Zerologon/iv_null.png)
 <br>
@@ -64,7 +70,7 @@ AES-CFB8의 Requirement에서는 AES-CFB8로 평문을 안전하게 보호하기
 
 그렇다면 IV 값이 모두 0일 때는 어떠한 문제가 생길 수 있을까요? 
 
-만약 IV 값을 Session key로 AES 암호화를 수행한 뒤 나온 결괏값의 첫 바이트가 0이라면 Plain Text도 0이고 Cipher Text도 0인 경우가 생깁니다.  공격자 입장에서는 Session Key를 몰라도 IV값을 Session Key로 암호화한 결괏값의 첫 바이트가 0이 되는 경우만 생기면 Cipher Text도 0이 되므로 이 취약점을 악용할 수 있습니다.
+만약 IV 값을 Session key로 AES 암호화를 수행한 뒤 나온 결과값의 첫 바이트가 0이라면 Plain Text도 0이고 Cipher Text도 0인 경우가 생깁니다.  공격자 입장에서는 Session Key를 몰라도 IV값을 Session Key로 암호화한 결과값의 첫 바이트가 0이 되는 경우만 생기면 Cipher Text도 0이 되므로 이 취약점을 악용할 수 있습니다.
 
 ![aes_cfb8_2.png](/img/Zerologon/aes_cfb8_2.png)
 
@@ -72,14 +78,14 @@ AES-CFB8의 Requirement에서는 AES-CFB8로 평문을 안전하게 보호하기
 
 ![NetrServerAuthenticate3.png](/img/Zerologon/NetrServerAuthenticate3.png)
 
-공격이 성공했을 때 Netlogon 관련 로그 파일에서 GOT Client Credential과 MADE Client Credentail의 MD5 Hash(0*8에 대한 MD5 Hash)가 동일한 것을 확인할 수 있습니다.
+만약 공격이 성공한다면 Netlogon 관련 로그 파일에서 GOT Client Credential과 MADE Client Credential의 MD5 Hash(0*8에 대한 MD5 Hash)가 동일한 것을 확인할 수 있습니다.
 ![netlogon_log.png](/img/Zerologon/netlogon_log.png)
 
-실제 POC에서는 공격을 대략 2000번 정도 시도한다면 99.6%의 확률로 성공합니다.  
+2000번의 인증을 시도하는 POC를 100회 실행했을 때 공격에 모두 성공하였습니다.   
 ![poc_attempt.png](/img/Zerologon/poc_attempt.png)
 <br>
 
-아래는 코드는 NlComputeCredentials에서 Client Challenge를 암호화하는 것을 C++ 코드로 재현한 코드입니다.
+다음 코드는 NlComputeCredentials에서 Client Challenge를 암호화하는 것을 직접 C++ 코드로 재현한 코드입니다.
 ```cpp
 #pragma comment (lib, "bcrypt.lib")
 
@@ -207,7 +213,7 @@ int main()
 
 Exploit 과정은 크게 5가지 Step으로 이루어집니다.
 
-## 1 : Spoofing the client credential
+## 1) Spoofing the client credential
 
 **NetrServerReqChallenge** 함수 호출로 Challenge를 교환한 후에 Client는 Server의 **NetrServerAuthenticate3** 함수를 호출하여 인증을 시도합니다. **NetrServerAuthenticate3**에는 ClientCredential이라는 매개 변수가 있으며 이것이 Server에서 비교할 Client Credential 값이 됩니다.
 
@@ -215,11 +221,11 @@ Exploit 과정은 크게 5가지 Step으로 이루어집니다.
 
 보통 1 단계가 성공하기 위해서 필요한 평균 횟수는 256회이고 실제로는 약 3초정도 밖에 걸리지 않습니다. 이 방법을 사용하면 도메인의 모든 컴퓨터의 Credential을 spoofing할 수 있고 여기에는 Backup Domain Controller와 Domain Controller도 포함됩니다.
 
-## 2 : Disabling signing and sealing
+## 2) Disabling signing and sealing
 
-Step1을 수행하며 Client Credential을 Spoofing할 수 있었지만 Session Key 값이 무엇인지는 알 수가 없는 상태입니다. 그래서 Netlogon 상에서 Transport Encryption Mechanism("RPC Signing and Sealing")이 적용된 상태라면 Subsequence Message들을 Session Key로 암호화해야 하지만 이 Encryption Mechanism은 선택적인 사항이며 NetrServerAuthenticate3을 호출할 때 *[Flag](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-nrpc/5805bc9f-e4c9-4c8a-b191-3c3a7de7eeed)* 값을 통해 비활성화 할 수 있습니다.
+Step1을 수행하며 Client Credential을 Spoofing할 수 있었지만 Session Key 값이 무엇인지는 알 수 없는 상황입니다. 그래서 Netlogon 상에서 Transport Encryption Mechanism("RPC Signing and Sealing")이 적용된 상태라면 Subsequence Message들을 Session Key로 암호화해야 하지만 이 Encryption Mechanism은 선택적인 사항이며 NetrServerAuthenticate3을 호출할 때 *[Flag](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-nrpc/5805bc9f-e4c9-4c8a-b191-3c3a7de7eeed)* 값을 통해 비활성화 할 수 있습니다.
 
-## 3 : Spoofing a call
+## 3) Spoofing a call
 
 Step2에서 Call Encryption을 비활성화시켰더라도, 모든  RPC Call은 Authenticator value값을 포함하고 있어야 합니다.  이 값은 [ComputeNetlogonCredential](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-nrpc/da7acaa3-030b-481e-979b-f58f89389806) 함수를 호출할 때 필요한 인자인 ClientStoredCredential을 계산하는 데 사용됩니다.
 
@@ -246,17 +252,17 @@ request["Authenticator"] = authenticator
 resp = rpc_con.request(request)
 ```
 
-TimeStamp는 현재 Posix 시간을 나타내며 서버가 이 시간 값이 실제 서버 시간 값과 일치 하는 지 검증을 하지 않기 때문에 단순히 1970년 1월 1일의 Timestamp 값을 사용하도록 0으로 설정하면 됩니다.
+TimeStamp는 현재 Posix 시간을 나타내며 서버는 자신의 실제 시간 값과 일치하는 지 검증하지 않으므로 단순히 1970년 1월 1일의 Timestamp 값을 사용하도록 0으로 설정하면 됩니다.
 
 ComputeNetlogCredential(ClientStoredCredential(0), Session-Key(Unknown), ClientAuthenticator.Credential(0,0)) ⇒ 0이므로 인증된 사용자만 호출할 수 있는 함수들을 호출할 수 있습니다.
 
-## 4 : Changing a computer's AD password
+## 4) Changing a computer's AD password
 
 앞의 Step들을 통해 이제 어떤 컴퓨터로든지 인증된 Netlogon Call을 수행할 수 있게 되었습니다. 이제 기존에 설정된 Computer 계정의 AD Password를 바꿔보도록 하겠습니다.
 
-공격하는 데 사용할 함수는 NetrServerPasswordSet2 함수입니다. 이 함수는 Client에서 새 Computer Password를 설정하는 데 사용됩니다.  설정할 암호 자체는 Hash 되어있지 않지만 Session Key로 암호화되어야 합니다. 서버에서 동일한 Session key를 사용하므로 Step1과 같이 0으로 설정하여 주면 됩니다. 
+공격하는 데 사용할 함수는 NetrServerPasswordSet2 함수입니다. 이 함수는 Client에서 새 Computer Password를 설정하는 데 사용됩니다. 설정할 암호 자체는 Hash 되어있지 않지만 Session Key로 암호화되어야 합니다. 서버에서 동일한 Session key를 사용하므로 Step1과 같이 0으로 설정하면 됩니다. 
 
-Netlogon 프로토콜의 Plain Text Password 구조는 516byte로 구성됩니다. 마지막 4byte는 Password의 Byte의 길이를 나타냅니다. 길이를 제외한 나머지 바이트들은 패딩으로 간주되며 임의의 값으로 설정하여도 됩니다. 516 byte를 모두 0으로 채우면, 길이가 0인 Password, 즉 Empty Password로 취급됩니다. Computer에 비어있는 암호를 설정하는 것은 금지되어있지 않음으로 도메인의 모든 컴퓨터에 Empty Password를 설정할 수 있습니다.
+Netlogon 프로토콜의 Plain Text Password 구조는 516 바이트 크기로 구성됩니다. 마지막 4 바이트는 Password의 길이(바이트)를 나타냅니다. 길이를 제외한 나머지 바이트들은 패딩으로 간주되며 임의의 값으로 설정하여도 됩니다. 516 바이트를 모두 0으로 채우면, 길이가 0인 Password, 즉 Empty Password로 취급됩니다. Computer에 빈 암호(Empty Password)를 설정하는 것은 금지되어있지 않음으로 도메인의 모든 컴퓨터에 Empty Password를 설정할 수 있습니다.
 
 ![changing_ad_pw.png](/img/Zerologon/changing_ad_pw.png)
 
@@ -264,17 +270,16 @@ Netlogon 프로토콜의 Plain Text Password 구조는 516byte로 구성됩니�
 
 다만 이러한 방식으로 컴퓨터 암호를 변경하면 AD(Active Directory) 상에서만 컴퓨터 암호가 변경됩니다. 대상 시스템 자체에서는 암호를 로컬로 저장하고 있음으로 더 이상 도메인에 인증할 수 없으며 이 시점에서 도메인의 모든 장치에 대한 DOS 공격이 될 수 있습니다.
 
-## 5 : From password change to domain admin
+## 5) From password change to domain admin
 
 앞의 과정을 통해 Domain Controller의 PW를 변경하면 AD에 저장된 DC PW와 시스템 로컬 레지스트리(`HKLM\SECURITY\Policy\Secret\$machine.ACC`)에 저장된 PW와 달라지는 현상이 발생합니다. 이로 인해 DC의 특정 서비스(DNS Resolver등)등이 멈추는 등 다양한 오류가 발생합니다. 이를 방지하기 위해 AD의 PW와 로컬 레지스트리를 동기화해주는 작업이 필요합니다. 이러한 작업을 위해서 DC에 새롭게 설정된 Password를 사용하여 로그인하여야 합니다.
 
-새롭게 설정한 PW로 impacket의 'secretsdump' script를 실행하면 DRS(Domain Repliocation Service)프로토콜을 통해 도메인의 모든 사용자 Hash를 성공적으로 추출할 수 있습니다. 여기에는GoldenTicket을 만드는 데 사용할 수 있는 krbtgt 계정의 Hash 또한 포함됩니다. 이 Hash 값을 이용하여 DC에 로그인한 뒤 DC의 로컬 레지스트리에 저장된 computer password를 업데이트 할 수 있습니다.
+새롭게 설정한 PW로 impacket의 'secretsdump' script를 실행하면 DRS(Domain Replication Service)프로토콜을 통해 도메인의 모든 사용자 Hash를 성공적으로 추출할 수 있습니다. 여기에는 GoldenTicket을 만드는 데 사용할 수 있는 krbtgt 계정의 Hash 또한 포함됩니다. 이 Hash 값을 이용하여 DC에 로그인한 뒤 DC의 로컬 레지스트리에 저장된 computer password를 업데이트 할 수 있습니다.
 <br>
 <br>
 
 ## 시연 연상
-
-[CVE-2020-1472.mp4](/img/Zerologon/CVE-2020-1472.mp4)
+<iframe width="560" height="315" src="https://www.youtube.com/embed/s7ysQ8c5NfA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 <br>
 <br>
 
@@ -288,7 +293,7 @@ Netlogon 프로토콜의 Plain Text Password 구조는 516byte로 구성됩니�
 
 ![patch.png](/img/Zerologon/patch.png)
 
-NlIsChallengeCredentialPairVulnerable 이라는 함수가 추가되었습니다. 이 함수는 Client에서 보낸 Client Challenge 값이 Client Challenge의 첫 바이트와 동일한 바이트가 5번 이상 반복되면 1을 리턴합니다. 1이 리턴되면 그 뒤의 인증 과정은 수행되지 않습니다.
+NlIsChallengeCredentialPairVulnerable 함수가 추가되었습니다. 이 함수는 Client에서 보낸 Client Challenge 값이 Client Challenge의 첫 바이트와 동일한 바이트가 5번 이상 반복되면 1을 리턴합니다. 1(True)이 리턴되면 그 뒤의 인증 과정은 수행되지 않습니다.
 
 ![patch_detail.png](/img/Zerologon/patch_detail.png)
 
@@ -298,12 +303,12 @@ NlIsChallengeCredentialPairVulnerable 이라는 함수가 추가되었습니다.
 
 또한 Microsoft는 2020년 8월 화요일 보안 패치에서 도메인의 모든 Windows Server 및 Client에 대해 Secure NRPC(Netlogon Seal & Sign)을 적용하도록 패치하여 이 문제를 해결하였습니다. 이로인해  Exploit이 Server에서 OK 메시지를 받아도 추가적인 Signing RPC를 호출하지 못하게 되었습니다.
 
-도메인에 연결된 모든 장치에 대해 Secure NRPC를 요구하는 "Enforcement Mode"도 존재하는데 2021년 2월부터 이 옵션은 기본적으로 사용설정 된다고 합니다.
+도메인에 연결된 모든 장치에 대해 Secure NRPC를 요구하는 "Enforcement Mode"도 존재하는데 2021년 2월부터 이 옵션은 기본 사용됩니다.
 <br>
 <br>
 
 # Conclusion
-해당 포스팅에서는 Zerologon 취약점에 관해 다뤄봤습니다. 본 포스팅에서 다뤘던 Exploit 방법 외에도 다양한 [방법](https://dirkjanm.io/a-different-way-of-abusing-zerologon/)도 존재하기 때문에 궁금하시다면 레퍼런스를 참고하시면 되겠습니다.
+이번 글에서는 Zerologon 취약점에 관해 다뤄봤습니다. 본 포스팅에서 다뤘던 Exploit 방법 외에도 다양한 [방법](https://dirkjanm.io/a-different-way-of-abusing-zerologon/)도 존재하기 때문에 추가적인 정보는 아래 레퍼런스를 참고해주세요. 감사합니다.
 <br>
 <br>
 
