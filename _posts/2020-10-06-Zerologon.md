@@ -82,7 +82,7 @@ AES-CFB8의 Requirement에서는 IV 값이 랜덤일 때 평문을 안전하게 
 ![netlogon_log.png](/img/Zerologon/netlogon_log.png)
 
 2000번의 인증을 시도하는 POC를 100회 실행했을 때 공격에 모두 성공하였습니다.   
-![poc_attempt.png](/img/Zerologon/poc_attempt.png)
+![poc_attempt_v2.png](/img/Zerologon/poc_attempt_v2.png)
 <br>
 
 다음 코드는 NlComputeCredentials에서 Client Challenge를 암호화하는 것을 직접 C++ 코드로 재현한 코드입니다.
