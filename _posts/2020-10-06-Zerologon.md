@@ -303,7 +303,7 @@ NlIsChallengeCredentialPairVulnerable 함수가 추가되었습니다. 이 함�
 
 또한 Microsoft는 2020년 8월 화요일 보안 패치에서 도메인의 모든 Windows Server 및 Client에 대해 Secure NRPC(Netlogon Seal & Sign)을 적용하도록 패치하여 이 문제를 해결하였습니다. 이로인해  Exploit이 Server에서 OK 메시지를 받아도 추가적인 Signing RPC를 호출하지 못하게 되었습니다.
 
-도메인에 연결된 모든 장치에 대해 Secure NRPC를 요구하는 "Enforcement Mode"도 존재하는데 2021년 2월부터 이 옵션은 기본 사용됩니다.
+도메인에 연결된 모든 장치에 대해 Secure NRPC를 요구하는 "Enforcement Mode"도 2021년 2월부터 기본 적용됩니다.
 <br>
 <br>
 
