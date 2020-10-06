@@ -308,6 +308,8 @@ NlIsChallengeCredentialPairVulnerable 이라는 함수가 추가되었습니다.
 <br>
 
 # Reference
-[https://dirkjanm.io/a-different-way-of-abusing-zerologon/](https://dirkjanm.io/a-different-way-of-abusing-zerologon/)
-[https://www.secura.com/blog/zero-logon](https://www.secura.com/blog/zero-logon)
-[https://github.com/SecuraBV/CVE-2020-1472](https://github.com/SecuraBV/CVE-2020-1472)
+[https://dirkjanm.io/a-different-way-of-abusing-zerologon/](https://dirkjanm.io/a-different-way-of-abusing-zerologon/) 
+
+[https://www.secura.com/blog/zero-logon](https://www.secura.com/blog/zero-logon) 
+
+[https://github.com/SecuraBV/CVE-2020-1472](https://github.com/SecuraBV/CVE-2020-1472) 
