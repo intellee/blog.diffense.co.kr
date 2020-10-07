@@ -220,7 +220,7 @@ Exploit 과정은 크게 5가지 Step으로 이루어집니다.
 
 이 매개 변수 값은 임의로 설정이 가능하고 취약 버전에서는 Server 상에서 어떠한 검증이나 잘못된 로그인 시도에 대한 제재가  존재하지 않으므로 인증이 성공할 때까지 계속하여 시도가 가능합니다.
 
-보통 1 단계가 성공하기 위해서 필요한 평균 횟수는 256회이고 실제로는 약 3초정도 밖에 걸리지 않습니다. 이 방법을 사용하면 도메인의 모든 컴퓨터의 Credential을 spoofing할 수 있고 여기에는 Backup Domain Controller와 Domain Controller도 포함됩니다.
+보통 1 단계가 성공하기 위해서 필요한 평균 횟수는 256회이고 실제로는 약 3초정도 밖에 걸리지 않습니다. 이 방법을 사용하면 도메인의 모든 Computer의 Credential을 spoofing할 수 있고 여기에는 Backup Domain Controller와 Domain Controller도 포함됩니다.
 
 ## 2) Disabling signing and sealing
 
@@ -259,17 +259,17 @@ ComputeNetlogCredential(ClientStoredCredential(0), Session-Key(Unknown), ClientA
 
 ## 4) Changing a computer's AD password
 
-앞의 Step들을 통해 이제 어떤 컴퓨터로든지 인증된 Netlogon Call을 수행할 수 있게 되었습니다. 이제 기존에 설정된 Computer 계정의 AD Password를 바꿔보도록 하겠습니다.
+앞의 Step들을 통해 이제 어떤 Computer로든지 인증된 Netlogon Call을 수행할 수 있게 되었습니다. 이제 기존에 설정된 Computer 계정의 AD Password를 바꿔보도록 하겠습니다.
 
 공격하는 데 사용할 함수는 NetrServerPasswordSet2 함수입니다. 이 함수는 Client에서 새 Computer Password를 설정하는 데 사용됩니다. 설정할 암호 자체는 Hash 되어있지 않지만 Session Key로 암호화되어야 합니다. 서버에서 동일한 Session key를 사용하므로 Step1과 같이 0으로 설정하면 됩니다. 
 
-Netlogon 프로토콜의 Plain Text Password 구조는 516 바이트 크기로 구성됩니다. 마지막 4 바이트는 Password의 길이(바이트)를 나타냅니다. 길이를 제외한 나머지 바이트들은 패딩으로 간주되며 임의의 값으로 설정하여도 됩니다. 516 바이트를 모두 0으로 채우면, 길이가 0인 Password, 즉 Empty Password로 취급됩니다. Computer에 빈 암호(Empty Password)를 설정하는 것은 금지되어있지 않음으로 도메인의 모든 컴퓨터에 Empty Password를 설정할 수 있습니다.
+Netlogon 프로토콜의 Plain Text Password 구조는 516 바이트 크기로 구성됩니다. 마지막 4 바이트는 Password의 길이(바이트)를 나타냅니다. 길이를 제외한 나머지 바이트들은 패딩으로 간주되며 임의의 값으로 설정하여도 됩니다. 516 바이트를 모두 0으로 채우면, 길이가 0인 Password, 즉 Empty Password로 취급됩니다. Computer에 빈 암호(Empty Password)를 설정하는 것은 금지되어있지 않음으로 도메인의 모든 Computer에 Empty Password를 설정할 수 있습니다.
 
 ![changing_ad_pw.png](/img/Zerologon/changing_ad_pw.png)
 
 이제 Password를 변경한 후에는 패스워드가 Empty Password란 것을 알고 있음으로 공격을 시도할 필요 없이 정상적인 사용자로서 권한있는 작업을 수행할 수 있습니다.
 
-다만 이러한 방식으로 컴퓨터 암호를 변경하면 AD(Active Directory) 상에서만 컴퓨터 암호가 변경됩니다. 대상 시스템 자체에서는 암호를 로컬로 저장하고 있음으로 더 이상 도메인에 인증할 수 없으며 이 시점에서 도메인의 모든 장치에 대한 DOS 공격이 될 수 있습니다.
+다만 이러한 방식으로 Computer 암호를 변경하면 AD(Active Directory) 상에서만 Computer 암호가 변경됩니다. 대상 시스템 자체에서는 암호를 로컬로 저장하고 있음으로 더 이상 도메인에 인증할 수 없으며 이 시점에서 도메인의 모든 장치에 대한 DOS 공격이 될 수 있습니다.
 
 ## 5) From password change to domain admin
 
